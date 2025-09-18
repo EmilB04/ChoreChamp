@@ -1,15 +1,20 @@
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { commonStyles } from "../styles";
 
 export default function History() {
   const [household, setHousehold] = useState("Remmen");
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
 
   const historyData = [
     {
@@ -33,9 +38,9 @@ export default function History() {
   ];
 
   return (
-    <View style={styles.container}>
+    <View style={commonStyles.container}>
       {/* Header */}
-      <Text style={styles.header}>Historikk</Text>
+      <Text style={[commonStyles.headerTitle, { color: colors.text }]}>Historikk</Text>
 
       {/* Filter bar */}
       <View style={styles.filterRow}>
@@ -78,9 +83,8 @@ export default function History() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#111", padding: 20, paddingInline: 30 },
   header: { fontSize: 24, fontWeight: "bold", color: "#fff", marginBottom: 20, marginTop: 80 },
-  filterRow: { flexDirection: "row", marginBottom: 15, alignItems: "center" },
+  filterRow: { flexDirection: "row", marginBottom: 15, marginTop: 5, alignItems: "center" },
   dropdown: {
     backgroundColor: "#fbbf24",
     paddingHorizontal: 12,

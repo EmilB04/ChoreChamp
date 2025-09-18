@@ -1,78 +1,119 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import React, { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { commonStyles } from "../styles";
 
 export default function Notifications() {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? "light"];
+    const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
 
     return (
-        <SafeAreaView
-            style={[styles.container, { backgroundColor: colors.background }]}
-        >
-            <View style={styles.header}>
-                <Text style={[styles.title, { color: colors.text }]}>Varsler</Text>
-                <Text style={[styles.subtitle, { color: colors.icon }]}>
-                    Du har ingen nye varsler akkurat nå.
+        <View style={[commonStyles.container, { backgroundColor: colors.background }]}>
+            <View style={styles.mainContent}>
+                <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
+                    Varsler
                 </Text>
-            </View>
+                <Text style={[styles.subtitle, { color: colors.icon }]}>
+                    Du har ingen varsler akkurat nå.
+                </Text>
 
-            <View style={styles.content}>
-                <View style={styles.emptyState}>
-                    <IconSymbol size={64} name="bell.slash" color={colors.icon} />
-                    <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                        Ingen varsler
-                    </Text>
-                    <Text style={[styles.emptyDescription, { color: colors.icon }]}>
-                        Du har ingen nye varsler akkurat nå.
-                    </Text>
+                {/* Content based on selected tab */}
+                <View style={styles.contentContainer}>
+                    {selectedTab === 'unread' ? (
+                        <Text style={[styles.subtitle, { color: colors.icon }]}>
+                            <View style={{ alignItems: 'center' }}>
+                                <Text style={[styles.subtitle, { color: colors.icon }]}>
+                                    Du er ajour
+                                </Text>
+                            </View>
+                        </Text>
+                    ) : (
+                        <Text style={[styles.subtitle, { color: colors.icon }]}>
+                            Ingen tidligere varsler å vise.
+                        </Text>
+                    )}
                 </View>
             </View>
-        </SafeAreaView>
+
+            {/* Switcher Bar for notification-type */}
+            <View style={[styles.bottomSwitcherContainer, { backgroundColor: colors.tabBarBackground }]}>
+                <TouchableOpacity
+                    style={[
+                        styles.switcherTab,
+                        selectedTab === 'unread' && { borderBottomWidth: 2, borderBottomColor: colors.tint }
+                    ]}
+                    onPress={() => setSelectedTab('unread')}
+                >
+                    <Text style={[
+                        styles.switcherText,
+                        { color: selectedTab === 'unread' ? colors.tint : colors.text }
+                    ]}>
+                        Uleste
+                    </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                    style={[
+                        styles.switcherTab,
+                        selectedTab === 'previous' && { borderBottomWidth: 2, borderBottomColor: colors.tint }
+                    ]}
+                    onPress={() => setSelectedTab('previous')}
+                >
+                    <Text style={[
+                        styles.switcherText,
+                        { color: selectedTab === 'previous' ? colors.tint : colors.text }
+                    ]}>
+                        Tidligere varsler
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    header: {
-        paddingTop: 20,
-        marginHorizontal: 30,
-        marginBottom: 30,
-    },
-    title: {
-        fontSize: 32,
-        textAlign: "left",
-        fontWeight: "bold",
-        marginTop: 20,
-        marginBottom: 8,
-    },
     subtitle: {
-        fontSize: 16,
-        opacity: 0.7,
+        fontSize: 14,
+        marginTop: 4,
+        textAlign: "left",
     },
-    content: {
+    mainContent: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: 40,
     },
-    emptyState: {
-        alignItems: "center",
+    bottomSwitcherContainer: {
+        flexDirection: 'row',
+        borderRadius: 0,
+        padding: 2,
+        position: 'absolute',
+        bottom: 0, // Position above the tab bar
+        left: 0,
+        right: 0,
+        marginHorizontal: 0,
+        paddingHorizontal: 0,
     },
-    emptyTitle: {
-        fontSize: 24,
-        fontWeight: "600",
+    switcherContainer: {
+        flexDirection: 'row',
+        borderRadius: 8,
+        padding: 2,
         marginTop: 20,
-        marginBottom: 12,
+        marginBottom: 20,
     },
-    emptyDescription: {
-        fontSize: 16,
-        textAlign: "center",
-        lineHeight: 24,
+    switcherTab: {
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    switcherText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
