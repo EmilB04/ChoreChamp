@@ -1,10 +1,36 @@
 import { Tabs } from "expo-router";
 import React from "react";
+import { View, StyleSheet } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+
+// Floating Tab Button Component
+function FloatingTabButton(props: any) {
+  return (
+    <HapticTab
+      {...props}
+      style={styles.floatingButtonContainer}
+    >
+      <View
+        style={[
+          styles.floatingButton,
+          props.accessibilityState?.selected &&
+            styles.floatingButtonFocused,
+        ]}
+      >
+        <IconSymbol
+          size={32}
+          name="plus"
+          color="white"
+          weight="semibold"
+        />
+      </View>
+    </HapticTab>
+  );
+}
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -16,17 +42,24 @@ export default function TabLayout() {
         tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tabIconDefault,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].tabBarBackground,
+          height: 90,
+          paddingBottom: 20,
+          paddingTop: 10,
         },
         headerShown: false,
         tabBarButton: HapticTab,
       }}
     >
       <Tabs.Screen
-        name="DashboardTab"
+        name="index"
         options={{
           title: "Hjem",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name={focused ? "house.fill" : "house"} color={color} />
+            <IconSymbol
+              size={28}
+              name={focused ? "house.fill" : "house"}
+              color={color}
+            />
           ),
         }}
       />
@@ -35,16 +68,26 @@ export default function TabLayout() {
         options={{
           title: "Historikk",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name={focused ? "clock.fill" : "clock"} color={color} />
+            <IconSymbol
+              size={28}
+              name={focused ? "clock.fill" : "clock"}
+              color={color}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="AddTaskTab"
         options={{
-          title: "",
+          title: "Add Task",
+          tabBarButton: FloatingTabButton,
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name={focused ? "plus.circle.fill" : "plus.circle"} color={color} />
+            <IconSymbol
+              size={32}
+              name="plus"
+              color="white"
+              weight="semibold"
+            />
           ),
         }}
       />
@@ -53,7 +96,11 @@ export default function TabLayout() {
         options={{
           title: "Varsel",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name={focused ? "bell.fill" : "bell"} color={color} />
+            <IconSymbol
+              size={28}
+              name={focused ? "bell.fill" : "bell"}
+              color={color}
+            />
           ),
         }}
       />
@@ -62,10 +109,42 @@ export default function TabLayout() {
         options={{
           title: "Profil",
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name={focused ? "person.fill" : "person"} color={color} />
+            <IconSymbol
+              size={28}
+              name={focused ? "person.fill" : "person"}
+              color={color}
+            />
           ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  floatingButtonContainer: {
+    top: -25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  floatingButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#FFBE00",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  floatingButtonFocused: {
+    backgroundColor: "#FFBE00",
+    transform: [{ scale: 1.1 }],
+  },
+});
