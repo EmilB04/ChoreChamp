@@ -63,7 +63,7 @@ export default function Profile() {
                     description="Logg ut av din konto"
                 />
 
-                <Text style={styles.more}>Mer</Text>
+                <Text style={[styles.more, { color: colors.lightText }]}>Mer</Text>
 
                 <MenuItem
                     icon="help-circle"
@@ -90,6 +90,9 @@ function MenuItem({
     title: string;
     description?: string;
 }) {
+    const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? "light"];
+
     return (
         <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuContent}>
@@ -100,7 +103,7 @@ function MenuItem({
                         color="#fbbf24"
                         style={{ marginRight: 10 }}
                     />
-                    <Text style={styles.menuText}>{title}</Text>
+                    <Text style={[styles.menuText, { color: colors.text }]}>{title}</Text>
                 </View>
                 {description && <Text style={styles.description}>{description}</Text>}
             </View>
@@ -189,7 +192,6 @@ const styles = StyleSheet.create({
     menuText: {
         fontSize: 16,
         fontWeight: "500",
-        color: "white",
     },
     description: {
         fontSize: 14,
@@ -201,6 +203,5 @@ const styles = StyleSheet.create({
     more: {
         paddingLeft: 0,
         paddingTop: 10,
-        color: "#6b7280",
     },
 });

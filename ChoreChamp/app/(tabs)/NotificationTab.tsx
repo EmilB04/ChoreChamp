@@ -15,22 +15,22 @@ export default function Notifications() {
                 <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
                     Varsler
                 </Text>
-                <Text style={[styles.subtitle, { color: colors.icon }]}>
+                <Text style={[styles.subtitle, { color: colors.lightText }]}>
                     Du har ingen varsler akkurat nå.
                 </Text>
 
                 {/* Content based on selected tab */}
                 <View style={styles.contentContainer}>
                     {selectedTab === 'unread' ? (
-                        <Text style={[styles.subtitle, { color: colors.icon }]}>
+                        <Text style={[styles.subtitle, { color: colors.lightText }]}>
                             <View style={{ alignItems: 'center' }}>
-                                <Text style={[styles.subtitle, { color: colors.icon }]}>
+                                <Text style={[styles.subtitle, { color: colors.lightText }]}>
                                     Du er ajour
                                 </Text>
                             </View>
                         </Text>
                     ) : (
-                        <Text style={[styles.subtitle, { color: colors.icon }]}>
+                        <Text style={[styles.subtitle, { color: colors.lightText }]}>
                             Ingen tidligere varsler å vise.
                         </Text>
                     )}

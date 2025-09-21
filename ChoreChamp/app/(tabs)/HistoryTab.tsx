@@ -58,12 +58,12 @@ export default function History() {
       {/* History list */}
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         {historyData.map((item, index) => (
-          <View key={index} style={styles.card}>
+          <View key={index} style={[styles.card, { backgroundColor: colors.background }]}>
             <View style={styles.weekBadge}>
               <Text style={styles.weekText}>Uke{"\n"}{item.week}</Text>
             </View>
             <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
               <Text style={styles.cardSubtitle}>
                 Alle oppgaver ble:{" "}
                 <Text style={{ color: item.statusColor }}>
@@ -108,8 +108,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#333",
   },
   weekBadge: {
     backgroundColor: "#fbbf24",
@@ -120,7 +118,7 @@ const styles = StyleSheet.create({
     minWidth: 55,
   },
   weekText: { fontWeight: "bold", fontSize: 14, color: "#000", textAlign: "center" },
-  cardTitle: { fontSize: 16, fontWeight: "600", color: "#fff" },
+  cardTitle: { fontSize: 16, fontWeight: "600" },
   cardSubtitle: { fontSize: 14, color: "#ccc", marginTop: 2 },
   dates: { fontSize: 12, color: "#888", marginTop: 4 },
 });
