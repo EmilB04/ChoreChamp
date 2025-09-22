@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { commonStyles } from "../styles";
+import commonStyles from "../commonStyles";
 
 export default function History() {
   const [household, setHousehold] = useState("Remmen");

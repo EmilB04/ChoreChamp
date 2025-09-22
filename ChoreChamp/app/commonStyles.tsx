@@ -1,9 +1,7 @@
 // Commonly used styles across the app
 import { StyleSheet } from 'react-native';
 
-
-export const commonStyles = StyleSheet.create({
-    
+export default StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
@@ -19,5 +17,11 @@ export const commonStyles = StyleSheet.create({
         alignSelf: 'flex-start',
         marginTop: 85,
         fontWeight: 'bold',
-    }
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        marginBottom: 10,
+        textAlign: 'left',
+    },
 });

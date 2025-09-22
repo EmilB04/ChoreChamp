@@ -10,7 +10,9 @@ export const Colors = {
   light: {
     // Text
     text: '#11181C',
+    darkText: '#11181C',
     lightText: '#687076',
+    lightDarkText: '#333333ff',
     activeText: '#FFBE00',
     lightNonInteractiveText: '#9CA3AF',
     darkNonInteractiveText: '#374151',
@@ -34,7 +36,9 @@ export const Colors = {
   dark: {
     // Text
     text: '#ECEDEE',
-    lightText: '#747474',
+    darkText: '#11181C',
+    lightText: '#333333ff',
+    lightDarkText: '#676D75',
     activeText: '#FFBE00',
     lightNonInteractiveText: '#838383',
     darkNonInteractiveText: '#000',

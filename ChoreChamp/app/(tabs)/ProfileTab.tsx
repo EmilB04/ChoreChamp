@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { commonStyles } from "../styles";
+import commonStyles from "../commonStyles";
 
 export default function Profile() {
     const colorScheme = useColorScheme();

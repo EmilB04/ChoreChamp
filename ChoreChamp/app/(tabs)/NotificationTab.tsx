@@ -2,7 +2,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { commonStyles } from "../styles";
+import commonStyles from "../commonStyles";
 
 export default function Notifications() {
     const colorScheme = useColorScheme();
@@ -15,7 +15,7 @@ export default function Notifications() {
                 <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
                     Varsler
                 </Text>
-                <Text style={[styles.subtitle, { color: colors.lightText }]}>
+                <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
                     Du har ingen varsler akkurat nå.
                 </Text>
 
@@ -24,13 +24,13 @@ export default function Notifications() {
                     {selectedTab === 'unread' ? (
                         <Text style={[styles.subtitle, { color: colors.lightText }]}>
                             <View style={{ alignItems: 'center' }}>
-                                <Text style={[styles.subtitle, { color: colors.lightText }]}>
+                                <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
                                     Du er ajour
                                 </Text>
                             </View>
                         </Text>
                     ) : (
-                        <Text style={[styles.subtitle, { color: colors.lightText }]}>
+                        <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
                             Ingen tidligere varsler å vise.
                         </Text>
                     )}
