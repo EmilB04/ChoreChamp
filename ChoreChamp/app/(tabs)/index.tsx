@@ -1,16 +1,69 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
-import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
-import { commonStyles } from "../styles";
+import commonStyles from "../commonStyles";
+
+// TODO: 
+// 1. Fetch user data dynamically
+// 2. Integrate main content and leaderboard sections
+// 3. Add interactivity to calendar (e.g., navigate to daily view on tap)
+
 
 export default function Dashboard() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const user = "Emil"; // Replace with dynamic user data as needed
+
+  // Sample tasks data - replace with database fetch
+  const todayTasks = [
+    {
+      id: 1,
+      title: "Gå med søpla",
+      time: "10:00",
+      assignedTo: "Ida",
+      avatar: require("@/assets/images/icon.png"),
+      duration: 60,
+      finished: true
+    },
+    {
+      id: 2,
+      title: "Støvsuge huset",
+      time: "12:00",
+      assignedTo: "Andreas",
+      avatar: require("@/assets/images/icon.png"),
+      duration: 60,
+      finished: false
+    },
+    {
+      id: 3,
+      title: "Lage middag",
+      time: "16:00",
+      assignedTo: "Emil",
+      avatar: require("@/assets/images/icon.png"),
+      duration: 90,
+      finished: false
+    }
+  ];
+
+  // Generate hourly time slots from 08:00 to 22:00
+  const timeSlots = [];
+  for (let hour = 8; hour <= 22; hour++) {
+    timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+  }
+
+  // Get current time for "now line"
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTimeString = `${currentHour.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+  
+  // Calculate position for now line (between time slots)
+  const shouldShowNowLine = currentHour >= 8 && currentHour <= 22;
+  const nowLinePosition = shouldShowNowLine ? currentHour - 8 + (currentMinutes / 60) : -1;
 
   // Get current date and week days
   const today = new Date();
@@ -46,7 +99,7 @@ export default function Dashboard() {
           >
             <Path
               d="M-9.15527e-05 0.5H290.5C290.5 0.5 306.722 0.753072 310 1.5C331.059 6.29817 336.662 15.3068 342 26.5C347.338 37.6932 346 71.5 346 71.5V145.5C273.284 73.4047 209.924 51.8583 124.73 69.9165C42.9585 87.2493 37.1901 59.6197 -9.15527e-05 0.5Z"
-              fill="#FFBE00"
+              fill={colors.tint}
             />
           </Svg>
         </View>
@@ -61,7 +114,7 @@ export default function Dashboard() {
           >
             <Path
               d="M20.4541 4.19128C24.9121 8.71509 28.7193 19.9138 24.1954 24.3718C19.6716 28.8298 8.52993 24.8589 4.07193 20.3351C-0.386075 15.8113 -0.332723 8.53012 4.19109 4.07211C8.71491 -0.385888 15.9961 -0.332537 20.4541 4.19128Z"
-              fill="#FFBE00"
+              fill={colors.tint}
             />
           </Svg>
         </View>
@@ -76,7 +129,7 @@ export default function Dashboard() {
           >
             <Path
               d="M4 2.28223C4 1.17766 3 -0.717773 2 0.282227C1 1.28223 0 1.17766 0 2.28223C0 3.3868 0.89543 4.28223 2 4.28223C3.10457 4.28223 4 3.3868 4 2.28223Z"
-              fill="#FFBE00"
+              fill={colors.tint}
             />
           </Svg>
         </View>
@@ -116,7 +169,7 @@ export default function Dashboard() {
               {weekDates.map((dayData, index) => (
                 <View key={index} style={[styles.calendarDay, dayData.isToday && styles.calendarDayActive]}>
                   <Text style={[
-                    styles.calendarDayNumber, { color: dayData.isToday ? colors.activeText : colors.lightText }
+                    styles.calendarDayNumber, { color: dayData.isToday ? colors.activeText : colors.lightDarkText }
                   ]}>
                     {dayData.date}
                   </Text>
@@ -132,11 +185,98 @@ export default function Dashboard() {
 
           {/* MAIN CONTENT */}
           <View style={styles.mainWrapper}>
-            {/* Placeholder for main content */}
+            <Text style={[commonStyles.sectionTitle, { color: colors.text, marginBottom: 16 }]}>
+              Dagens oppgaver:
+            </Text>
+            
+            {/* Hourly Calendar */}
+            <View style={styles.calendarContainer}>
+              {timeSlots.map((timeSlot, index) => {
+                // Find task for this time slot
+                const taskForSlot = todayTasks.find(task => task.time === timeSlot);
+                
+                // Check if we should show the now line after this time slot
+                const showNowLineAfter = shouldShowNowLine && 
+                  index < timeSlots.length - 1 && 
+                  nowLinePosition > index && 
+                  nowLinePosition < index + 1;
+                
+                return (
+                  <View key={index}>
+                    <View style={styles.timeSlotRow}>
+                      {/* Time Label */}
+                      <View style={styles.timeColumn}>
+                        <Text style={[styles.timeLabel, { color: colors.lightDarkText }]}>
+                          {timeSlot}
+                        </Text>
+                      </View>
+                      
+                      {/* Task Column */}
+                      <View style={styles.taskColumn}>
+                        {taskForSlot ? (
+                          <TouchableOpacity style={[
+                            styles.taskCard, 
+                            { backgroundColor: taskForSlot.finished ? colors.nonInteractiveBackground : colors.interactiveBackground }
+                          ]}>
+                            <View style={styles.taskContent}>
+                              <Text style={[
+                                styles.taskTitle, 
+                                { 
+                                  color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.darkText,
+                                  textDecorationLine: taskForSlot.finished ? 'line-through' : 'none'
+                                }
+                              ]}>
+                                {taskForSlot.title}
+                              </Text>
+                              <Text style={[
+                                styles.taskSubtitle, 
+                                { color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.lightText }
+                              ]}>
+                                {taskForSlot.assignedTo}
+                              </Text>
+                            </View>
+                            <View style={[
+                              styles.taskAvatar,
+                              taskForSlot.finished && styles.taskAvatarFinished
+                            ]}>
+                              <Image
+                                source={taskForSlot.avatar}
+                                style={[
+                                  styles.avatarImage,
+                                  taskForSlot.finished && styles.avatarImageFinished
+                                ]}
+                              />
+                            </View>
+                          </TouchableOpacity>
+                        ) : null}
+                      </View>
+                    </View>
+                    
+                    {/* Now Line */}
+                    {showNowLineAfter && (
+                      <View style={styles.nowLineContainer}>
+                        <View style={styles.nowTimeColumn}>
+                          <Text style={[styles.nowTimeLabel, { color: colors.activeText }]}>
+                            {currentTimeString}
+                          </Text>
+                        </View>
+                        <View style={styles.nowLineWrapper}>
+                          <View style={[styles.nowLine, { backgroundColor: colors.activeText }]} />
+                          <View style={[styles.nowDot, { backgroundColor: colors.activeText }]} />
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
           </View>
 
           {/* Leaderboard */}
           <View style={styles.leaderboardWrapper}>
+            <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+              Ledertavle:
+            </Text>
             {/* Placeholder for leaderboard content */}
           </View>
         </View>
@@ -225,11 +365,116 @@ const styles = StyleSheet.create({
   },
 
   mainWrapper: {
-    // NOT USED YET
+    marginTop: 16,
   },
 
   leaderboardWrapper: {
-    // NOT USED YET
+    marginTop: 32,
+  },
+
+  // Hourly Calendar Styles
+  calendarContainer: {
+    flex: 1,
+  },
+  timeSlotRow: {
+    flexDirection: 'row',
+    minHeight: 50,
+    alignItems: 'flex-start',
+    paddingVertical: 4,
+  },
+  timeColumn: {
+    width: 60,
+    paddingTop: 4,
+  },
+  timeLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  taskColumn: {
+    flex: 1,
+    paddingLeft: 16,
+  },
+  taskCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  taskContent: {
+    flex: 1,
+  },
+  taskTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  taskSubtitle: {
+    fontSize: 14,
+  },
+  taskAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginLeft: 12,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  taskAvatarFinished: {
+    opacity: 0.5,
+  },
+  avatarImageFinished: {
+    opacity: 0.6,
+  },
+  searchSlot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  searchText: {
+    fontSize: 14,
+    marginLeft: 8,
+  },
+
+  // Now Line Styles
+  nowLineContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+    zIndex: 10,
+  },
+  nowTimeColumn: {
+    width: 60,
+    alignItems: 'flex-start',
+  },
+  nowTimeLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  nowLineWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 16,
+  },
+  nowLine: {
+    height: 2,
+    flex: 1,
+    borderRadius: 1,
+  },
+  nowDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: -4,
   },
 
 });
