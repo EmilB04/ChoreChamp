@@ -1,7 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
-import { StyleSheet, Text, View, ScrollView} from "react-native";
+import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { commonStyles } from "../styles";
@@ -11,6 +11,30 @@ export default function Dashboard() {
   const colors = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const user = "Emil"; // Replace with dynamic user data as needed
+
+  // Get current date and week days
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const currentDate = today.getDate();
+  
+  // Calculate Monday of current week
+  const mondayDate = new Date(today);
+  const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Handle Sunday
+  mondayDate.setDate(today.getDate() - daysFromMonday);
+
+  // Generate week days
+  const weekDays = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
+  const weekDates = [];
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(mondayDate);
+    date.setDate(mondayDate.getDate() + i);
+    weekDates.push({
+      day: weekDays[i],
+      date: date.getDate(),
+      isToday: date.getDate() === currentDate && date.getMonth() === today.getMonth()
+    });
+  }
 
   const svgFigures = [
     () => {
@@ -70,10 +94,12 @@ export default function Dashboard() {
         style={[commonStyles.container, { zIndex: 2 }]}
         contentContainerStyle={{ paddingBottom: 24 }} // Extra padding at the bottom for better scroll experience
         showsVerticalScrollIndicator={false}
-        >
+      >
+        {/* CONTENT */}
         <View style={[styles.headerWrapper, { paddingTop: insets.top }]}>
+          {/* HEADER */}
           <View style={styles.header}>
-            <Text style={[commonStyles.headerTitle, styles.greeting, { color: colors.text }]}>God dag,{"\n"}{user}!</Text>
+            <Text style={[commonStyles.headerTitle, { color: colors.text, marginTop: 0 }]}>God dag,{"\n"}{user}!</Text>
             <View style={styles.profileSection}>
               <View style={styles.profileContainer}>
                 <Image
@@ -83,9 +109,37 @@ export default function Dashboard() {
               </View>
             </View>
           </View>
-        </View>
 
-        
+          {/* HEADER CALENDAR */}
+          <View style={styles.calendarWrapper}>
+            <View style={styles.calendarWeek}>
+              {weekDates.map((dayData, index) => (
+                <View key={index} style={[styles.calendarDay, dayData.isToday && styles.calendarDayActive]}>
+                  <Text style={[
+                    styles.calendarDayNumber, { color: dayData.isToday ? colors.activeText : colors.lightText }
+                  ]}>
+                    {dayData.date}
+                  </Text>
+                  <Text style={[
+                    styles.calendarDayLabel, { color: dayData.isToday ? colors.activeText : colors.text }
+                  ]}>
+                    {dayData.day}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* MAIN CONTENT */}
+          <View style={styles.mainWrapper}>
+            {/* Placeholder for main content */}
+          </View>
+
+          {/* Leaderboard */}
+          <View style={styles.leaderboardWrapper}>
+            {/* Placeholder for leaderboard content */}
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -109,9 +163,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  greeting: {
-    marginTop: 0,
-  },
   userName: {
     fontSize: 24,
     fontWeight: "bold",
@@ -129,23 +180,58 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 18,
   },
-  titleContainer: {
-    color: "white",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  
+
+  calendarWrapper: {
+    marginTop: 20,
+    marginBottom: 20,
+    backgroundColor: "rgba(59, 59, 59, 0.20)",
+    borderRadius: 25,
+    padding: 16,
+    height: 75,
+    width: '100%'
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  calendarWeek: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: '100%',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  calendarDay: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 35,
   },
+  calendarDayNumber: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  calendarDayLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  calendarDayActive: {
+    backgroundColor: '#464545',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 16,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Cancel the padding's impact on layout so surrounding items don't shift
+    marginHorizontal: -8,
+    marginVertical: -8,
+  },
+
+  mainWrapper: {
+    // NOT USED YET
+  },
+
+  leaderboardWrapper: {
+    // NOT USED YET
+  },
+
 });
 
 
