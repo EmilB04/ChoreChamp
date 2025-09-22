@@ -33,7 +33,7 @@ export default function Profile() {
                 <View style={styles.separator} />
                 <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", paddingVertical: 8 }}>
                     <Text style={styles.editProfile}>Rediger profil</Text>
-                    <Ionicons name="create-outline" size={20} color="#1f2937" style={{ position: "absolute", left: 100, top: 5.5 }} />
+                    <Ionicons name="create-outline" size={20} color={colors.darkText} style={{ position: "absolute", left: 100, top: 5.5 }} />
                 </TouchableOpacity>
             </View>
 
@@ -63,7 +63,7 @@ export default function Profile() {
                     description="Logg ut av din konto"
                 />
 
-                <Text style={[styles.more, { color: colors.lightText }]}>Mer</Text>
+                <Text style={[styles.more, { color: colors.lightDarkText }]}>Mer</Text>
 
                 <MenuItem
                     icon="help-circle"
@@ -100,14 +100,14 @@ function MenuItem({
                     <Ionicons
                         name={icon}
                         size={22}
-                        color="#fbbf24"
+                        color={colors.tint}
                         style={{ marginRight: 10 }}
                     />
                     <Text style={[styles.menuText, { color: colors.text }]}>{title}</Text>
                 </View>
                 {description && <Text style={styles.description}>{description}</Text>}
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#666" />
+            <Ionicons name="chevron-forward" size={20} color={colors.lightDarkText} />
         </TouchableOpacity>
     );
 }
