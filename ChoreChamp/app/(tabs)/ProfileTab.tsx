@@ -19,7 +19,6 @@ export default function Profile() {
 
     return (
         <View style={[commonStyles.container, { backgroundColor: colors.background }]}>
-
             {/* Header */}
             <View style={styles.header}>
                 <Text style={commonStyles.headerTitle}>
@@ -31,14 +30,14 @@ export default function Profile() {
                 />
                 <Text style={styles.name}>Emil Berglund</Text>
                 <View style={styles.separator} />
-                <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", paddingVertical: 8 }}>
+                <TouchableOpacity style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}>
                     <Text style={styles.editProfile}>Rediger profil</Text>
-                    <Ionicons name="create-outline" size={20} color={colors.darkText} style={{ position: "absolute", left: 100, top: 5.5 }} />
+                    <Ionicons name="create-outline" size={20} color={colors.darkText} />
                 </TouchableOpacity>
             </View>
 
             {/* Settings */}
-            <ScrollView style={styles.menu}>
+            <ScrollView style={styles.menu} showsVerticalScrollIndicator={false}>
                 <MenuItem
                     icon="person-circle"
                     title="Min konto"
@@ -95,16 +94,15 @@ function MenuItem({
 
     return (
         <TouchableOpacity style={styles.menuItem}>
+            <View style={styles.iconContainer}>
+                <Ionicons
+                    name={icon}
+                    size={24}
+                    color={colors.tint}
+                />
+            </View>
             <View style={styles.menuContent}>
-                <View style={styles.menuHeader}>
-                    <Ionicons
-                        name={icon}
-                        size={22}
-                        color={colors.tint}
-                        style={{ marginRight: 10 }}
-                    />
-                    <Text style={[styles.menuText, { color: colors.text }]}>{title}</Text>
-                </View>
+                <Text style={[styles.menuText, { color: colors.text }]}>{title}</Text>
                 {description && <Text style={styles.description}>{description}</Text>}
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.lightDarkText} />
@@ -172,7 +170,7 @@ const styles = StyleSheet.create({
     },
     menuItem: {
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "stretch",
         paddingVertical: 12,
         borderRadius: 12,
         shadowColor: "#000",
@@ -182,8 +180,15 @@ const styles = StyleSheet.create({
         elevation: 1,
         justifyContent: "space-between",
     },
+    iconContainer: {
+        width: 32,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 10,
+    },
     menuContent: {
         flex: 1,
+        justifyContent: "center",
     },
     menuHeader: {
         flexDirection: "row",
@@ -197,7 +202,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#6b7280",
         marginTop: 4,
-        marginLeft: 32,
         wordWrap: 'break-word',
     },
     more: {
