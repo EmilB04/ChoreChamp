@@ -1,6 +1,7 @@
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Image } from "expo-image";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
@@ -17,6 +18,21 @@ export default function Dashboard() {
   const colors = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const user = "Emil"; // Replace with dynamic user data as needed
+
+  // State for current time that updates every minute
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update time every minute
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(new Date());
+    };
+    updateTime();
+    // Set interval to update every minute
+    const interval = setInterval(updateTime, 60000);
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
 
   // Sample tasks data - replace with database fetch
   const todayTasks = [
@@ -56,9 +72,8 @@ export default function Dashboard() {
   }
 
   // Get current time for "now line"
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinutes = now.getMinutes();
+  const currentHour = currentTime.getHours();
+  const currentMinutes = currentTime.getMinutes();
   const currentTimeString = `${currentHour.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
   
   // Calculate position for now line (between time slots)
@@ -66,7 +81,7 @@ export default function Dashboard() {
   const nowLinePosition = shouldShowNowLine ? currentHour - 8 + (currentMinutes / 60) : -1;
 
   // Get current date and week days
-  const today = new Date();
+  const today = currentTime;
   const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
   const currentDate = today.getDate();
   
