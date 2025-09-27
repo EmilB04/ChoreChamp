@@ -1,5 +1,4 @@
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -10,25 +9,26 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import commonStyles from "../commonStyles";
 
 export default function Profile() {
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
-
+    const { colors } = useTheme();
+    const insets = useSafeAreaInsets();
 
     return (
-        <View style={[commonStyles.container, { backgroundColor: colors.background }]}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={commonStyles.headerTitle}>
+        <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
+            {/* Header - Outside Safe Area */}
+            <View style={[styles.header, { paddingTop: insets.top, backgroundColor: colors.tint }]}>
+                {/* Adjust marginTop to keep title level with rest */}
+                <Text style={[commonStyles.headerTitle, { marginTop: Math.max(0, 80 - insets.top) }]}>
                     Profil & {"\n"}Innstillinger
                 </Text>
                 <Image
                     source={{ uri: "https://i.pravatar.cc/150?" }}
                     style={styles.avatar}
                 />
-                <Text style={styles.name}>Emil Berglund</Text>
+                <Text style={[styles.name, { color: colors.darkText }]}>Emil Berglund</Text>
                 <View style={styles.separator} />
                 <TouchableOpacity style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}>
                     <Text style={styles.editProfile}>Rediger profil</Text>
@@ -36,8 +36,10 @@ export default function Profile() {
                 </TouchableOpacity>
             </View>
 
-            {/* Settings */}
-            <ScrollView style={styles.menu} showsVerticalScrollIndicator={false}>
+            {/* Content with proper padding */}
+            <View style={[commonStyles.container, { flex: 1, paddingVertical: 0 }]}>
+                {/* Settings */}
+                <ScrollView style={styles.menu} showsVerticalScrollIndicator={false}>
                 <MenuItem
                     icon="person-circle"
                     title="Min konto"
@@ -75,7 +77,8 @@ export default function Profile() {
                     title="Om appen"
                     description="Informasjon om appen og utviklerne"
                 />
-            </ScrollView>
+                </ScrollView>
+            </View>
         </View>
     );
 }
@@ -88,9 +91,8 @@ function MenuItem({
     icon: keyof typeof Ionicons.glyphMap;
     title: string;
     description?: string;
-}) {
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    }) {
+    const { colors } = useTheme();
 
     return (
         <TouchableOpacity style={styles.menuItem}>
@@ -103,7 +105,7 @@ function MenuItem({
             </View>
             <View style={styles.menuContent}>
                 <Text style={[styles.menuText, { color: colors.text }]}>{title}</Text>
-                {description && <Text style={styles.description}>{description}</Text>}
+                {description && <Text style={[styles.description, { color: colors.lightDarkText }]}>{description}</Text>}
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.lightDarkText} />
         </TouchableOpacity>
@@ -112,15 +114,13 @@ function MenuItem({
 
 const styles = StyleSheet.create({
     header: {
-        backgroundColor: "#fbbf24",
-        paddingBottom: 30,
-        paddingLeft: 20,
-        marginLeft: -20,
-        marginTop: -20,
-        width: "110%",
+        width: "100%",
         alignItems: "center",
+        paddingTop: 20,
+        paddingHorizontal: 20,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
+        paddingBottom: 20,
     },
     profileSection: {
         alignItems: "center",
@@ -131,12 +131,10 @@ const styles = StyleSheet.create({
         height: 80,
         borderRadius: 40,
         marginBottom: 10,
-        backgroundColor: "rgba(255,255,255,0.3)",
     },
     profileName: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#1f2937",
         marginBottom: 4,
     },
     avatar: {
@@ -157,12 +155,14 @@ const styles = StyleSheet.create({
         height: 1.5,
         backgroundColor: "black",
         opacity: 0.8,
-        marginBlock: 5,
+        marginTop: 5,
+        marginBottom: 0,
     },
     editProfile: {
         fontSize: 16,
         color: "#1f2937",
         fontWeight: "500",
+        padding: 0,
     },
     menu: {
         flex: 1,
@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 14,
-        color: "#6b7280",
         marginTop: 4,
         wordWrap: 'break-word',
     },

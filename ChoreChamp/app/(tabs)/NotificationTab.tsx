@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     },
     switcherTab: {
         flex: 1,
-        paddingVertical: 12,
+        paddingVertical: 16,
         paddingHorizontal: 16,
         alignItems: 'center',
         justifyContent: 'center',
