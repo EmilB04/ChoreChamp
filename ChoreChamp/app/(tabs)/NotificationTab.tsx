@@ -1,12 +1,10 @@
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useTheme } from "@/contexts/ThemeContext";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import commonStyles from "../commonStyles";
 
 export default function Notifications() {
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const { colors } = useTheme();
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
 
     return (

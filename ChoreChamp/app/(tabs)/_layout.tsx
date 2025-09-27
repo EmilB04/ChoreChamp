@@ -4,8 +4,7 @@ import { View, StyleSheet } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // Floating Tab Button Component
 function FloatingTabButton(props: any) {
@@ -33,18 +32,19 @@ function FloatingTabButton(props: any) {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colors } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tabIconDefault,
+        tabBarActiveTintColor: colors.tint,
+        tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].tabBarBackground,
+          backgroundColor: colors.tabBarBackground,
           height: 90,
           paddingBottom: 20,
           paddingTop: 10,
+          borderTopWidth: 0,
         },
         headerShown: false,
         tabBarButton: HapticTab,

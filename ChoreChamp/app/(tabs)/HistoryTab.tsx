@@ -1,5 +1,4 @@
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
@@ -13,8 +12,7 @@ import commonStyles from "../commonStyles";
 
 export default function History() {
   const [household, setHousehold] = useState("Remmen");
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? "light"];
+  const { colors } = useTheme();
 
   const historyData = [
     {
@@ -38,7 +36,7 @@ export default function History() {
   ];
 
   return (
-    <View style={commonStyles.container}>
+    <View style={[commonStyles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <Text style={[commonStyles.headerTitle, { color: colors.text }]}>Historikk</Text>
 

@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/theme";
+import { useTheme } from "@/contexts/ThemeContext";
 import React, { useState } from "react";
 import {
     StyleSheet,
@@ -6,13 +6,11 @@ import {
     View,
     ScrollView,
     TouchableOpacity,
-    useColorScheme,
 } from "react-native";
 import commonStyles from "../commonStyles";
 
 export default function AddTask() {
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const { colors } = useTheme();
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
     // Get current date and calculate next two days
