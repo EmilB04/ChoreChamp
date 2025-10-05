@@ -5,6 +5,7 @@ export default StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        paddingTop: 0,
     },
     header: {
         textAlign: 'left',
@@ -13,8 +14,6 @@ export default StyleSheet.create({
     headerTitle: {
         fontSize: 26,
         textAlign: 'left',
-        alignContent: 'flex-start',
-        alignSelf: 'flex-start',
         marginTop: 85,
         fontWeight: 'bold',
     },

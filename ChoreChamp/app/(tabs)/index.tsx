@@ -92,7 +92,7 @@ export default function Dashboard() {
   // Generate week days
   const weekDays = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
   const weekDates = [];
-  
+
   // Populate week dates array
   for (let i = 0; i < 7; i++) {
     const date = new Date(mondayDate);
@@ -108,39 +108,39 @@ export default function Dashboard() {
   function generateTimeSlots() {
     const defaultStart = 8;  // Default start hour (08:00)
     const defaultEnd = 20;   // Default end hour (20:00)
-    
+
     // Extract hours from tasks
     const taskHours = todayTasks.map(task => {
       const [hour] = task.time.split(':');
       return parseInt(hour, 10);
     });
-    
+
     // Determine the range including task hours
     const minHour = Math.min(defaultStart, ...taskHours);
     const maxHour = Math.max(defaultEnd, ...taskHours);
-    
+
     // Generate time slots for the extended range
     const slots = [];
     for (let hour = minHour; hour <= maxHour; hour++) {
       slots.push(`${hour.toString().padStart(2, '0')}:00`);
     }
-    
+
     return slots;
   }
   // Calculate position for now line dynamically based on actual time slots
   function calculateNowLinePosition() {
     if (timeSlots.length === 0) return { shouldShow: false, position: -1 };
-    
+
     // Get the first and last hour from time slots
     const firstHour = parseInt(timeSlots[0].split(':')[0], 10);
     const lastHour = parseInt(timeSlots[timeSlots.length - 1].split(':')[0], 10);
-    
+
     // Check if current hour is within the displayed range
     const shouldShow = currentHour >= firstHour && currentHour <= lastHour;
-    
+
     // Calculate position relative to the first time slot
     const position = shouldShow ? currentHour - firstHour + (currentMinutes / 60) : -1;
-    
+
     return { shouldShow, position };
   }
 
@@ -153,147 +153,144 @@ export default function Dashboard() {
 
 
   return (
-    <ScrollView style={[{ backgroundColor: colors.background, flex : 1 }]}>
+    <ScrollView style={[styles.outsideSafeArea, { backgroundColor: colors.background }]}>
       {/* HEADER SVG - Outside Safe Area */}
       <SvgFigures.BackgroundShape tintColor={colors.tint} />
       <SvgFigures.CircularShape tintColor={colors.tint} />
       <SvgFigures.SmallDot tintColor={colors.tint} />
       <ScrollView
-        style={[commonStyles.container, { zIndex: 2 }]}
+        style={[commonStyles.container, { zIndex: 2, paddingTop: 0 }]}
         contentContainerStyle={{ paddingBottom: 24 }} // Extra padding at the bottom for better scroll experience
         showsVerticalScrollIndicator={false}
       >
-        {/* CONTENT */}
-        <View style={[styles.headerWrapper, { paddingTop: insets.top }]}>
-          {/* HEADER */}
-          <View style={styles.header}>
-            <WelcomeGreeting userName={user} />
-            <View style={styles.profileSection}>
-              <View style={styles.profileContainer}>
-                <Image
-                  source={require("@/assets/images/icon.png")}
-                  style={styles.profileImage}
-                />
+        {/* HEADER */}
+        <View style={[styles.header, commonStyles.headerTitle]}>
+          <WelcomeGreeting userName={user} />
+          <View style={styles.profileSection}>
+            <View style={styles.profileContainer}>
+              <Image
+                source={require("@/assets/images/icon.png")}
+                style={styles.profileImage}
+              />
+            </View>
+          </View>
+        </View>
+
+        {/* HEADER CALENDAR */}
+        <View style={styles.calendarWrapper}>
+          <View style={styles.calendarWeek}>
+            {weekDates.map((dayData, index) => (
+              <View key={index} style={[styles.calendarDay, dayData.isToday && styles.calendarDayActive]}>
+                <Text style={[
+                  styles.calendarDayNumber, { color: dayData.isToday ? colors.activeText : colors.lightDarkText }
+                ]}>
+                  {dayData.date}
+                </Text>
+                <Text style={[
+                  styles.calendarDayLabel, { color: dayData.isToday ? colors.activeText : colors.text }
+                ]}>
+                  {dayData.day}
+                </Text>
               </View>
-            </View>
+            ))}
           </View>
+        </View>
 
-          {/* HEADER CALENDAR */}
-          <View style={styles.calendarWrapper}>
-            <View style={styles.calendarWeek}>
-              {weekDates.map((dayData, index) => (
-                <View key={index} style={[styles.calendarDay, dayData.isToday && styles.calendarDayActive]}>
-                  <Text style={[
-                    styles.calendarDayNumber, { color: dayData.isToday ? colors.activeText : colors.lightDarkText }
-                  ]}>
-                    {dayData.date}
-                  </Text>
-                  <Text style={[
-                    styles.calendarDayLabel, { color: dayData.isToday ? colors.activeText : colors.text }
-                  ]}>
-                    {dayData.day}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
+        {/* MAIN CONTENT */}
+        <View style={styles.mainWrapper}>
+          <Text style={[commonStyles.sectionTitle, { color: colors.text, marginBottom: 16 }]}>
+            Dagens oppgaver:
+          </Text>
 
-          {/* MAIN CONTENT */}
-          <View style={styles.mainWrapper}>
-            <Text style={[commonStyles.sectionTitle, { color: colors.text, marginBottom: 16 }]}>
-              Dagens oppgaver:
-            </Text>
+          {/* Hourly Calendar */}
+          <View style={styles.calendarContainer}>
+            {timeSlots.map((timeSlot, index) => {
+              // Find task for this time slot
+              const taskForSlot = todayTasks.find(task => task.time === timeSlot);
 
-            {/* Hourly Calendar */}
-            <View style={styles.calendarContainer}>
-              {timeSlots.map((timeSlot, index) => {
-                // Find task for this time slot
-                const taskForSlot = todayTasks.find(task => task.time === timeSlot);
+              // Check if we should show the now line after this time slot
+              const showNowLineAfter = shouldShowNowLine &&
+                index < timeSlots.length - 1 &&
+                nowLinePosition > index &&
+                nowLinePosition < index + 1;
 
-                // Check if we should show the now line after this time slot
-                const showNowLineAfter = shouldShowNowLine &&
-                  index < timeSlots.length - 1 &&
-                  nowLinePosition > index &&
-                  nowLinePosition < index + 1;
-
-                return (
-                  <View key={index}>
-                    <View style={styles.timeSlotRow}>
-                      {/* Time Label */}
-                      <View style={styles.timeColumn}>
-                        <Text style={[styles.timeLabel, { color: colors.lightDarkText }]}>
-                          {timeSlot}
-                        </Text>
-                      </View>
-
-                      {/* Task Column */}
-                      <View style={styles.taskColumn}>
-                        {taskForSlot ? (
-                          <TouchableOpacity style={[
-                            styles.taskCard,
-                            { backgroundColor: taskForSlot.finished ? colors.nonInteractiveBackground : colors.interactiveBackground }
-                          ]}>
-                            <View style={styles.taskContent}>
-                              <Text style={[
-                                styles.taskTitle,
-                                {
-                                  color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.darkText,
-                                  textDecorationLine: taskForSlot.finished ? 'line-through' : 'none'
-                                }
-                              ]}>
-                                {taskForSlot.title}
-                              </Text>
-                              <Text style={[
-                                styles.taskSubtitle,
-                                { color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.lightText }
-                              ]}>
-                                {taskForSlot.assignedTo}
-                              </Text>
-                            </View>
-                            <View style={[
-                              styles.taskAvatar,
-                              taskForSlot.finished && styles.taskAvatarFinished
-                            ]}>
-                              <Image
-                                source={taskForSlot.avatar}
-                                style={[
-                                  styles.avatarImage,
-                                  taskForSlot.finished && styles.avatarImageFinished
-                                ]}
-                              />
-                            </View>
-                          </TouchableOpacity>
-                        ) : null}
-                      </View>
+              return (
+                <View key={index}>
+                  <View style={styles.timeSlotRow}>
+                    {/* Time Label */}
+                    <View style={styles.timeColumn}>
+                      <Text style={[styles.timeLabel, { color: colors.lightDarkText }]}>
+                        {timeSlot}
+                      </Text>
                     </View>
 
-                    {/* Now Line */}
-                    {showNowLineAfter && (
-                      <View style={styles.nowLineContainer}>
-                        <View style={styles.nowTimeColumn}>
-                          <Text style={[styles.nowTimeLabel, { color: colors.activeText }]}>
-                            {currentTimeString}
-                          </Text>
-                        </View>
-                        <View style={styles.nowLineWrapper}>
-                          <View style={[styles.nowLine, { backgroundColor: colors.activeText }]} />
-                          <View style={[styles.nowDot, { backgroundColor: colors.activeText }]} />
-                        </View>
-                      </View>
-                    )}
+                    {/* Task Column */}
+                    <View style={styles.taskColumn}>
+                      {taskForSlot ? (
+                        <TouchableOpacity style={[
+                          styles.taskCard,
+                          { backgroundColor: taskForSlot.finished ? colors.nonInteractiveBackground : colors.interactiveBackground }
+                        ]}>
+                          <View style={styles.taskContent}>
+                            <Text style={[
+                              styles.taskTitle,
+                              {
+                                color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.darkText,
+                                textDecorationLine: taskForSlot.finished ? 'line-through' : 'none'
+                              }
+                            ]}>
+                              {taskForSlot.title}
+                            </Text>
+                            <Text style={[
+                              styles.taskSubtitle,
+                              { color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.lightText }
+                            ]}>
+                              {taskForSlot.assignedTo}
+                            </Text>
+                          </View>
+                          <View style={[
+                            styles.taskAvatar,
+                            taskForSlot.finished && styles.taskAvatarFinished
+                          ]}>
+                            <Image
+                              source={taskForSlot.avatar}
+                              style={[
+                                styles.avatarImage,
+                                taskForSlot.finished && styles.avatarImageFinished
+                              ]}
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
                   </View>
-                );
-              })}
-            </View>
-          </View>
 
-          {/* Leaderboard */}
-          <View style={styles.leaderboardWrapper}>
-            <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-              Ledertavle:
-            </Text>
-            {/* Placeholder for leaderboard content */}
+                  {/* Now Line */}
+                  {showNowLineAfter && (
+                    <View style={styles.nowLineContainer}>
+                      <View style={styles.nowTimeColumn}>
+                        <Text style={[styles.nowTimeLabel, { color: colors.activeText }]}>
+                          {currentTimeString}
+                        </Text>
+                      </View>
+                      <View style={styles.nowLineWrapper}>
+                        <View style={[styles.nowLine, { backgroundColor: colors.activeText }]} />
+                        <View style={[styles.nowDot, { backgroundColor: colors.activeText }]} />
+                      </View>
+                    </View>
+                  )}
+                </View>
+              );
+            })}
           </View>
+        </View>
+
+        {/* Leaderboard */}
+        <View style={styles.leaderboardWrapper}>
+          <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+            Ledertavle:
+          </Text>
+          {/* Placeholder for leaderboard content */}
         </View>
       </ScrollView>
     </ScrollView>
@@ -301,11 +298,11 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-  headerWrapper: {
-    position: "relative",
-    zIndex: 1,
+  outsideSafeArea: {
+    flex: 1,
+    margin: 0,
+    padding: 0,
   },
-
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -335,8 +332,6 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 18,
   },
-
-
   calendarWrapper: {
     marginTop: 20,
     marginBottom: 20,

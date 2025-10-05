@@ -19,9 +19,9 @@ export default function Profile() {
     return (
         <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
             {/* Header - Outside Safe Area */}
-            <View style={[styles.header, { paddingTop: insets.top, backgroundColor: colors.tint }]}>
+            <View style={[styles.header, { backgroundColor: colors.tint }]}>
                 {/* Adjust marginTop to keep title level with rest */}
-                <Text style={[commonStyles.headerTitle, { marginTop: Math.max(0, 80 - insets.top) }]}>
+                <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
                     Profil & {"\n"}Innstillinger
                 </Text>
                 <Image
@@ -36,10 +36,8 @@ export default function Profile() {
                 </TouchableOpacity>
             </View>
 
-            {/* Content with proper padding */}
-            <View style={[commonStyles.container, { flex: 1, paddingVertical: 0 }]}>
-                {/* Settings */}
-                <ScrollView style={styles.menu} showsVerticalScrollIndicator={false}>
+            {/* Settings */}
+            <ScrollView style={[commonStyles.container, styles.menu, { flex: 1 }]}>
                 <MenuItem
                     icon="person-circle"
                     title="Min konto"
@@ -77,8 +75,7 @@ export default function Profile() {
                     title="Om appen"
                     description="Informasjon om appen og utviklerne"
                 />
-                </ScrollView>
-            </View>
+            </ScrollView>
         </View>
     );
 }
@@ -91,7 +88,7 @@ function MenuItem({
     icon: keyof typeof Ionicons.glyphMap;
     title: string;
     description?: string;
-    }) {
+}) {
     const { colors } = useTheme();
 
     return (
@@ -116,11 +113,13 @@ const styles = StyleSheet.create({
     header: {
         width: "100%",
         alignItems: "center",
-        paddingTop: 20,
         paddingHorizontal: 20,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         paddingBottom: 20,
+    },
+    headerTitle: {
+        alignSelf: 'flex-start',
     },
     profileSection: {
         alignItems: "center",
