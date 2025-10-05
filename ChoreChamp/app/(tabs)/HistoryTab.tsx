@@ -92,7 +92,7 @@ export default function History() {
             </Text>
           </TouchableOpacity>
           
-          {/* Household Dropdown Menu */}
+          {/* Household Dropdown - Active */}
           {showHouseholdDropdown && (
             <View style={[styles.dropdownMenu, {backgroundColor: colors.contextBackground}]}>
               {households.map((householdOption, index) => (
@@ -119,60 +119,32 @@ export default function History() {
           )}
         </View>
 
-        {/* Search Button/Field */}
-        {!showSearch ? (
-          <TouchableOpacity 
-            style={[styles.iconButton, {backgroundColor: colors.contextBackground}]}
-            onPress={() => setShowSearch(true)}
-          >
-            <Ionicons name="search" size={20} color={colors.text} />
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.searchContainer}>
-            <TextInput
-              style={[styles.searchInput, {backgroundColor: colors.contextBackground, color: colors.text}]}
-              placeholder="Søk i historikk..."
-              placeholderTextColor={colors.lightNonInteractiveText}
-              value={searchText}
-              onChangeText={setSearchText}
-              autoFocus
-            />
-            <TouchableOpacity 
-              style={styles.searchCloseButton}
-              onPress={() => {
-                setShowSearch(false);
-                setSearchText("");
-              }}
-            >
-              <Ionicons name="close" size={16} color={colors.text} />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Filter Options Button */}
-        <TouchableOpacity 
-          style={[
-            styles.iconButton, 
-            {backgroundColor: selectedFilters.length > 0 ? colors.tint : colors.contextBackground}
-          ]}
-          onPress={() => setShowFiltersModal(true)}
-        >
-          <Ionicons 
-            name="options-outline" 
-            size={20} 
-            color={selectedFilters.length > 0 ? colors.darkText : colors.text} 
-          />
-          {selectedFilters.length > 0 && (
-            <View style={[styles.filterBadge, {backgroundColor: colors.statusFailedText}]}>
-              <Text style={[styles.filterBadgeText, {color: colors.background}]}>
-                {selectedFilters.length}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
       </View>
 
-      {/* Filters Modal */}
+      {/* Search Field - Active */}
+      {showSearch && (
+        <View style={[styles.searchBar, {backgroundColor: colors.contextBackground}]}>
+          <TextInput
+            style={[styles.searchInput, {color: colors.text}]}
+            placeholder="Søk i historikk..."
+            placeholderTextColor={colors.lightNonInteractiveText}
+            value={searchText}
+            onChangeText={setSearchText}
+            autoFocus
+          />
+          <TouchableOpacity 
+            style={styles.searchCloseButton}
+            onPress={() => {
+              setShowSearch(false);
+              setSearchText("");
+            }}
+          >
+            <Ionicons name="close" size={16} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Filters - Active */}
       <Modal
         visible={showFiltersModal}
         transparent
@@ -221,6 +193,7 @@ export default function History() {
               )}
             />
             
+            {/* Filters - Active buttons  */}
             <View style={styles.filterActions}>
               <TouchableOpacity
                 style={[styles.clearFiltersButton, {backgroundColor: colors.statusFailedBackground}]}
@@ -260,12 +233,16 @@ export default function History() {
               <Text style={[styles.cardTitle, { color: colors.text }]}>
                 {item.title}
               </Text>
-              <Text style={[styles.cardSubtitle, { color: colors.text }]}>
-                Alle oppgaver ble:{" "}
-                <Text style={[styles.statusText, { color: item.statusColor === "green" ? colors.statusSuccessText : colors.statusFailedText, backgroundColor: item.statusColor === "green" ? colors.statusSuccessBackground : colors.statusFailedBackground }]}>
-                  {item.status}
+              <View style={styles.statusContainer}>
+                <Text style={[styles.cardSubtitle, { color: colors.text }]}>
+                  Alle oppgaver ble:{" "}
                 </Text>
-              </Text>
+                <View style={[styles.statusText, { backgroundColor: item.statusColor === "green" ? colors.statusSuccessBackground : colors.statusFailedBackground }]}>
+                  <Text style={[styles.statusTextInner, { color: item.statusColor === "green" ? colors.statusSuccessText : colors.statusFailedText }]}>
+                    {item.status}
+                  </Text>
+                </View>
+              </View>
               <Text style={[styles.cardSubtitle, { color: colors.text }]}>
                 Antall oppgaver: {item.count}
               </Text>
@@ -276,6 +253,44 @@ export default function History() {
           </View>
         ))}
       </ScrollView>
+
+      {/* Floating Action Buttons */}
+      <View style={styles.floatingButtons}>
+        <TouchableOpacity 
+          style={[
+            styles.floatingButton,
+            {backgroundColor: colors.tint}
+          ]}
+          onPress={() => setShowSearch(!showSearch)}
+        >
+          <Ionicons 
+            name={showSearch ? "close" : "search"} 
+            size={24} 
+            color={colors.darkText} 
+          />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[
+            styles.floatingButton,
+            {backgroundColor: selectedFilters.length > 0 ? colors.statusSuccessBackground : colors.tint}
+          ]}
+          onPress={() => setShowFiltersModal(true)}
+        >
+          <Ionicons 
+            name="options-outline" 
+            size={24} 
+            color={selectedFilters.length > 0 ? colors.statusSuccessText : colors.darkText} 
+          />
+          {selectedFilters.length > 0 && (
+            <View style={[styles.filterBadge, {backgroundColor: colors.statusFailedText}]}>
+              <Text style={[styles.filterBadgeText, {color: colors.background}]}>
+                {selectedFilters.length}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -284,14 +299,48 @@ const styles = StyleSheet.create({
   filterRow: {
     flexDirection: "row",
     marginBottom: 15,
-    marginTop: 5,
+    marginTop: 10,
     alignItems: "center",
     zIndex: 1000,
   },
   dropdownContainer: {
     flex: 1,
     position: "relative",
-    marginRight: 8,
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  floatingButtons: {
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    gap: 16,
+  },
+  floatingButton: {
+    width: 45,
+    height: 45,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    position: "relative",
   },
   dropdown: {
     height: 45,
@@ -471,11 +520,19 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 4
   },
+  statusContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
   statusText: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 1,
     borderRadius: 4,
-    overflow: "hidden",
-    fontWeight: "600"
+    marginLeft: 0,
+  },
+  statusTextInner: {
+    fontSize: 14,
+    fontWeight: "600",
   }
 });

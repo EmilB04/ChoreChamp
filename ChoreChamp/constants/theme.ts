@@ -39,6 +39,10 @@ export const Colors = {
     statusSuccessText: '#5DC486',
     statusFailedBackground: '#FF000033',
     statusFailedText: '#C45D5D',
+
+    // Pure colors
+    white: '#FFFFFF',
+    black: '#000000',
   },
   dark: {
     // Text
@@ -72,6 +76,10 @@ export const Colors = {
     statusSuccessText: '#5DC486',
     statusFailedBackground: '#FF000033',
     statusFailedText: '#C45D5D',
+
+    // Pure colors
+    white: '#FFFFFF',
+    black: '#000000',
   }
 };
 
