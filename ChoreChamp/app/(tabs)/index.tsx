@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import commonStyles from "../commonStyles";
@@ -15,7 +14,6 @@ import SvgFigures from '../../components/svg/SvgFigures';
 
 export default function Dashboard() {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();                               // Get safe area insets for proper padding
   const user = "Emil";                                              // Replace with dynamic user data as needed
 
   // State for current time that updates live
