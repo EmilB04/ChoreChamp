@@ -18,20 +18,20 @@ export default function Dashboard() {
   const insets = useSafeAreaInsets();                               // Get safe area insets for proper padding
   const user = "Emil";                                              // Replace with dynamic user data as needed
 
-  // State for current time that updates every minute
+  // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Update time every minute
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(new Date());
     };
-    updateTime();
-    // Set interval to update every minute
-    const interval = setInterval(updateTime, 60000);
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
+    updateTime();                                                   // Update immediately on mount
+    const interval = setInterval(updateTime, 10000);                // Update every 10 seconds
+    return () => clearInterval(interval);                           // Cleanup interval on component unmount
   }, []);
+
+
+
 
   // Sample tasks data - replace with database fetch
   const todayTasks = [
@@ -61,38 +61,39 @@ export default function Dashboard() {
       avatar: require("@/assets/images/icon.png"),
       duration: 90,
       finished: false
-    }
+    },
+    {
+      id: 4,
+      title: "Vanne planter",
+      time: "21:00",
+      assignedTo: "Emil",
+      avatar: require("@/assets/images/icon.png"),
+      duration: 30,
+      finished: false
+    },
   ];
 
-  // Generate hourly time slots from 08:00 to 22:00
-  const timeSlots = [];
-  for (let hour = 8; hour <= 22; hour++) {
-    timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
-  }
+  // ------------------------------------------------------------------ //
+  /*                    Variables to be handled by Expo                 */
+  // ------------------------------------------------------------------ //
 
-  // Get current time for "now line"
-  const currentHour = currentTime.getHours();
-  const currentMinutes = currentTime.getMinutes();
-  const currentTimeString = `${currentHour.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
-
-  // Calculate position for now line (between time slots)
-  const shouldShowNowLine = currentHour >= 8 && currentHour <= 22;
-  const nowLinePosition = shouldShowNowLine ? currentHour - 8 + (currentMinutes / 60) : -1;
-
-  // Get current date and week days
+  // Frequently used date variables
   const today = currentTime;
-  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-  const currentDate = today.getDate();
+  const currentDay = today.getDay();                               // 0 = Sunday, 1 = Monday, etc.
+  const currentDate = today.getDate();                             // Day of month
+  const currentHour = today.getHours();                            // Hour of day
+  const currentMinutes = today.getMinutes();                       // Minute of hour
 
   // Calculate Monday of current week
   const mondayDate = new Date(today);
-  const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Handle Sunday
+  const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1;    // Handle Sunday
   mondayDate.setDate(today.getDate() - daysFromMonday);
 
   // Generate week days
   const weekDays = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
   const weekDates = [];
-
+  
+  // Populate week dates array
   for (let i = 0; i < 7; i++) {
     const date = new Date(mondayDate);
     date.setDate(mondayDate.getDate() + i);
@@ -102,6 +103,54 @@ export default function Dashboard() {
       isToday: date.getDate() === currentDate && date.getMonth() === today.getMonth()
     });
   }
+
+  // Generate dynamic time slots based on tasks and default range
+  function generateTimeSlots() {
+    const defaultStart = 8;  // Default start hour (08:00)
+    const defaultEnd = 20;   // Default end hour (20:00)
+    
+    // Extract hours from tasks
+    const taskHours = todayTasks.map(task => {
+      const [hour] = task.time.split(':');
+      return parseInt(hour, 10);
+    });
+    
+    // Determine the range including task hours
+    const minHour = Math.min(defaultStart, ...taskHours);
+    const maxHour = Math.max(defaultEnd, ...taskHours);
+    
+    // Generate time slots for the extended range
+    const slots = [];
+    for (let hour = minHour; hour <= maxHour; hour++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+    }
+    
+    return slots;
+  }
+  // Calculate position for now line dynamically based on actual time slots
+  function calculateNowLinePosition() {
+    if (timeSlots.length === 0) return { shouldShow: false, position: -1 };
+    
+    // Get the first and last hour from time slots
+    const firstHour = parseInt(timeSlots[0].split(':')[0], 10);
+    const lastHour = parseInt(timeSlots[timeSlots.length - 1].split(':')[0], 10);
+    
+    // Check if current hour is within the displayed range
+    const shouldShow = currentHour >= firstHour && currentHour <= lastHour;
+    
+    // Calculate position relative to the first time slot
+    const position = shouldShow ? currentHour - firstHour + (currentMinutes / 60) : -1;
+    
+    return { shouldShow, position };
+  }
+
+  // Generate time slots once
+  const timeSlots = generateTimeSlots();
+  // Get current time for "now line"
+  const currentTimeString = `${currentHour.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+  // Determine if and where to show the "now line"
+  const { shouldShow: shouldShowNowLine, position: nowLinePosition } = calculateNowLinePosition();
+
 
   return (
     <ScrollView style={[{ backgroundColor: colors.background, flex : 1 }]}>
