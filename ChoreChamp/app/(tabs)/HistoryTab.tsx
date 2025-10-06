@@ -41,29 +41,71 @@ export default function History() {
       title: "Oppsummering - Uke 40",
       status: "Fullført",
       count: 9,
+      finishedCount: 9,
       startDate: "29 sep 2025",
       endDate: "05 okt 2025",
       statusColor: "green",
+      houseHold: "Remmen",
     },
     {
       week: "39",
       title: "Oppsummering - Uke 39",
       status: "Ikke fullført",
       count: 5,
+      finishedCount: 3,
       startDate: "22 sep 2025",
       endDate: "28 sep 2025",
       statusColor: "red",
+      houseHold: "Hjemme",
     },
     {
       week: "38",
       title: "Oppsummering - Uke 38",
       status: "Fullført",
       count: 7,
+      finishedCount: 7,
       startDate: "15 sep 2025",
       endDate: "21 sep 2025",
       statusColor: "green",
+      houseHold: "Hjemme",
+    },
+    {
+      week: "37",
+      title: "Oppsummering - Uke 37",
+      status: "Fullført",
+      count: 12,
+      finishedCount: 12,
+      startDate: "08 sep 2025",
+      endDate: "14 sep 2025",
+      statusColor: "green",
+      houseHold: "Kollektiv",
+    },
+    {
+      week: "36",
+      title: "Oppsummering - Uke 36",
+      status: "Ikke fullført",
+      count: 4,
+      finishedCount: 2,
+      startDate: "01 sep 2025",
+      endDate: "07 sep 2025",
+      statusColor: "red",
+      houseHold: "Familie",
+    },
+    {
+      week: "35",
+      title: "Oppsummering - Uke 35",
+      status: "Fullført",
+      count: 8,
+      finishedCount: 8,
+      startDate: "25 aug 2025",
+      endDate: "31 aug 2025",
+      statusColor: "green",
+      houseHold: "Remmen",
     },
   ];
+
+  // Filter history data based on selected household
+  const filteredHistoryData = historyData.filter(item => item.houseHold === household);
 
   return (
     <View
@@ -118,7 +160,6 @@ export default function History() {
             </View>
           )}
         </View>
-
       </View>
 
       {/* Search Field - Active */}
@@ -218,7 +259,7 @@ export default function History() {
 
       {/* History list */}
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        {historyData.map((item, index) => (
+        {filteredHistoryData.map((item, index) => (
           <View
             key={index}
             style={[styles.card, { backgroundColor: colors.contextBackground }]}
