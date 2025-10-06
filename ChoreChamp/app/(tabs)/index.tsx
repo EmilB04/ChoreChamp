@@ -6,7 +6,7 @@ import commonStyles from "../commonStyles";
 import WelcomeGreeting from '../../components/index/WelcomeGreeting';
 import SvgFigures from '../../components/svg/SvgFigures';
 
-// TODO: 
+// TODO:
 // 1. Fetch user data dynamically
 // 2. Integrate main content and leaderboard sections
 // 3. Add interactivity to calendar (e.g., navigate to daily view on tap)
@@ -14,7 +14,7 @@ import SvgFigures from '../../components/svg/SvgFigures';
 
 export default function Dashboard() {
   const { colors } = useTheme();
-  const user = "Emil";                                              // Replace with dynamic user data as needed
+  const user = "Emil Berglund";                                              // Replace with dynamic user data as needed
 
   // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -70,6 +70,29 @@ export default function Dashboard() {
       finished: false
     },
   ];
+
+  // Sample Leaderboard data - replace with database fetch
+  const rawLeaderboardData = [
+    { id: 1, name: "Ola Nordmann", points: 43, avatar: require("@/assets/images/icon.png") },
+    { id: 2, name: "Andreas B. Olaussen", points: 40, avatar: require("@/assets/images/icon.png") },
+    { id: 3, name: "Sebastian W. Thomsen", points: 38, avatar: require("@/assets/images/icon.png") },
+    { id: 4, name: "Ida K. Tollaksen", points: 36, avatar: require("@/assets/images/icon.png") },
+    { id: 5, name: "Khalid O.", points: 35, avatar: require("@/assets/images/icon.png") },
+    { id: 6, name: "Emil Berglund", points: 34, avatar: require("@/assets/images/icon.png")},
+    { id: 7, name: "Bruker", points: 33, avatar: require("@/assets/images/icon.png") },
+    { id: 8, name: "Bruker", points: 32, avatar: require("@/assets/images/icon.png") },
+    { id: 9, name: "Bruker", points: 31, avatar: require("@/assets/images/icon.png") },
+    { id: 10, name: "Bruker", points: 30, avatar: require("@/assets/images/icon.png") },
+  ];
+
+  // Sort by points (descending) and calculate positions
+  const leaderboardData = rawLeaderboardData
+    .sort((a, b) => b.points - a.points)
+    .map((userData, index) => ({
+      ...userData,
+      position: index + 1,
+      isCurrentUser: userData.name === user // Check if this user is the logged-in user
+    }));
 
   // ------------------------------------------------------------------ //
   /*                    Variables to be handled by Expo                 */
@@ -288,7 +311,93 @@ export default function Dashboard() {
           <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
             Ledertavle:
           </Text>
-          {/* Placeholder for leaderboard content */}
+          
+          {/* Top 3 Podium */}
+          <View style={styles.podiumContainer}>
+            {/* Second Place */}
+            <View style={styles.podiumPosition}>
+              <View style={[styles.podiumAvatar, styles.secondPlaceAvatar]}>
+                <Image source={leaderboardData[1].avatar} style={styles.avatarImage} />
+                <View style={[styles.positionBadge, styles.secondPlaceBadge]}>
+                  <Text style={styles.positionText}>2</Text>
+                </View>
+              </View>
+              <Text style={[styles.podiumName, { color: colors.text }]}>{leaderboardData[1].name}</Text>
+              <View style={styles.pointsContainer}>
+                <Text style={styles.pointsIcon}>🏆</Text>
+                <Text style={[styles.podiumPoints, { color: colors.text }]}>{leaderboardData[1].points} pts</Text>
+              </View>
+            </View>
+
+            {/* First Place */}
+            <View style={styles.podiumPosition}>
+              <View style={[styles.podiumAvatar, styles.firstPlaceAvatar]}>
+                <Image source={leaderboardData[0].avatar} style={styles.avatarImage} />
+                <View style={[styles.positionBadge, styles.firstPlaceBadge]}>
+                  <Text style={styles.positionText}>1</Text>
+                </View>
+                <View style={styles.crownContainer}>
+                  <Text style={styles.crown}>👑</Text>
+                </View>
+              </View>
+              <Text style={[styles.podiumName, { color: colors.text }]}>{leaderboardData[0].name}</Text>
+              <View style={styles.pointsContainer}>
+                <Text style={styles.pointsIcon}>🏆</Text>
+                <Text style={[styles.podiumPoints, { color: colors.text }]}>{leaderboardData[0].points} pts</Text>
+              </View>
+            </View>
+
+            {/* Third Place */}
+            <View style={styles.podiumPosition}>
+              <View style={[styles.podiumAvatar, styles.thirdPlaceAvatar]}>
+                <Image source={leaderboardData[2].avatar} style={styles.avatarImage} />
+                <View style={[styles.positionBadge, styles.thirdPlaceBadge]}>
+                  <Text style={styles.positionText}>3</Text>
+                </View>
+              </View>
+              <Text style={[styles.podiumName, { color: colors.text }]}>{leaderboardData[2].name}</Text>
+              <View style={styles.pointsContainer}>
+                <Text style={styles.pointsIcon}>🏆</Text>
+                <Text style={[styles.podiumPoints, { color: colors.text }]}>{leaderboardData[2].points} pts</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Positions 4-10 */}
+          <View style={styles.leaderboardList}>
+            {leaderboardData.slice(3).map((user) => (
+              <View 
+                key={user.id} 
+                style={[
+                  styles.leaderboardItem,
+                  user.isCurrentUser && styles.currentUserItem,
+                  { backgroundColor: user.isCurrentUser ? '#FF6B9D' : colors.contextBackground }
+                ]}
+              >
+                <View style={styles.leaderboardLeft}>
+                  <Text style={[
+                    styles.leaderboardPosition,
+                    { color: user.isCurrentUser ? '#FFF' : colors.text }
+                  ]}>
+                    {user.position}
+                  </Text>
+                  <Image source={user.avatar} style={styles.leaderboardAvatar} />
+                  <Text style={[
+                    styles.leaderboardName,
+                    { color: user.isCurrentUser ? '#FFF' : colors.text }
+                  ]}>
+                    {user.name}
+                  </Text>
+                </View>
+                <Text style={[
+                  styles.leaderboardPoints,
+                  { color: user.isCurrentUser ? '#FFF' : colors.text }
+                ]}>
+                  {user.points} pts
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       </ScrollView>
     </ScrollView>
@@ -483,6 +592,133 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     marginLeft: -4,
+  },
+
+  // Leaderboard Styles
+  podiumContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    marginTop: 20,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  podiumPosition: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  podiumAvatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    marginBottom: 8,
+  },
+  firstPlaceAvatar: {
+    borderColor: '#FFD700',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  secondPlaceAvatar: {
+    borderColor: '#FFD700',
+  },
+  thirdPlaceAvatar: {
+    borderColor: '#FFD700',
+  },
+  positionBadge: {
+    position: 'absolute',
+    bottom: -8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  firstPlaceBadge: {
+    backgroundColor: '#FFD700',
+  },
+  secondPlaceBadge: {
+    backgroundColor: '#FFD700',
+  },
+  thirdPlaceBadge: {
+    backgroundColor: '#FFD700',
+  },
+  positionText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  crownContainer: {
+    position: 'absolute',
+    top: -15,
+  },
+  crown: {
+    fontSize: 20,
+  },
+  podiumName: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  pointsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  pointsIcon: {
+    fontSize: 12,
+    marginRight: 4,
+  },
+  podiumPoints: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  leaderboardList: {
+    gap: 8,
+  },
+  leaderboardItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+  },
+  currentUserItem: {
+    backgroundColor: '#FF6B9D',
+  },
+  leaderboardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  leaderboardPosition: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    width: 24,
+    textAlign: 'center',
+    marginRight: 12,
+  },
+  leaderboardAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 12,
+  },
+  leaderboardName: {
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+  },
+  leaderboardPoints: {
+    fontSize: 16,
+    fontWeight: '500',
   },
 
 });
