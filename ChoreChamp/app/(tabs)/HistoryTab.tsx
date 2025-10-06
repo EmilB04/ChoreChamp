@@ -178,12 +178,26 @@ export default function History() {
     return monthNames.indexOf(dateParts[1].toLowerCase());
   };
 
-  // Filter history data based on selected household and filters
+  // Filter history data based on selected household, filters, and search text
   const filteredHistoryData = historyData.filter(item => {
     // First filter by household
     if (item.houseHold !== household) return false;
 
-    // If no filters selected, show all (for this household)
+    // Apply search text filter if search is active
+    if (searchText.trim() !== "") {
+      const searchLower = searchText.toLowerCase().trim();
+      const matchesSearch = 
+        item.title.toLowerCase().includes(searchLower) ||
+        item.status.toLowerCase().includes(searchLower) ||
+        item.week.toLowerCase().includes(searchLower) ||
+        item.startDate.toLowerCase().includes(searchLower) ||
+        item.endDate.toLowerCase().includes(searchLower) ||
+        item.count.toString().includes(searchLower);
+      
+      if (!matchesSearch) return false;
+    }
+
+    // If no filters selected, show all (for this household and search)
     if (selectedFilters.length === 0) return true;
 
     // Apply selected filters
@@ -396,7 +410,12 @@ export default function History() {
             styles.floatingButton,
             { backgroundColor: colors.tint }
           ]}
-          onPress={() => setShowSearch(!showSearch)}
+          onPress={() => {
+            if (showSearch) {
+              setSearchText("");
+            }
+            setShowSearch(!showSearch);
+          }}
         >
           <Ionicons
             name={showSearch ? "close" : "search"}
