@@ -28,12 +28,46 @@ export default function History() {
   // Available filter options
   const filterOptions = [
     "Fullført",
-    "Ikke fullført", 
+    "Ikke fullført",
     "Denne måneden",
     "Forrige måned",
     "Høy aktivitet",
     "Lav aktivitet"
   ];
+
+  // Define mutually exclusive filter groups
+  const mutuallyExclusiveGroups = [
+    ["Fullført", "Ikke fullført"],
+    ["Denne måneden", "Forrige måned"],
+    ["Høy aktivitet", "Lav aktivitet"]
+  ];
+
+  // Helper function to handle filter selection with mutual exclusion
+  const handleFilterSelection = (selectedItem: string) => {
+    let newFilters = [...selectedFilters];
+
+    if (selectedFilters.includes(selectedItem)) {
+      // Remove the filter if it's already selected
+      newFilters = selectedFilters.filter(filter => filter !== selectedItem);
+    } else {
+      // Find if the selected item belongs to any mutually exclusive group
+      const exclusiveGroup = mutuallyExclusiveGroups.find(group =>
+        group.includes(selectedItem)
+      );
+
+      if (exclusiveGroup) {
+        // Remove any other filters from the same exclusive group
+        newFilters = selectedFilters.filter(filter =>
+          !exclusiveGroup.includes(filter)
+        );
+      }
+
+      // Add the new filter
+      newFilters = [...newFilters, selectedItem];
+    }
+
+    setSelectedFilters(newFilters);
+  };
 
   const historyData = [
     {
@@ -102,10 +136,76 @@ export default function History() {
       statusColor: "green",
       houseHold: "Remmen",
     },
+    {
+      week: "41",
+      title: "Oppsummering - Uke 41",
+      status: "Fullført",
+      count: 11,
+      finishedCount: 11,
+      startDate: "06 okt 2025",
+      endDate: "12 okt 2025",
+      statusColor: "green",
+      houseHold: "Hjemme",
+    },
+    {
+      week: "34",
+      title: "Oppsummering - Uke 34",
+      status: "Ikke fullført",
+      count: 3,
+      finishedCount: 1,
+      startDate: "18 aug 2025",
+      endDate: "24 aug 2025",
+      statusColor: "red",
+      houseHold: "Kollektiv",
+    },
   ];
 
-  // Filter history data based on selected household
-  const filteredHistoryData = historyData.filter(item => item.houseHold === household);
+  // Helper function to get current month data
+  const getCurrentMonth = () => {
+    const now = new Date();
+    return now.getMonth();
+  };
+
+  const getPreviousMonth = () => {
+    const now = new Date();
+    return now.getMonth() - 1;
+  };
+
+  const getItemMonth = (item: any) => {
+    // Parse the start date to get the month
+    const dateParts = item.startDate.split(' ');
+    const monthNames = ["jan", "feb", "mar", "apr", "mai", "jun", "jul", "aug", "sep", "okt", "nov", "des"];
+    return monthNames.indexOf(dateParts[1].toLowerCase());
+  };
+
+  // Filter history data based on selected household and filters
+  const filteredHistoryData = historyData.filter(item => {
+    // First filter by household
+    if (item.houseHold !== household) return false;
+
+    // If no filters selected, show all (for this household)
+    if (selectedFilters.length === 0) return true;
+
+    // Apply selected filters
+    return selectedFilters.every(filter => {
+      switch (filter) {
+        case "Fullført":
+          return item.status === "Fullført";
+        case "Ikke fullført":
+          return item.status === "Ikke fullført";
+        case "Denne måneden":
+          return getItemMonth(item) === getCurrentMonth();
+        case "Forrige måned":
+          return getItemMonth(item) === getPreviousMonth();
+        case "Høy aktivitet":
+          return item.count >= 8; // Consider 8+ tasks as high activity
+        case "Lav aktivitet":
+          return item.count < 8; // Consider less than 8 tasks as low activity
+        default:
+          return true;
+      }
+    });
+  });
 
   return (
     <View
@@ -120,29 +220,29 @@ export default function History() {
       <View style={styles.filterRow}>
         {/* Household Dropdown */}
         <View style={styles.dropdownContainer}>
-          <TouchableOpacity 
-            style={[styles.dropdown, {backgroundColor: colors.tint}]}
+          <TouchableOpacity
+            style={[styles.dropdown, { backgroundColor: colors.tint }]}
             onPress={() => setShowHouseholdDropdown(!showHouseholdDropdown)}
           >
-            <Text style={[styles.dropdownText, {color: colors.darkText}]}>
+            <Text style={[styles.dropdownText, { color: colors.darkText }]}>
               Husholdning: {household}{" "}
-              <Ionicons 
-                name={showHouseholdDropdown ? "chevron-up" : "chevron-down"} 
-                size={16} 
-                color={colors.darkText} 
+              <Ionicons
+                name={showHouseholdDropdown ? "chevron-up" : "chevron-down"}
+                size={16}
+                color={colors.darkText}
               />
             </Text>
           </TouchableOpacity>
-          
+
           {/* Household Dropdown - Active */}
           {showHouseholdDropdown && (
-            <View style={[styles.dropdownMenu, {backgroundColor: colors.contextBackground}]}>
+            <View style={[styles.dropdownMenu, { backgroundColor: colors.contextBackground }]}>
               {households.map((householdOption, index) => (
                 <TouchableOpacity
                   key={index}
                   style={[
                     styles.dropdownItem,
-                    household === householdOption && {backgroundColor: colors.tint}
+                    household === householdOption && { backgroundColor: colors.tint }
                   ]}
                   onPress={() => {
                     setHousehold(householdOption);
@@ -151,7 +251,7 @@ export default function History() {
                 >
                   <Text style={[
                     styles.dropdownItemText,
-                    {color: household === householdOption ? colors.darkText : colors.text}
+                    { color: household === householdOption ? colors.darkText : colors.text }
                   ]}>
                     {householdOption}
                   </Text>
@@ -164,16 +264,16 @@ export default function History() {
 
       {/* Search Field - Active */}
       {showSearch && (
-        <View style={[styles.searchBar, {backgroundColor: colors.contextBackground}]}>
+        <View style={[styles.searchBar, { backgroundColor: colors.contextBackground }]}>
           <TextInput
-            style={[styles.searchInput, {color: colors.text}]}
+            style={[styles.searchInput, { color: colors.text }]}
             placeholder="Søk i historikk..."
             placeholderTextColor={colors.lightNonInteractiveText}
             value={searchText}
             onChangeText={setSearchText}
             autoFocus
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.searchCloseButton}
             onPress={() => {
               setShowSearch(false);
@@ -192,18 +292,18 @@ export default function History() {
         animationType="fade"
         onRequestClose={() => setShowFiltersModal(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           onPress={() => setShowFiltersModal(false)}
         >
-          <View style={[styles.filterModal, {backgroundColor: colors.contextBackground}]}>
+          <View style={[styles.filterModal, { backgroundColor: colors.contextBackground }]}>
             <View style={styles.filterHeader}>
-              <Text style={[styles.filterTitle, {color: colors.text}]}>Filtrer historikk</Text>
+              <Text style={[styles.filterTitle, { color: colors.text }]}>Filtrer historikk</Text>
               <TouchableOpacity onPress={() => setShowFiltersModal(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
-            
+
             <FlatList
               data={filterOptions}
               keyExtractor={(item) => item}
@@ -211,19 +311,13 @@ export default function History() {
                 <TouchableOpacity
                   style={[
                     styles.filterOption,
-                    selectedFilters.includes(item) && {backgroundColor: colors.tint}
+                    selectedFilters.includes(item) && { backgroundColor: colors.tint }
                   ]}
-                  onPress={() => {
-                    if (selectedFilters.includes(item)) {
-                      setSelectedFilters(selectedFilters.filter(filter => filter !== item));
-                    } else {
-                      setSelectedFilters([...selectedFilters, item]);
-                    }
-                  }}
+                  onPress={() => handleFilterSelection(item)}
                 >
                   <Text style={[
                     styles.filterOptionText,
-                    {color: selectedFilters.includes(item) ? colors.darkText : colors.text}
+                    { color: selectedFilters.includes(item) ? colors.darkText : colors.text }
                   ]}>
                     {item}
                   </Text>
@@ -233,22 +327,22 @@ export default function History() {
                 </TouchableOpacity>
               )}
             />
-            
+
             {/* Filters - Active buttons  */}
             <View style={styles.filterActions}>
               <TouchableOpacity
-                style={[styles.clearFiltersButton, {backgroundColor: colors.statusFailedBackground}]}
+                style={[styles.clearFiltersButton, { backgroundColor: colors.statusFailedBackground }]}
                 onPress={() => setSelectedFilters([])}
               >
-                <Text style={[styles.clearFiltersText, {color: colors.statusFailedText}]}>
+                <Text style={[styles.clearFiltersText, { color: colors.statusFailedText }]}>
                   Fjern alle
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.applyFiltersButton, {backgroundColor: colors.tint}]}
+                style={[styles.applyFiltersButton, { backgroundColor: colors.tint }]}
                 onPress={() => setShowFiltersModal(false)}
               >
-                <Text style={[styles.applyFiltersText, {color: colors.darkText}]}>
+                <Text style={[styles.applyFiltersText, { color: colors.darkText }]}>
                   Bruk filtre
                 </Text>
               </TouchableOpacity>
@@ -297,35 +391,35 @@ export default function History() {
 
       {/* Floating Action Buttons */}
       <View style={styles.floatingButtons}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[
             styles.floatingButton,
-            {backgroundColor: colors.tint}
+            { backgroundColor: colors.tint }
           ]}
           onPress={() => setShowSearch(!showSearch)}
         >
-          <Ionicons 
-            name={showSearch ? "close" : "search"} 
-            size={24} 
-            color={colors.darkText} 
+          <Ionicons
+            name={showSearch ? "close" : "search"}
+            size={24}
+            color={colors.darkText}
           />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[
             styles.floatingButton,
-            {backgroundColor: selectedFilters.length > 0 ? colors.statusSuccessBackground : colors.tint}
+            { backgroundColor: selectedFilters.length > 0 ? colors.statusSuccessBackground : colors.tint }
           ]}
           onPress={() => setShowFiltersModal(true)}
         >
-          <Ionicons 
-            name="options-outline" 
-            size={24} 
-            color={selectedFilters.length > 0 ? colors.statusSuccessText : colors.darkText} 
+          <Ionicons
+            name="options-outline"
+            size={24}
+            color={selectedFilters.length > 0 ? colors.statusSuccessText : colors.darkText}
           />
           {selectedFilters.length > 0 && (
-            <View style={[styles.filterBadge, {backgroundColor: colors.statusFailedText}]}>
-              <Text style={[styles.filterBadgeText, {color: colors.background}]}>
+            <View style={[styles.filterBadge, { backgroundColor: colors.statusFailedText }]}>
+              <Text style={[styles.filterBadgeText, { color: colors.background }]}>
                 {selectedFilters.length}
               </Text>
             </View>
