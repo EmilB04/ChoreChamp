@@ -330,7 +330,7 @@ export default function Dashboard() {
             </View>
 
             {/* First Place */}
-            <View style={styles.podiumPosition}>
+            <View style={styles.firstPlacePosition}>
               <View style={[styles.podiumAvatar, styles.firstPlaceAvatar]}>
                 <Image source={leaderboardData[0].avatar} style={styles.avatarImage} />
                 <View style={[styles.positionBadge, styles.firstPlaceBadge]}>
@@ -371,27 +371,27 @@ export default function Dashboard() {
                 style={[
                   styles.leaderboardItem,
                   user.isCurrentUser && styles.currentUserItem,
-                  { backgroundColor: user.isCurrentUser ? '#FF6B9D' : colors.contextBackground }
+                  { backgroundColor: user.isCurrentUser ? colors.tint : colors.contextBackground }
                 ]}
               >
                 <View style={styles.leaderboardLeft}>
                   <Text style={[
                     styles.leaderboardPosition,
-                    { color: user.isCurrentUser ? '#FFF' : colors.text }
+                    { color: user.isCurrentUser ? colors.black : colors.text }
                   ]}>
                     {user.position}
                   </Text>
                   <Image source={user.avatar} style={styles.leaderboardAvatar} />
                   <Text style={[
                     styles.leaderboardName,
-                    { color: user.isCurrentUser ? '#FFF' : colors.text }
+                    { color: user.isCurrentUser ? colors.black : colors.text }
                   ]}>
                     {user.name}
                   </Text>
                 </View>
                 <Text style={[
                   styles.leaderboardPoints,
-                  { color: user.isCurrentUser ? '#FFF' : colors.text }
+                  { color: user.isCurrentUser ? colors.black : colors.text }
                 ]}>
                   {user.points} pts
                 </Text>
@@ -480,11 +480,9 @@ const styles = StyleSheet.create({
     marginHorizontal: -8,
     marginVertical: -8,
   },
-
   mainWrapper: {
     marginTop: 16,
   },
-
   leaderboardWrapper: {
     marginTop: 32,
   },
@@ -541,6 +539,7 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 50,
   },
   taskAvatarFinished: {
     opacity: 0.5,
@@ -598,14 +597,20 @@ const styles = StyleSheet.create({
   podiumContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     marginTop: 20,
     marginBottom: 20,
     paddingHorizontal: 10,
+    minHeight: 160,
   },
   podiumPosition: {
     alignItems: 'center',
     flex: 1,
+  },
+  firstPlacePosition: {
+    alignItems: 'center',
+    flex: 1,
+    marginTop: -30,
   },
   podiumAvatar: {
     width: 70,
@@ -629,7 +634,7 @@ const styles = StyleSheet.create({
   thirdPlaceAvatar: {
     borderColor: '#FFD700',
   },
-  positionBadge: {
+  positionBadge: { // Placement number badge
     position: 'absolute',
     bottom: -8,
     width: 24,
