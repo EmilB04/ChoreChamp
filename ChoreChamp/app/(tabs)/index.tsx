@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-nati
 import React, { useState, useEffect } from "react";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useUser } from "@/contexts/UserContext";
 import commonStyles from "../commonStyles";
 import WelcomeGreeting from '../../components/index/WelcomeGreeting';
 import SvgFigures from '../../components/svg/SvgFigures';
@@ -14,7 +15,7 @@ import SvgFigures from '../../components/svg/SvgFigures';
 
 export default function Dashboard() {
   const { colors } = useTheme();
-  const user = "Emil Berglund";                                              // Replace with dynamic user data as needed
+  const { userData } = useUser();
 
   // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -88,10 +89,10 @@ export default function Dashboard() {
   // Sort by points (descending) and calculate positions
   const leaderboardData = rawLeaderboardData
     .sort((a, b) => b.points - a.points)
-    .map((userData, index) => ({
-      ...userData,
+    .map((userData_item, index) => ({
+      ...userData_item,
       position: index + 1,
-      isCurrentUser: userData.name === user // Check if this user is the logged-in user
+      isCurrentUser: userData_item.name === userData.name // Check if this user is the logged-in user
     }));
 
   // ------------------------------------------------------------------ //
@@ -186,11 +187,11 @@ export default function Dashboard() {
       >
         {/* HEADER */}
         <View style={[styles.header, commonStyles.headerTitle]}>
-          <WelcomeGreeting userName={user} />
+          <WelcomeGreeting userName={userData.name} />
           <View style={styles.profileSection}>
             <View style={styles.profileContainer}>
               <Image
-                source={require("@/assets/images/icon.png")}
+                source={{ uri: userData.imageUri }}
                 style={styles.profileImage}
               />
             </View>

@@ -1,6 +1,7 @@
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useState } from "react";
 import {
     Image,
     ScrollView,
@@ -11,10 +12,20 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import commonStyles from "../commonStyles";
+import EditProfileModal from '@/components/profile/EditProfileModal';
 
 export default function Profile() {
     const { colors } = useTheme();
+    const { userData, updateUserData } = useUser();
     const insets = useSafeAreaInsets();
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+
+    // Handler for saving profile changes
+    const handleSaveProfile = (newName: string, newImageUri: string) => {
+        updateUserData({ name: newName, imageUri: newImageUri });
+        // Here you would typically save to your backend/database
+        console.log('Profile updated:', { name: newName, image: newImageUri });
+    };
 
     return (
         <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
@@ -25,12 +36,15 @@ export default function Profile() {
                     Profil & {"\n"}Innstillinger
                 </Text>
                 <Image
-                    source={{ uri: "https://i.pravatar.cc/150?" }}
+                    source={{ uri: userData.imageUri }}
                     style={styles.avatar}
                 />
-                <Text style={[styles.name, { color: colors.darkText }]}>Emil Berglund</Text>
+                <Text style={[styles.name, { color: colors.darkText }]}>{userData.name}</Text>
                 <View style={styles.separator} />
-                <TouchableOpacity style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}>
+                <TouchableOpacity 
+                    style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
+                    onPress={() => setIsEditModalVisible(true)}
+                >
                     <Text style={styles.editProfile}>Rediger profil</Text>
                     <Ionicons name="create-outline" size={20} color={colors.darkText} />
                 </TouchableOpacity>
@@ -76,6 +90,15 @@ export default function Profile() {
                     description="Informasjon om appen og utviklerne"
                 />
             </ScrollView>
+
+            {/* Edit Profile Modal */}
+            <EditProfileModal
+                visible={isEditModalVisible}
+                onClose={() => setIsEditModalVisible(false)}
+                currentName={userData.name}
+                currentImageUri={userData.imageUri}
+                onSave={handleSaveProfile}
+            />
         </View>
     );
 }
