@@ -63,22 +63,26 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/EmilB04/ChoreChamp.git
    cd ChoreChamp
    ```
 
 2. **Navigate to the project directory**
+
    ```bash
    cd ChoreChamp
    ```
 
 3. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 4. **Start the development server**
+
    ```bash
    npx expo start
    ```
@@ -91,7 +95,7 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 
 ## 📂 Project Structure
 
-```
+```()
 ChoreChamp/
 ├── ChoreChamp/                 # Main application directory
 │   ├── app/                    # App screens and navigation
@@ -117,16 +121,19 @@ ChoreChamp/
 ## 🎨 Architecture Highlights
 
 ### Dynamic UI Components
+
 - **Responsive SVG Graphics**: Auto-scaling background shapes that adapt to any screen size
 - **Dynamic Time Slots**: Task scheduling that includes early morning and late evening tasks
 - **Floating Action Buttons**: Mobile-optimized search and filter controls
 
 ### Theme Management
+
 - **Centralized Theme Context**: Eliminates redundant color imports across components
 - **Consistent Styling**: Unified color scheme and typography throughout the app
 - **Cross-Platform Compatibility**: Ensures consistent appearance on all platforms
 
 ### Performance Optimizations
+
 - **Live Time Updates**: Efficient 10-second intervals for real-time dashboard updates
 - **Dimension Listeners**: Dynamic screen size adjustments for orientation changes
 - **Optimized Rendering**: Minimal re-renders through proper state management
@@ -145,7 +152,6 @@ This project is developed as part of the **Mobilprogrammering** (Mobile Programm
 ## 📄 License
 
 This project is developed for educational purposes as part of a mobile programming course.
-
 
 ---
 
