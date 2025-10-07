@@ -18,7 +18,8 @@ export const Colors = {
     darkNonInteractiveText: '#374151',
 
     // Background
-    background: '#fff',
+    background: '#FFFFF7',
+    contextBackground: '#fff',
     interactiveBackground: '#FEF3C7',
     nonInteractiveBackground: '#F3F4F6',
 
@@ -32,6 +33,16 @@ export const Colors = {
     tabIconDefault: '#676D75',
     tabIconSelected: '#FFBE00',
     tabBarBackground: '#FFFFFF',
+
+    // Status codes
+    statusSuccessBackground: '#00FF9433',
+    statusSuccessText: '#5DC486',
+    statusFailedBackground: '#FF000033',
+    statusFailedText: '#C45D5D',
+
+    // Pure colors
+    white: '#FFFFFF',
+    black: '#000000',
   },
   dark: {
     // Text
@@ -45,6 +56,7 @@ export const Colors = {
 
     // Background
     background: '#121212',
+    contextBackground: '#1E1F21',
     interactiveBackground: '#FF9595',
     nonInteractiveBackground: '#353535',
 
@@ -58,7 +70,17 @@ export const Colors = {
     tabIconDefault: '#676D75',
     tabIconSelected: '#FFBE00',
     tabBarBackground: '#1E1F21',
-  },
+
+    // Status codes
+    statusSuccessBackground: '#00FF9433',
+    statusSuccessText: '#5DC486',
+    statusFailedBackground: '#FF000033',
+    statusFailedText: '#C45D5D',
+
+    // Pure colors
+    white: '#FFFFFF',
+    black: '#000000',
+  }
 };
 
 export const Fonts = Platform.select({

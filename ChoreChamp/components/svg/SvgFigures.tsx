@@ -1,76 +1,81 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackgroundShape, CircularShape, SmallDot } from './HeaderShapes';
+
 
 interface SvgFiguresProps {
     tintColor: string;
 }
 
-const svgStyles = StyleSheet.create({
-    backgroundShapePosition: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1,
-        height: 200,
-    },
-    svgBackground: {
-        width: "100%",
-        height: 200,
-    },
-    circularShapePosition: {
-        position: "absolute",
-        top: 90,
-        right: 95,
-        zIndex: 1,
-    },
-    circularSvg: {
-        width: 27,
-        height: 27,
-        zIndex: 1,
-    },
-    smallDotPosition: {
-        position: "absolute",
-        top: 120,
-        right: 90,
-        zIndex: 1,
-    },
-    smallDotSvg: {
-        width: 4,
-        height: 5,
-    },
-});
+const createResponsiveStyles = (safeAreaTop: number, screenWidth: number, screenHeight: number) => {
+    return StyleSheet.create({
+        // Background curve
+        backgroundShapePosition: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1,
+        },
+        svgBackground: {
+            width: '100%',
+        },
 
-// Individual SVG figure components
-const BackgroundShapeFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => (
-    <View style={svgStyles.backgroundShapePosition}>
-        <BackgroundShape
-            fill={tintColor}
-            style={svgStyles.svgBackground}
-        />
-    </View>
-);
+        // Circular shape positioning
+        circularShapePosition: {
+            position: 'absolute',
+            top: 85,
+            right: screenWidth * 0.25,
+            zIndex: 1,
+        },
 
-const CircularShapeFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => (
-    <View style={svgStyles.circularShapePosition}>
-        <CircularShape
-            fill={tintColor}
-            style={svgStyles.circularSvg}
-        />
-    </View>
-);
+        // Small dot positioning
+        smallDotPosition: {
+            position: 'absolute',
+            top: 115,
+            right: screenWidth * 0.23,
+            zIndex: 1,
+        },
+    });
+};
 
-const SmallDotFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => (
-    <View style={svgStyles.smallDotPosition}>
-        <SmallDot
-            fill={tintColor}
-            style={svgStyles.smallDotSvg}
-        />
-    </View>
-);
+const BackgroundShapeFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => {
+    const insets = useSafeAreaInsets();
+    const { width, height } = useWindowDimensions();
+    const styles = createResponsiveStyles(insets.top, width, height);
 
-// Export as namespace object
+    return (
+        <View style={styles.backgroundShapePosition}>
+            <BackgroundShape fill={tintColor} style={styles.svgBackground} />
+        </View>
+    );
+};
+
+const CircularShapeFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => {
+    const insets = useSafeAreaInsets();
+    const { width, height } = useWindowDimensions();
+    const styles = createResponsiveStyles(insets.top, width, height);
+
+    return (
+        <View style={styles.circularShapePosition}>
+            <CircularShape fill={tintColor} />
+        </View>
+    );
+};
+
+const SmallDotFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => {
+    const insets = useSafeAreaInsets();
+    const { width, height } = useWindowDimensions();
+    const styles = createResponsiveStyles(insets.top, width, height);
+
+    return (
+        <View style={styles.smallDotPosition}>
+            <SmallDot fill={tintColor} />
+        </View>
+    );
+};
+
 const SvgFigures = {
     BackgroundShape: BackgroundShapeFigure,
     CircularShape: CircularShapeFigure,
