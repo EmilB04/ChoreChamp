@@ -17,7 +17,7 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 - **[idatol](https://github.com/idatol)** - Frontend/Backend Developer
   - UI/UX design and implementation
   - Profile and settings management
-- **[Andolaus ](https://github.com/Andolaus)** - Backend Developer
+- **[Andolaus](https://github.com/Andolaus)** - Backend Developer
   - Authentication and database management
   - API development and integration
 - **[Thomsen97](https://github.com/Thomsen97)** - Backend Developer
