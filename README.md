@@ -156,3 +156,9 @@ This project is developed for educational purposes as part of a mobile programmi
 ---
 
 *Built with ❤️ for the Mobilprogrammering course - Making household chores fun, one task at a time!* 🏠✨
+
+<!--
+This README was generated with Claude Sonnet 4 with the following prompt:
+
+Update #file:README.md with relevant info about the project along side the contributors
+-->
