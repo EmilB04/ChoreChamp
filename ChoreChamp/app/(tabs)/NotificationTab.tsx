@@ -485,13 +485,6 @@ const styles = StyleSheet.create({
     readNotificationTitle: {
         fontWeight: '500',
     },
-    unreadIndicator: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#F59E0B',
-        marginTop: 4,
-    },
     notificationMessage: {
         fontSize: 14,
         lineHeight: 20,
