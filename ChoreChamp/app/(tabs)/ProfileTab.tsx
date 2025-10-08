@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import commonStyles from "../commonStyles";
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import MinKontoScreen from '@/components/profile/MinKontoScreen';
+import MineHusstanderScreen from '@/components/profile/MineHusstanderScreen';
 
 export default function Profile() {
     const { colors } = useTheme();
@@ -21,17 +22,22 @@ export default function Profile() {
     const insets = useSafeAreaInsets();
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [showMinKonto, setShowMinKonto] = useState(false);
+    const [showMineHusstander, setShowMineHusstander] = useState(false);
 
     // Handler for saving profile changes
     const handleSaveProfile = (newName: string, newImageUri: string) => {
         updateUserData({ name: newName, imageUri: newImageUri });
-        // Here you would typically save to your backend/database
         console.log('Profile updated:', { name: newName, image: newImageUri });
     };
 
     // If showing Min Konto screen, render it instead
     if (showMinKonto) {
         return <MinKontoScreen onBack={() => setShowMinKonto(false)} />;
+    }
+
+    // If showing Mine Husstander screen, render it instead
+    if (showMineHusstander) {
+        return <MineHusstanderScreen onBack={() => setShowMineHusstander(false)} />;
     }
 
     return (
@@ -70,6 +76,7 @@ export default function Profile() {
                     icon="people"
                     title="Mine husstander"
                     description="Se og administrer dine tilknyttede husstander"
+                    onPress={() => setShowMineHusstander(true)}
                 />
 
                 <MenuItem
