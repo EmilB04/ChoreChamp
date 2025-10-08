@@ -2,7 +2,6 @@ import { useTheme } from "@/contexts/ThemeContext";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import commonStyles from "../commonStyles";
-import { ThemedText } from '@/components/themed-text';
 
 export default function Notifications() {
     const { colors } = useTheme();
@@ -131,7 +130,8 @@ export default function Notifications() {
                             {groupedNotifications.today.filter(n => !n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <ThemedText style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>I dag</ThemedText>
+                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>I dag</Text>
+                                        <Text style={[styles.sectionDivider, {borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.today.filter(n => !n.read).map((notification) => (
                                         <View
@@ -140,23 +140,23 @@ export default function Notifications() {
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
-                                                    <ThemedText style={styles.avatarText}>
+                                                    <Text style={styles.avatarText}>
                                                         {notification.avatar}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.notificationText}>
-                                                    <ThemedText style={[styles.notificationTitle, { color: colors.text }]}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.text }]}>
                                                         {notification.title}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
                                                         {notification.subtitle}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationPoints, { color: colors.tint }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}>
                                                         {notification.points}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 {!notification.read && <View style={[styles.unreadDot, { backgroundColor: colors.tint }]} />}
                                             </View>
@@ -169,7 +169,8 @@ export default function Notifications() {
                             {groupedNotifications.thisWeek.filter(n => !n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <ThemedText style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>Denne uken</ThemedText>
+                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>Denne uken</Text>
+                                        <Text style={[styles.sectionDivider, { borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.thisWeek.filter(n => !n.read).map((notification) => (
                                         <View
@@ -178,23 +179,23 @@ export default function Notifications() {
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
-                                                    <ThemedText style={styles.avatarText}>
+                                                    <Text style={styles.avatarText}>
                                                         {notification.avatar}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.notificationText}>
-                                                    <ThemedText style={[styles.notificationTitle, { color: colors.text }]}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.text }]}>
                                                         {notification.title}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
                                                         {notification.subtitle}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationPoints, { color: colors.tint }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}>
                                                         {notification.points}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 {!notification.read && <View style={[styles.unreadDot, { backgroundColor: colors.tint }]} />}
                                             </View>
@@ -207,7 +208,8 @@ export default function Notifications() {
                             {groupedNotifications.earlier.filter(n => !n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <ThemedText style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>Tidligere</ThemedText>
+                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>Tidligere</Text>
+                                        <Text style={[styles.sectionDivider, { borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.earlier.filter(n => !n.read).map((notification) => (
                                         <View
@@ -216,23 +218,23 @@ export default function Notifications() {
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
-                                                    <ThemedText style={styles.avatarText}>
+                                                    <Text style={styles.avatarText}>
                                                         {notification.avatar}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.notificationText}>
-                                                    <ThemedText style={[styles.notificationTitle, { color: colors.text }]}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.text }]}>
                                                         {notification.title}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
                                                         {notification.subtitle}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationPoints, { color: colors.tint }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}>
                                                         {notification.points}
-                                                    </ThemedText>
-                                                    <ThemedText style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
+                                                    </Text>
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 {!notification.read && <View style={[styles.unreadDot, { backgroundColor: colors.tint }]} />}
                                             </View>
@@ -245,7 +247,7 @@ export default function Notifications() {
                             {unreadNotifications.length === 0 && (
                                 <View style={styles.emptyState}>
                                     <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>💬</Text>
-                                    <ThemedText style={[styles.emptyStateText, { color: colors.tint }]}>Du er ajour</ThemedText>
+                                    <Text style={[styles.emptyStateText, { color: colors.tint }]}>Du er ajour</Text>
                                 </View>
                             )}
                         </ScrollView>
@@ -259,7 +261,7 @@ export default function Notifications() {
                             {groupedNotifications.thisWeek.filter(n => n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Denne uken</ThemedText>
+                                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Denne uken</Text>
                                     </View>
                                     {groupedNotifications.thisWeek.filter(n => n.read).map((notification) => (
                                         <View
@@ -268,27 +270,27 @@ export default function Notifications() {
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}>
-                                                    <ThemedText style={styles.avatarText}>
+                                                    <Text style={styles.avatarText}>
                                                         {notification.avatar}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.notificationText}>
-                                                    <ThemedText style={[styles.notificationTitle, { color: colors.lightDarkText }]}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.lightDarkText }]}>
                                                         {notification.title}
-                                                    </ThemedText>
+                                                    </Text>
                                                     {notification.subtitle && (
-                                                        <ThemedText style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}>
+                                                        <Text style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}>
                                                             {notification.subtitle}
-                                                        </ThemedText>
+                                                        </Text>
                                                     )}
                                                     {notification.points && (
-                                                        <ThemedText style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}>
+                                                        <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}>
                                                             Mottok {notification.points} poeng
-                                                        </ThemedText>
+                                                        </Text>
                                                     )}
-                                                    <ThemedText style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                             </View>
                                         </View>
@@ -300,7 +302,7 @@ export default function Notifications() {
                             {groupedNotifications.earlier.filter(n => n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <ThemedText style={[styles.sectionTitle, { color: colors.text }]}>Tidligere</ThemedText>
+                                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Tidligere</Text>
                                     </View>
                                     {groupedNotifications.earlier.filter(n => n.read).map((notification) => (
                                         <View
@@ -309,27 +311,27 @@ export default function Notifications() {
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}>
-                                                    <ThemedText style={styles.avatarText}>
+                                                    <Text style={styles.avatarText}>
                                                         {notification.avatar}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.notificationText}>
-                                                    <ThemedText style={[styles.notificationTitle, { color: colors.lightDarkText }]}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.lightDarkText }]}>
                                                         {notification.title}
-                                                    </ThemedText>
+                                                    </Text>
                                                     {notification.subtitle && (
-                                                        <ThemedText style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}>
+                                                        <Text style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}>
                                                             {notification.subtitle}
-                                                        </ThemedText>
+                                                        </Text>
                                                     )}
                                                     {notification.points && (
-                                                        <ThemedText style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}>
+                                                        <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}>
                                                             Mottok {notification.points} poeng
-                                                        </ThemedText>
+                                                        </Text>
                                                     )}
-                                                    <ThemedText style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
-                                                    </ThemedText>
+                                                    </Text>
                                                 </View>
                                             </View>
                                         </View>
@@ -341,7 +343,7 @@ export default function Notifications() {
                             {notifications.filter(n => n.read).length === 0 && (
                                 <View style={styles.emptyState}>
                                     <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>💬</Text>
-                                    <ThemedText style={[styles.emptyStateText, { color: colors.lightDarkText }]}>Du er ajour</ThemedText>
+                                    <Text style={[styles.emptyStateText, { color: colors.lightDarkText }]}>Du er ajour</Text>
                                 </View>
                             )}
                         </ScrollView>
@@ -445,7 +447,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     notificationCard: {
-        padding: 16,
+        padding: 4,
         marginBottom: 12,
         borderRadius: 12,
         shadowColor: '#000',
@@ -493,7 +495,7 @@ const styles = StyleSheet.create({
     notificationMessage: {
         fontSize: 14,
         lineHeight: 20,
-        marginBottom: 8,
+        marginBottom: 2,
     },
     readNotificationMessage: {
         opacity: 0.8,
@@ -503,10 +505,18 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     sectionHeader: {
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
+        paddingVertical: 8,
+        marginBottom: 0,
         backgroundColor: 'transparent',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    sectionDivider: {
+        flex: 1,
+        height: 1,
+        borderBottomWidth: 1,
     },
     sectionTitle: {
         fontSize: 18,
