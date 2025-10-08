@@ -3,6 +3,10 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface UserData {
     name: string;
     imageUri: string;
+    email?: string;
+    phone?: string;
+    notificationsEnabled?: boolean;
+    darkModeEnabled?: boolean;
 }
 
 interface UserContextType {
@@ -19,7 +23,11 @@ interface UserProviderProps {
 export function UserProvider({ children }: UserProviderProps) {
     const [userData, setUserData] = useState<UserData>({
         name: "Emil Berglund",
-        imageUri: "https://i.pravatar.cc/150?"
+        imageUri: "https://i.pravatar.cc/150?",
+        email: "emil.berglund@email.com",
+        phone: "+47 123 45 678",
+        notificationsEnabled: true,
+        darkModeEnabled: true,
     });
 
     const updateUserData = (data: Partial<UserData>) => {

@@ -13,12 +13,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import commonStyles from "../commonStyles";
 import EditProfileModal from '@/components/profile/EditProfileModal';
+import MinKontoScreen from '@/components/profile/MinKontoScreen';
 
 export default function Profile() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
     const insets = useSafeAreaInsets();
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [showMinKonto, setShowMinKonto] = useState(false);
 
     // Handler for saving profile changes
     const handleSaveProfile = (newName: string, newImageUri: string) => {
@@ -26,6 +28,11 @@ export default function Profile() {
         // Here you would typically save to your backend/database
         console.log('Profile updated:', { name: newName, image: newImageUri });
     };
+
+    // If showing Min Konto screen, render it instead
+    if (showMinKonto) {
+        return <MinKontoScreen onBack={() => setShowMinKonto(false)} />;
+    }
 
     return (
         <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
@@ -56,6 +63,7 @@ export default function Profile() {
                     icon="person-circle"
                     title="Min konto"
                     description="Administrer kontoinformasjon og personlige innstillinger"
+                    onPress={() => setShowMinKonto(true)}
                 />
 
                 <MenuItem
@@ -107,15 +115,17 @@ function MenuItem({
     icon,
     title,
     description,
+    onPress,
 }: {
     icon: keyof typeof Ionicons.glyphMap;
     title: string;
     description?: string;
+    onPress?: () => void;
 }) {
     const { colors } = useTheme();
 
     return (
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={onPress}>
             <View style={styles.iconContainer}>
                 <Ionicons
                     name={icon}
