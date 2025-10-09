@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build",
+  "buildOutputDirectory": "dist",
+  "compatibilityFlags": ["nodejs_compat"]
+}
