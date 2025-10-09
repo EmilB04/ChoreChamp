@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
     Image,
+    Linking,
     ScrollView,
     StyleSheet,
     Text,
@@ -25,6 +26,20 @@ export default function Profile() {
     const [showMinKonto, setShowMinKonto] = useState(false);
     const [showMineHusstander, setShowMineHusstander] = useState(false);
     const [showAppInnstillinger, setShowAppInnstillinger] = useState(false);
+    const [showHelpSupport, setShowHelpSupport] = useState(false);
+    const [showAboutApp, setShowAboutApp] = useState(false);
+
+    // Toggle About App section
+
+    const toggleAboutApp = () => {
+        setShowAboutApp(!showAboutApp);
+    };
+
+    // Toggle Help and Support section
+
+    const toggleHelpSupport = () => {
+        setShowHelpSupport(!showHelpSupport);
+    };
 
     // Handler for saving profile changes
     const handleSaveProfile = (newName: string, newImageUri: string) => {
@@ -101,17 +116,90 @@ export default function Profile() {
 
                 <Text style={[styles.more, { color: colors.lightDarkText }]}>Mer</Text>
 
-                <MenuItem
-                    icon="help-circle"
-                    title="Hjelp og støtte"
-                    description="Få hjelp og kontakt kundestøtte"
-                />
+                <TouchableOpacity 
+                    style={[
+                        styles.actionButton, 
+                        { backgroundColor: colors.contextBackground },
+                        showHelpSupport && styles.actionButtonExpanded
+                    ]}
+                    onPress={toggleHelpSupport}
+                >
+                    <View style={styles.actionButtonContent}>
+                        <Ionicons name="help-circle-outline" size={24} color={colors.tint} />
+                        <View style={styles.actionButtonText}>
+                            <Text style={[styles.actionButtonTitle, { color: colors.text }]}>
+                                Hjelp og støtte
+                            </Text>
+                            <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}>
+                                Kontaktinformasjon og support
+                            </Text>
+                        </View>
+                    </View>
+                    <Ionicons 
+                        name={showHelpSupport ? "chevron-down" : "chevron-forward"} 
+                        size={20} 
+                        color={colors.lightDarkText} 
+                    />
+                </TouchableOpacity>
 
-                <MenuItem
-                    icon="information-circle"
-                    title="Om appen"
-                    description="Informasjon om appen og utviklerne"
-                />
+                {/* Help and Support dropdown content */}
+                {showHelpSupport && (
+                    <View style={[styles.dropdownContent, { backgroundColor: colors.contextBackground }]}>
+                        <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}>
+                            E-post: 
+                            <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('mailto:support@chorechamp.com')}>
+                                support@chorechamp.com
+                            </Text>
+                            {'\n\n'}
+                            Telefon: 
+                            <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('tel:+4712345678')}>
+                                +47 123 45 678
+                            </Text>
+                        </Text>
+                    </View>
+                )}
+
+                <TouchableOpacity 
+                    style={[
+                        styles.actionButton, 
+                        { backgroundColor: colors.contextBackground },
+                        showAboutApp && styles.actionButtonExpanded
+                    ]}
+                    onPress={toggleAboutApp}
+                >
+                    <View style={styles.actionButtonContent}>
+                        <Ionicons name="information-circle-outline" size={24} color={colors.tint} />
+                        <View style={styles.actionButtonText}>
+                            <Text style={[styles.actionButtonTitle, { color: colors.text }]}>
+                                Om Appen
+                            </Text>
+                            <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}>
+                                Informasjon om ChoreChamp og utviklerne
+                            </Text>
+                        </View>
+                    </View>
+                    <Ionicons 
+                        name={showAboutApp ? "chevron-down" : "chevron-forward"} 
+                        size={20} 
+                        color={colors.lightDarkText} 
+                    />
+                </TouchableOpacity>
+
+                {/* About App dropdown content */}
+                {showAboutApp && (
+                    <View style={[styles.dropdownContent, { backgroundColor: colors.contextBackground }]}>
+                        <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}>
+                            ChoreChamp er en app for å organisere og administrere oppgaver i hjemmet. 
+                            Man kan opprette husstander, tildele oppgaver, og følge med på fremdriften i leaderboards med et poengsystem. 
+                            Appen er utviklet for å gjøre vanlige husoppgaver til en morsom og engasjerende konkurranse for hele familien.{'\n\n'}
+                            Appen er utviklet av:{'\n'}
+                            - Emil Berglund{'\n'}
+                            - Andreas B. Olaussen{'\n'}
+                            - Sebastian W. Thomsen{'\n'}
+                            - Ida Tollaksen
+                        </Text>
+                    </View>
+                )}
             </ScrollView>
 
             {/* Edit Profile Modal */}
@@ -253,5 +341,54 @@ const styles = StyleSheet.create({
     more: {
         paddingLeft: 0,
         paddingTop: 10,
+    },
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+    },
+    actionButtonExpanded: {
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        marginBottom: 0,
+    },
+    actionButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    actionButtonText: {
+        marginLeft: 12,
+        flex: 1,
+    },
+    actionButtonTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        marginBottom: 2,
+    },
+    actionButtonDescription: {
+        fontSize: 14,
+    },
+    dropdownContent: {
+        marginTop: 0,
+        padding: 16,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        borderBottomLeftRadius: 12,
+        borderBottomRightRadius: 12,
+        marginBottom: 12,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    dropdownText: {
+        fontSize: 14,
+        lineHeight: 20,
+    },
+    linkText: {
+        textDecorationLine: 'underline',
+        fontWeight: '500',
     },
 });
