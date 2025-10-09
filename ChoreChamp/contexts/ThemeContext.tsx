@@ -8,6 +8,7 @@ the theme data in any functional component.
 import React, { createContext, useContext, ReactNode } from 'react';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useUser } from './UserContext';
 
 interface ThemeContextType {
     colorScheme: 'light' | 'dark';
@@ -21,7 +22,14 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-    const colorScheme = useColorScheme() ?? 'dark';
+    const systemColorScheme = useColorScheme() ?? 'dark';
+    const { userData } = useUser();
+    
+    // Use user preference if set, otherwise follow system
+    const colorScheme: 'light' | 'dark' = userData.darkModeEnabled !== undefined 
+        ? (userData.darkModeEnabled ? 'dark' : 'light')
+        : systemColorScheme;
+    
     const colors = Colors[colorScheme];
 
     const value: ThemeContextType = {
