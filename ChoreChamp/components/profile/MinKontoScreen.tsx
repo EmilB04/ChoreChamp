@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
+import Header from './Header';
 
 interface MinKontoScreenProps {
     onBack: () => void;
@@ -81,16 +82,21 @@ export default function MinKontoScreen({ onBack }: MinKontoScreenProps) {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.tint }]}>
-                <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.darkText} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: colors.darkText }]}>
-                    Min konto
-                </Text>
-                <View style={styles.headerSpacer} />
-            </View>
+            <Header 
+                title="Min konto" 
+                onBack={onBack}
+                rightElement={
+                    isEditing ? (
+                        <TouchableOpacity onPress={handleSaveChanges}>
+                            <Ionicons name="checkmark" size={24} color={colors.darkText} />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity onPress={() => setIsEditing(true)}>
+                            <Ionicons name="create-outline" size={24} color={colors.darkText} />
+                        </TouchableOpacity>
+                    )
+                }
+            />
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Personal Information Section */}
@@ -298,25 +304,6 @@ export default function MinKontoScreen({ onBack }: MinKontoScreenProps) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        paddingTop: 60,
-    },
-    backButton: {
-        padding: 4,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: '600',
-        marginLeft: 12,
-        flex: 1,
-    },
-    headerSpacer: {
-        width: 32,
     },
     content: {
         flex: 1,

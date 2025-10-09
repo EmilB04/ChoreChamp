@@ -15,6 +15,7 @@ import commonStyles from "../commonStyles";
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import MinKontoScreen from '@/components/profile/MinKontoScreen';
 import MineHusstanderScreen from '@/components/profile/MineHusstanderScreen';
+import AppInnstillingerScreen from '@/components/profile/AppInnstillingerScreen';
 
 export default function Profile() {
     const { colors } = useTheme();
@@ -23,6 +24,7 @@ export default function Profile() {
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [showMinKonto, setShowMinKonto] = useState(false);
     const [showMineHusstander, setShowMineHusstander] = useState(false);
+    const [showAppInnstillinger, setShowAppInnstillinger] = useState(false);
 
     // Handler for saving profile changes
     const handleSaveProfile = (newName: string, newImageUri: string) => {
@@ -38,6 +40,11 @@ export default function Profile() {
     // If showing Mine Husstander screen, render it instead
     if (showMineHusstander) {
         return <MineHusstanderScreen onBack={() => setShowMineHusstander(false)} />;
+    }
+
+    // If showing App Innstillinger screen, render it instead
+    if (showAppInnstillinger) {
+        return <AppInnstillingerScreen onBack={() => setShowAppInnstillinger(false)} />;
     }
 
     return (
@@ -83,6 +90,7 @@ export default function Profile() {
                     icon="cog"
                     title="App innstillinger"
                     description="Tilpass appens funksjonalitet og utseende"
+                    onPress={() => setShowAppInnstillinger(true)}
                 />
 
                 <MenuItem
