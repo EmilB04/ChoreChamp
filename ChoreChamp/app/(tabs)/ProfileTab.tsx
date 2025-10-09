@@ -18,6 +18,8 @@ import MinKontoScreen from '@/components/profile/MinKontoScreen';
 import MineHusstanderScreen from '@/components/profile/MineHusstanderScreen';
 import AppInnstillingerScreen from '@/components/profile/AppInnstillingerScreen';
 
+//TODO: Implement log out functionality
+
 export default function Profile() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
