@@ -1,3 +1,9 @@
+/*
+This context manages user data such as name, image, email, phone, notification preferences, and dark mode settings.
+It uses React's Context API to share user information throughout the component tree. 
+The `useUser` hook allows easy access to the user data and update functions in any functional component.
+*/
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface UserData {
@@ -6,7 +12,7 @@ interface UserData {
     email?: string;
     phone?: string;
     notificationsEnabled?: boolean;
-    darkModeEnabled?: boolean;
+    darkModeEnabled?: boolean; // undefined = follow system, true = dark, false = light
 }
 
 interface UserContextType {
@@ -27,7 +33,7 @@ export function UserProvider({ children }: UserProviderProps) {
         email: "emil.berglund@email.com",
         phone: "+47 123 45 678",
         notificationsEnabled: true,
-        darkModeEnabled: true,
+        darkModeEnabled: true, 
     });
 
     const updateUserData = (data: Partial<UserData>) => {

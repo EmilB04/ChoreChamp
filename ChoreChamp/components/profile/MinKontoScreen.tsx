@@ -203,12 +203,9 @@ export default function MinKontoScreen({ onBack }: MinKontoScreenProps) {
                                 <Text style={[styles.switchLabel, { color: colors.text }]}>
                                     Mørk modus
                                 </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Bruk mørkt tema i appen
-                                </Text>
                             </View>
                             <Switch
-                                value={userData.darkModeEnabled || true}
+                                value={userData.darkModeEnabled}
                                 onValueChange={handleDarkModeToggle}
                                 trackColor={{ false: colors.lightDarkText, true: colors.tint }}
                                 thumbColor={colors.background}
