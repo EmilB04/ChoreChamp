@@ -117,6 +117,19 @@ ChoreChamp/
 │   └── assets/               # Images, fonts, and static assets
 └── README.md                 # This file
 ```
+## Deploying to Cloudflare Pages (web)
+
+Cloudflare Pages can build the static web export of this Expo Router app.
+
+1. In Cloudflare Pages, select this repo and set the project root to `ChoreChamp/`.
+2. Build command: `npm run build`
+3. Output directory: `dist`
+4. Environment: Node 20+ (Pages currently uses modern Node by default)
+
+Notes
+- The build script runs `expo export -p web --output-dir dist`.
+- `app.json` already has `web.output: static` and a `favicon`.
+- Optional: add `_redirects` and `_headers` files under `public/` for SPA routing and security headers.
 
 ## 🎨 Architecture Highlights
 
