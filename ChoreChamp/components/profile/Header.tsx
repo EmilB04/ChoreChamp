@@ -27,7 +27,7 @@ export default function Header({ title, onBack, rightElement }: HeaderProps) {
                 <Text style={[styles.headerTitle, { color: colors.darkText }]}>
                     {title}
                 </Text>
-                <View style={styles.headerSpacer}>
+                <View>
                     {rightElement}
                 </View>
             </View>
@@ -39,14 +39,10 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 15,
+        paddingTop: 60,
         marginBottom: 20,
         paddingHorizontal: 15,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        paddingBottom: 10,
     },
     backButton: {
         padding: 5,
@@ -56,8 +52,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 20,
         fontWeight: 'bold',
-    },
-    headerSpacer: {
-        width: 29, 
     },
 });
