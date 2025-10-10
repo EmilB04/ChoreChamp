@@ -10,26 +10,35 @@ const OnboardingScreen = () => {
     const opacity = useRef(new Animated.Value(1)).current;
     
     useEffect(() => {
-        Animated.timing(translateY, {
-            toValue: -442,
-            duration: 1500,
-            useNativeDriver: true,
-        }).start();
-        
-        Animated.timing(opacity, {
-            toValue: 0.95,
-            duration: 3000,
-            useNativeDriver: true,
-        }).start();
+        const INITIAL_DELAY = 500; 
 
-        const timer = setTimeout(() => {
-            router.replace('/(tabs)');
-        }, 1800);
-        
-    return () => {
-        clearTimeout(timer);
-        translateY.stopAnimation();
-        opacity.stopAnimation();
+        const ANIM_DURATION = 1500; 
+
+        let navTimer: ReturnType<typeof setTimeout> | undefined; 
+
+        const delayTimer = setTimeout(() => { 
+            Animated.timing(translateY, {
+                toValue: -800,
+                duration: ANIM_DURATION,
+                useNativeDriver: true,
+            }).start();
+
+            Animated.timing(opacity, {
+                toValue: 0.95,
+                duration: 1500,
+                useNativeDriver: true,
+            }).start();
+
+            navTimer = setTimeout(() => { 
+                router.replace('/(tabs)');
+            }, ANIM_DURATION + 300); 
+        }, INITIAL_DELAY); 
+
+        return () => {
+            clearTimeout(delayTimer); 
+            if (navTimer) clearTimeout(navTimer); 
+            translateY.stopAnimation();
+            opacity.stopAnimation();
         };
     }, [router, translateY, opacity]);
 
