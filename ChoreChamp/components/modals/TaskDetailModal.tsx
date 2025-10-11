@@ -12,24 +12,27 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import type { Task } from "@/types/task";
 
-// TODO: Implement validation for action button based on user ID and task assignedToId
+// TODO: Implement validation for action buttons based on user ID and task assignedToId
+
+interface ActionButton {
+  label: string;
+  onPress: () => void;
+  iconName?: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap; // Asked AI how to make Ionicon flexible for different icons without having to hardcode.
+  variant?: "success" | "danger" | "primary" | "secondary";
+}
 
 interface TaskDetailModalProps {
   visible: boolean;
   task: Task | null;
   onClose: () => void;
-  actionButton?: {
-    label: string;
-    onPress: () => void;
-    iconName?: keyof typeof import("@expo/vector-icons").Ionicons.glyphMap;
-  };
+  actionButtons?: ActionButton[];
 }
 
 export default function TaskDetailModal({
   visible,
   task,
   onClose,
-  actionButton,
+  actionButtons,
 }: TaskDetailModalProps) {
   const { colors } = useTheme();
 
@@ -225,32 +228,52 @@ export default function TaskDetailModal({
           </ScrollView>
 
           {/* Action Buttons */}
-          {actionButton && (
+          {actionButtons && actionButtons.length > 0 && (
             <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  { backgroundColor: colors.statusSuccessBackground },
-                ]}
-                onPress={actionButton.onPress}
-              >
-                {actionButton.iconName && (
-                  <Ionicons
-                    name={actionButton.iconName}
-                    size={20}
-                    color={colors.statusSuccessText}
-                  />
-                )}
-                <Text
-                  style={[
-                    styles.semiboldText,
-                    styles.actionButtonText,
-                    { color: colors.statusSuccessText },
-                  ]}
-                >
-                  {actionButton.label}
-                </Text>
-              </TouchableOpacity>
+              {actionButtons.map((button, index) => {
+                const backgroundColor =
+                  button.variant === "danger"
+                    ? colors.statusFailedBackground
+                    : button.variant === "primary"
+                    ? colors.tint
+                    : button.variant === "secondary"
+                    ? colors.contextBackground
+                    : colors.statusSuccessBackground;
+
+                const textColor =
+                  button.variant === "danger"
+                    ? colors.statusFailedText
+                    : button.variant === "primary"
+                    ? colors.background
+                    : button.variant === "secondary"
+                    ? colors.text
+                    : colors.statusSuccessText;
+
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.actionButton, { backgroundColor }]}
+                    onPress={button.onPress}
+                  >
+                    {button.iconName && (
+                      <Ionicons
+                        name={button.iconName}
+                        size={20}
+                        color={textColor}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.semiboldText,
+                        styles.actionButtonText,
+                        { color: textColor },
+                      ]}
+                    >
+                      {button.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>

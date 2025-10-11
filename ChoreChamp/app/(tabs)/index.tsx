@@ -538,19 +538,22 @@ export default function Dashboard() {
         visible={isModalVisible}
         task={selectedTask}
         onClose={() => setIsModalVisible(false)}
-        actionButton={
+        actionButtons={
           selectedTask &&
           !selectedTask.finished &&
           selectedTask.assignedTo === userData.name
-            ? {
-                label: "Marker som fullført",
-                iconName: "checkmark-circle-outline",
-                onPress: () => {
-                  // TODO: Implement mark as complete functionality
-                  console.log("Mark task as complete:", selectedTask?.id);
-                  setIsModalVisible(false);
+            ? [
+                {
+                  label: "Marker som fullført",
+                  iconName: "checkmark-circle-outline",
+                  variant: "success",
+                  onPress: () => {
+                    // TODO: Implement mark as complete functionality
+                    console.log("Mark task as complete:", selectedTask?.id);
+                    setIsModalVisible(false);
+                  },
                 },
-              }
+              ]
             : undefined
         }
       />
