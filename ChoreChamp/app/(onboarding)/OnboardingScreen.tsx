@@ -24,7 +24,7 @@ const OnboardingScreen = () => {
         // Start the animation after delay 
         const delayTimer = setTimeout(() => { 
             Animated.timing(translateY, {
-                toValue: -500,
+                toValue: -800,
                 duration: ANIM_DURATION,
                 useNativeDriver: true,
             }).start();
@@ -37,7 +37,7 @@ const OnboardingScreen = () => {
 
             // Navigate to the main app screen after animation
             navTimer = setTimeout(() => { 
-                router.replace('/(tabs)');
+                router.replace('/(onboarding)/language');
             }, ANIM_DURATION + 300); 
         }, INITIAL_DELAY);  
 
