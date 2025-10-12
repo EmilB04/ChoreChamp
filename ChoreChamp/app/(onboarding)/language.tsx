@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   langBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFC107', // yellow style
+    backgroundColor: '#FFC107', 
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 28,
