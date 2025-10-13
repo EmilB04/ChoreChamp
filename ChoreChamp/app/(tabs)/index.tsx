@@ -1,17 +1,24 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import commonStyles from "../commonStyles";
-import WelcomeGreeting from '../../components/index/WelcomeGreeting';
-import SvgFigures from '../../components/svg/SvgFigures';
+import WelcomeGreeting from "../../components/index/WelcomeGreeting";
+import SvgFigures from "../../components/svg/SvgFigures";
+import TaskDetailModal from "../../components/modals/TaskDetailModal";
+import type { Task } from "@/types/task";
 
 // TODO:
 // 1. Fetch user data dynamically
 // 2. Integrate main content and leaderboard sections
 // 3. Add interactivity to calendar (e.g., navigate to daily view on tap)
-
 
 export default function Dashboard() {
   const { colors } = useTheme();
@@ -20,20 +27,21 @@ export default function Dashboard() {
   // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // State for task detail modal
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(new Date());
     };
-    updateTime();                                                   // Update immediately on mount
-    const interval = setInterval(updateTime, 10000);                // Update every 10 seconds
-    return () => clearInterval(interval);                           // Cleanup interval on component unmount
+    updateTime(); // Update immediately on mount
+    const interval = setInterval(updateTime, 10000); // Update every 10 seconds
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
 
-
-
-
   // Sample tasks data - replace with database fetch
-  const todayTasks = [
+  const todayTasks: Task[] = [
     {
       id: 1,
       title: "Gå med søpla",
@@ -41,25 +49,28 @@ export default function Dashboard() {
       assignedTo: "Ida",
       avatar: require("@/assets/images/icon.png"),
       duration: 60,
-      finished: true
+      finished: true,
     },
     {
       id: 2,
       title: "Støvsuge huset",
       time: "12:00",
       assignedTo: "Andreas",
+      description:
+        "Husk godt under sofaen, hybelkaniner på størrelse med hodet ditt.",
       avatar: require("@/assets/images/icon.png"),
       duration: 60,
-      finished: false
+      finished: false,
     },
     {
       id: 3,
       title: "Lage middag",
       time: "16:00",
-      assignedTo: "Emil",
+      assignedTo: "Emil Berglund",
+      description: "Prøv den nye oppskriften med kebabkjøtt og maiskaker.",
       avatar: require("@/assets/images/icon.png"),
       duration: 90,
-      finished: false
+      finished: false,
     },
     {
       id: 4,
@@ -68,7 +79,7 @@ export default function Dashboard() {
       assignedTo: "Emil",
       avatar: require("@/assets/images/icon.png"),
       duration: 30,
-      finished: false
+      finished: false,
     },
   ];
 
@@ -92,7 +103,7 @@ export default function Dashboard() {
     .map((userData_item, index) => ({
       ...userData_item,
       position: index + 1,
-      isCurrentUser: userData_item.name === userData.name // Check if this user is the logged-in user
+      isCurrentUser: userData_item.name === userData.name, // Check if this user is the logged-in user
     }));
 
   // ------------------------------------------------------------------ //
@@ -101,18 +112,18 @@ export default function Dashboard() {
 
   // Frequently used date variables
   const today = currentTime;
-  const currentDay = today.getDay();                               // 0 = Sunday, 1 = Monday, etc.
-  const currentDate = today.getDate();                             // Day of month
-  const currentHour = today.getHours();                            // Hour of day
-  const currentMinutes = today.getMinutes();                       // Minute of hour
+  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const currentDate = today.getDate(); // Day of month
+  const currentHour = today.getHours(); // Hour of day
+  const currentMinutes = today.getMinutes(); // Minute of hour
 
   // Calculate Monday of current week
   const mondayDate = new Date(today);
-  const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1;    // Handle Sunday
+  const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Handle Sunday
   mondayDate.setDate(today.getDate() - daysFromMonday);
 
   // Generate week days
-  const weekDays = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
+  const weekDays = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"];
   const weekDates = [];
 
   // Populate week dates array
@@ -122,18 +133,19 @@ export default function Dashboard() {
     weekDates.push({
       day: weekDays[i],
       date: date.getDate(),
-      isToday: date.getDate() === currentDate && date.getMonth() === today.getMonth()
+      isToday:
+        date.getDate() === currentDate && date.getMonth() === today.getMonth(),
     });
   }
 
   // Generate dynamic time slots based on tasks and default range
   function generateTimeSlots() {
-    const defaultStart = 8;  // Default start hour (08:00)
-    const defaultEnd = 20;   // Default end hour (20:00)
+    const defaultStart = 8; // Default start hour (08:00)
+    const defaultEnd = 20; // Default end hour (20:00)
 
     // Extract hours from tasks
-    const taskHours = todayTasks.map(task => {
-      const [hour] = task.time.split(':');
+    const taskHours = todayTasks.map((task) => {
+      const [hour] = task.time.split(":");
       return parseInt(hour, 10);
     });
 
@@ -144,7 +156,7 @@ export default function Dashboard() {
     // Generate time slots for the extended range
     const slots = [];
     for (let hour = minHour; hour <= maxHour; hour++) {
-      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+      slots.push(`${hour.toString().padStart(2, "0")}:00`);
     }
 
     return slots;
@@ -154,14 +166,19 @@ export default function Dashboard() {
     if (timeSlots.length === 0) return { shouldShow: false, position: -1 };
 
     // Get the first and last hour from time slots
-    const firstHour = parseInt(timeSlots[0].split(':')[0], 10);
-    const lastHour = parseInt(timeSlots[timeSlots.length - 1].split(':')[0], 10);
+    const firstHour = parseInt(timeSlots[0].split(":")[0], 10);
+    const lastHour = parseInt(
+      timeSlots[timeSlots.length - 1].split(":")[0],
+      10
+    );
 
     // Check if current hour is within the displayed range
     const shouldShow = currentHour >= firstHour && currentHour <= lastHour;
 
     // Calculate position relative to the first time slot
-    const position = shouldShow ? currentHour - firstHour + (currentMinutes / 60) : -1;
+    const position = shouldShow
+      ? currentHour - firstHour + currentMinutes / 60
+      : -1;
 
     return { shouldShow, position };
   }
@@ -169,13 +186,17 @@ export default function Dashboard() {
   // Generate time slots once
   const timeSlots = generateTimeSlots();
   // Get current time for "now line"
-  const currentTimeString = `${currentHour.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+  const currentTimeString = `${currentHour
+    .toString()
+    .padStart(2, "0")}:${currentMinutes.toString().padStart(2, "0")}`;
   // Determine if and where to show the "now line"
-  const { shouldShow: shouldShowNowLine, position: nowLinePosition } = calculateNowLinePosition();
-
+  const { shouldShow: shouldShowNowLine, position: nowLinePosition } =
+    calculateNowLinePosition();
 
   return (
-    <ScrollView style={[styles.outsideSafeArea, { backgroundColor: colors.background }]}>
+    <ScrollView
+      style={[styles.outsideSafeArea, { backgroundColor: colors.background }]}
+    >
       {/* HEADER SVG - Outside Safe Area */}
       <SvgFigures.BackgroundShape tintColor={colors.tint} />
       <SvgFigures.CircularShape tintColor={colors.tint} />
@@ -202,15 +223,33 @@ export default function Dashboard() {
         <View style={styles.calendarWrapper}>
           <View style={styles.calendarWeek}>
             {weekDates.map((dayData, index) => (
-              <View key={index} style={[styles.calendarDay, dayData.isToday && styles.calendarDayActive]}>
-                <Text style={[
-                  styles.calendarDayNumber, { color: dayData.isToday ? colors.activeText : colors.lightDarkText }
-                ]}>
+              <View
+                key={index}
+                style={[
+                  styles.calendarDay,
+                  dayData.isToday && styles.calendarDayActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.calendarDayNumber,
+                    {
+                      color: dayData.isToday
+                        ? colors.activeText
+                        : colors.lightDarkText,
+                    },
+                  ]}
+                >
                   {dayData.date}
                 </Text>
-                <Text style={[
-                  styles.calendarDayLabel, { color: dayData.isToday ? colors.activeText : colors.text }
-                ]}>
+                <Text
+                  style={[
+                    styles.calendarDayLabel,
+                    {
+                      color: dayData.isToday ? colors.activeText : colors.text,
+                    },
+                  ]}
+                >
                   {dayData.day}
                 </Text>
               </View>
@@ -220,7 +259,12 @@ export default function Dashboard() {
 
         {/* MAIN CONTENT */}
         <View style={styles.mainWrapper}>
-          <Text style={[commonStyles.sectionTitle, { color: colors.text, marginBottom: 16 }]}>
+          <Text
+            style={[
+              commonStyles.sectionTitle,
+              { color: colors.text, marginBottom: 16 },
+            ]}
+          >
             Dagens oppgaver:
           </Text>
 
@@ -228,10 +272,13 @@ export default function Dashboard() {
           <View style={styles.calendarContainer}>
             {timeSlots.map((timeSlot, index) => {
               // Find task for this time slot
-              const taskForSlot = todayTasks.find(task => task.time === timeSlot);
+              const taskForSlot = todayTasks.find(
+                (task) => task.time === timeSlot
+              );
 
               // Check if we should show the now line after this time slot
-              const showNowLineAfter = shouldShowNowLine &&
+              const showNowLineAfter =
+                shouldShowNowLine &&
                 index < timeSlots.length - 1 &&
                 nowLinePosition > index &&
                 nowLinePosition < index + 1;
@@ -241,49 +288,80 @@ export default function Dashboard() {
                   <View style={styles.timeSlotRow}>
                     {/* Time Label */}
                     <View style={styles.timeColumn}>
-                      <Text style={[styles.timeLabel, { color: colors.lightDarkText }]}>
+                      <Text
+                        style={[
+                          styles.timeLabel,
+                          { color: colors.lightDarkText },
+                        ]}
+                      >
                         {timeSlot}
                       </Text>
                     </View>
 
                     {/* Task Column */}
                     <View style={styles.taskColumn}>
-                      {taskForSlot ? (
-                        <TouchableOpacity style={[
-                          styles.taskCard,
-                          { backgroundColor: taskForSlot.finished ? colors.nonInteractiveBackground : colors.interactiveBackground }
-                        ]}>
+                      {taskForSlot && (
+                        <TouchableOpacity
+                          style={[
+                            styles.taskCard,
+                            {
+                              backgroundColor: taskForSlot.finished
+                                ? colors.nonInteractiveBackground
+                                : colors.interactiveBackground,
+                            },
+                          ]}
+                          onPress={() => {
+                            setSelectedTask(taskForSlot);
+                            setIsModalVisible(true);
+                          }}
+                          activeOpacity={0.7}
+                        >
                           <View style={styles.taskContent}>
-                            <Text style={[
-                              styles.taskTitle,
-                              {
-                                color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.darkText,
-                                textDecorationLine: taskForSlot.finished ? 'line-through' : 'none'
-                              }
-                            ]}>
+                            <Text
+                              style={[
+                                styles.taskTitle,
+                                {
+                                  color: taskForSlot.finished
+                                    ? colors.lightNonInteractiveText
+                                    : colors.darkText,
+                                  textDecorationLine: taskForSlot.finished
+                                    ? "line-through"
+                                    : "none",
+                                },
+                              ]}
+                            >
                               {taskForSlot.title}
                             </Text>
-                            <Text style={[
-                              styles.taskSubtitle,
-                              { color: taskForSlot.finished ? colors.lightNonInteractiveText : colors.lightText }
-                            ]}>
+                            <Text
+                              style={[
+                                styles.taskSubtitle,
+                                {
+                                  color: taskForSlot.finished
+                                    ? colors.lightNonInteractiveText
+                                    : colors.lightText,
+                                },
+                              ]}
+                            >
                               {taskForSlot.assignedTo}
                             </Text>
                           </View>
-                          <View style={[
-                            styles.taskAvatar,
-                            taskForSlot.finished && styles.taskAvatarFinished
-                          ]}>
+                          <View
+                            style={[
+                              styles.taskAvatar,
+                              taskForSlot.finished && styles.taskAvatarFinished,
+                            ]}
+                          >
                             <Image
                               source={taskForSlot.avatar}
                               style={[
                                 styles.avatarImage,
-                                taskForSlot.finished && styles.avatarImageFinished
+                                taskForSlot.finished &&
+                                  styles.avatarImageFinished,
                               ]}
                             />
                           </View>
                         </TouchableOpacity>
-                      ) : null}
+                      )}
                     </View>
                   </View>
 
@@ -291,13 +369,28 @@ export default function Dashboard() {
                   {showNowLineAfter && (
                     <View style={styles.nowLineContainer}>
                       <View style={styles.nowTimeColumn}>
-                        <Text style={[styles.nowTimeLabel, { color: colors.activeText }]}>
+                        <Text
+                          style={[
+                            styles.nowTimeLabel,
+                            { color: colors.activeText },
+                          ]}
+                        >
                           {currentTimeString}
                         </Text>
                       </View>
                       <View style={styles.nowLineWrapper}>
-                        <View style={[styles.nowLine, { backgroundColor: colors.activeText }]} />
-                        <View style={[styles.nowDot, { backgroundColor: colors.activeText }]} />
+                        <View
+                          style={[
+                            styles.nowLine,
+                            { backgroundColor: colors.activeText },
+                          ]}
+                        />
+                        <View
+                          style={[
+                            styles.nowDot,
+                            { backgroundColor: colors.activeText },
+                          ]}
+                        />
                       </View>
                     </View>
                   )}
@@ -312,28 +405,38 @@ export default function Dashboard() {
           <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
             Ledertavle:
           </Text>
-          
+
           {/* Top 3 Podium */}
           <View style={styles.podiumContainer}>
             {/* Second Place */}
             <View style={styles.podiumPosition}>
               <View style={[styles.podiumAvatar, styles.secondPlaceAvatar]}>
-                <Image source={leaderboardData[1].avatar} style={styles.avatarImage} />
+                <Image
+                  source={leaderboardData[1].avatar}
+                  style={styles.avatarImage}
+                />
                 <View style={[styles.positionBadge, styles.secondPlaceBadge]}>
                   <Text style={styles.positionText}>2</Text>
                 </View>
               </View>
-              <Text style={[styles.podiumName, { color: colors.text }]}>{leaderboardData[1].name}</Text>
+              <Text style={[styles.podiumName, { color: colors.text }]}>
+                {leaderboardData[1].name}
+              </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
-                <Text style={[styles.podiumPoints, { color: colors.text }]}>{leaderboardData[1].points} pts</Text>
+                <Text style={[styles.podiumPoints, { color: colors.text }]}>
+                  {leaderboardData[1].points} pts
+                </Text>
               </View>
             </View>
 
             {/* First Place */}
             <View style={styles.firstPlacePosition}>
               <View style={[styles.podiumAvatar, styles.firstPlaceAvatar]}>
-                <Image source={leaderboardData[0].avatar} style={styles.avatarImage} />
+                <Image
+                  source={leaderboardData[0].avatar}
+                  style={styles.avatarImage}
+                />
                 <View style={[styles.positionBadge, styles.firstPlaceBadge]}>
                   <Text style={styles.positionText}>1</Text>
                 </View>
@@ -341,25 +444,36 @@ export default function Dashboard() {
                   <Text style={styles.crown}>👑</Text>
                 </View>
               </View>
-              <Text style={[styles.podiumName, { color: colors.text }]}>{leaderboardData[0].name}</Text>
+              <Text style={[styles.podiumName, { color: colors.text }]}>
+                {leaderboardData[0].name}
+              </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
-                <Text style={[styles.podiumPoints, { color: colors.text }]}>{leaderboardData[0].points} pts</Text>
+                <Text style={[styles.podiumPoints, { color: colors.text }]}>
+                  {leaderboardData[0].points} pts
+                </Text>
               </View>
             </View>
 
             {/* Third Place */}
             <View style={styles.podiumPosition}>
               <View style={[styles.podiumAvatar, styles.thirdPlaceAvatar]}>
-                <Image source={leaderboardData[2].avatar} style={styles.avatarImage} />
+                <Image
+                  source={leaderboardData[2].avatar}
+                  style={styles.avatarImage}
+                />
                 <View style={[styles.positionBadge, styles.thirdPlaceBadge]}>
                   <Text style={styles.positionText}>3</Text>
                 </View>
               </View>
-              <Text style={[styles.podiumName, { color: colors.text }]}>{leaderboardData[2].name}</Text>
+              <Text style={[styles.podiumName, { color: colors.text }]}>
+                {leaderboardData[2].name}
+              </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
-                <Text style={[styles.podiumPoints, { color: colors.text }]}>{leaderboardData[2].points} pts</Text>
+                <Text style={[styles.podiumPoints, { color: colors.text }]}>
+                  {leaderboardData[2].points} pts
+                </Text>
               </View>
             </View>
           </View>
@@ -367,33 +481,50 @@ export default function Dashboard() {
           {/* Positions 4-10 */}
           <View style={styles.leaderboardList}>
             {leaderboardData.slice(3).map((user) => (
-              <View 
-                key={user.id} 
+              <View
+                key={user.id}
                 style={[
                   styles.leaderboardItem,
                   user.isCurrentUser && styles.currentUserItem,
-                  { backgroundColor: user.isCurrentUser ? colors.tint : colors.contextBackground }
+                  {
+                    backgroundColor: user.isCurrentUser
+                      ? colors.tint
+                      : colors.contextBackground,
+                  },
                 ]}
               >
                 <View style={styles.leaderboardLeft}>
-                  <Text style={[
-                    styles.leaderboardPosition,
-                    { color: user.isCurrentUser ? colors.black : colors.text }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.leaderboardPosition,
+                      {
+                        color: user.isCurrentUser ? colors.black : colors.text,
+                      },
+                    ]}
+                  >
                     {user.position}
                   </Text>
-                  <Image source={user.avatar} style={styles.leaderboardAvatar} />
-                  <Text style={[
-                    styles.leaderboardName,
-                    { color: user.isCurrentUser ? colors.black : colors.text }
-                  ]}>
+                  <Image
+                    source={user.avatar}
+                    style={styles.leaderboardAvatar}
+                  />
+                  <Text
+                    style={[
+                      styles.leaderboardName,
+                      {
+                        color: user.isCurrentUser ? colors.black : colors.text,
+                      },
+                    ]}
+                  >
                     {user.name}
                   </Text>
                 </View>
-                <Text style={[
-                  styles.leaderboardPoints,
-                  { color: user.isCurrentUser ? colors.black : colors.text }
-                ]}>
+                <Text
+                  style={[
+                    styles.leaderboardPoints,
+                    { color: user.isCurrentUser ? colors.black : colors.text },
+                  ]}
+                >
                   {user.points} pts
                 </Text>
               </View>
@@ -401,6 +532,31 @@ export default function Dashboard() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        visible={isModalVisible}
+        task={selectedTask}
+        onClose={() => setIsModalVisible(false)}
+        actionButtons={
+          selectedTask &&
+          !selectedTask.finished &&
+          selectedTask.assignedTo === userData.name
+            ? [
+                {
+                  label: "Marker som fullført",
+                  iconName: "checkmark-circle-outline",
+                  variant: "success",
+                  onPress: () => {
+                    // TODO: Implement mark as complete functionality
+                    console.log("Mark task as complete:", selectedTask?.id);
+                    setIsModalVisible(false);
+                  },
+                },
+              ]
+            : undefined
+        }
+      />
     </ScrollView>
   );
 }
@@ -447,36 +603,36 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 16,
     height: 75,
-    width: '100%'
+    width: "100%",
   },
   calendarWeek: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    height: "100%",
   },
   calendarDay: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     minWidth: 35,
   },
   calendarDayNumber: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
   },
   calendarDayLabel: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   calendarDayActive: {
-    backgroundColor: '#464545',
+    backgroundColor: "#464545",
     paddingHorizontal: 8,
     paddingVertical: 8,
     borderRadius: 16,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
     // Cancel the padding's impact on layout so surrounding items don't shift
     marginHorizontal: -8,
     marginVertical: -8,
@@ -493,9 +649,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   timeSlotRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     minHeight: 50,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     paddingVertical: 4,
   },
   timeColumn: {
@@ -504,16 +660,16 @@ const styles = StyleSheet.create({
   },
   timeLabel: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   taskColumn: {
     flex: 1,
     paddingLeft: 16,
   },
   taskCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
@@ -524,7 +680,7 @@ const styles = StyleSheet.create({
   },
   taskTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 2,
   },
   taskSubtitle: {
@@ -534,12 +690,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginLeft: 12,
   },
   avatarImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 50,
   },
   taskAvatarFinished: {
@@ -549,8 +705,8 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   searchSlot: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
@@ -563,23 +719,23 @@ const styles = StyleSheet.create({
 
   // Now Line Styles
   nowLineContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 8,
     zIndex: 10,
   },
   nowTimeColumn: {
     width: 60,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
   },
   nowTimeLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   nowLineWrapper: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingLeft: 16,
   },
   nowLine: {
@@ -596,20 +752,20 @@ const styles = StyleSheet.create({
 
   // Leaderboard Styles
   podiumContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
     marginTop: 20,
     marginBottom: 20,
     paddingHorizontal: 10,
     minHeight: 160,
   },
   podiumPosition: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   firstPlacePosition: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
     marginTop: -30,
   },
@@ -618,50 +774,51 @@ const styles = StyleSheet.create({
     height: 70,
     borderRadius: 35,
     borderWidth: 3,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+    justifyContent: "center",
+    alignItems: "center",
+    position: "relative",
     marginBottom: 8,
   },
   firstPlaceAvatar: {
-    borderColor: '#FFD700',
+    borderColor: "#FFD700",
     width: 80,
     height: 80,
     borderRadius: 40,
   },
   secondPlaceAvatar: {
-    borderColor: '#FFD700',
+    borderColor: "#FFD700",
   },
   thirdPlaceAvatar: {
-    borderColor: '#FFD700',
+    borderColor: "#FFD700",
   },
-  positionBadge: { // Placement number badge
-    position: 'absolute',
+  positionBadge: {
+    // Placement number badge
+    position: "absolute",
     bottom: -8,
     width: 24,
     height: 24,
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: '#FFF',
+    borderColor: "#FFF",
   },
   firstPlaceBadge: {
-    backgroundColor: '#FFD700',
+    backgroundColor: "#FFD700",
   },
   secondPlaceBadge: {
-    backgroundColor: '#FFD700',
+    backgroundColor: "#FFD700",
   },
   thirdPlaceBadge: {
-    backgroundColor: '#FFD700',
+    backgroundColor: "#FFD700",
   },
   positionText: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
   },
   crownContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: -15,
   },
   crown: {
@@ -669,13 +826,13 @@ const styles = StyleSheet.create({
   },
   podiumName: {
     fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     marginBottom: 4,
   },
   pointsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   pointsIcon: {
     fontSize: 12,
@@ -683,32 +840,32 @@ const styles = StyleSheet.create({
   },
   podiumPoints: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   leaderboardList: {
     gap: 8,
   },
   leaderboardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 12,
   },
   currentUserItem: {
-    backgroundColor: '#FF6B9D',
+    backgroundColor: "#FF6B9D",
   },
   leaderboardLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   leaderboardPosition: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     width: 24,
-    textAlign: 'center',
+    textAlign: "center",
     marginRight: 12,
   },
   leaderboardAvatar: {
@@ -719,13 +876,11 @@ const styles = StyleSheet.create({
   },
   leaderboardName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     flex: 1,
   },
   leaderboardPoints: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
-
 });
-
