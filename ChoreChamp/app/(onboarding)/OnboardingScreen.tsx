@@ -24,14 +24,14 @@ const OnboardingScreen = () => {
         // Start the animation after delay 
         const delayTimer = setTimeout(() => { 
             Animated.timing(translateY, {
-                toValue: -800,
+                toValue: -800, // How far the logo moves up
                 duration: ANIM_DURATION,
                 useNativeDriver: true,
             }).start();
 
             Animated.timing(opacity, {
                 toValue: 0.95,
-                duration: 1500,
+                duration: 1500, // Fade duration
                 useNativeDriver: true,
             }).start();
 

@@ -1,17 +1,30 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import OnboardingDots from '../../components/OnboardingDots';
+
+/*
+Language Selection Screen
+    - Lets the user choose their preferred language.
+    - Each button navigates to the welcome screen with a language code in the query.
+    - Shows progress dots (first dot active).
+*/
 
 export default function LanguageSelection() {
     const router = useRouter();
 
+    // Navigates to the Welcome screen and sends selected language as query parameter
     function select(langCode: string){
+        
         //navigate to welcome screen and pass language as query parameter
         router.push(`/(onboarding)/welcome?lang=${encodeURIComponent(langCode)}`);
     }
 
     return(
         <SafeAreaView style={styles.safe}>
+
+            <OnboardingDots activeIndex={0} />
+            
             <View style= {styles.container}>
                 <View style= {styles.header}>
                     <Image

@@ -1,22 +1,33 @@
 import React from "react";
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image } from "react-native";
 import {useRouter} from 'expo-router';
+import OnboardingDots from "../../components/OnboardingDots";
+
+/*
+Notifications Screen
+    - Asks user to enable notifications for updates about chores.
+    - Two options: allow or skip.
+    - Both options navigate to the main app (tabs).
+    - Shows progress dots (third dot active).
+*/
 
 export default function NotificationsScreen() {
     const router = useRouter();
 
+    // If user allows notifications, continue to main app
     function handleAllow(){
         router.replace('/(tabs)');
     }
 
+    // If user skips, continue without enabling notifications
     function handleSkip(){
         router.replace('/(tabs)');
     }
 
     return(
         <SafeAreaView style={styles.safe}>
+            <OnboardingDots activeIndex={2} />
             <View style= {styles.container}>
-
                 <Image
                     source={require('../../assets/images/bell.png')}
                     style={styles.icon}

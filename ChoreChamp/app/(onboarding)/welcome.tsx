@@ -1,6 +1,15 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import OnboardingDots from '../../components/OnboardingDots';
+
+/*
+Welcome Screen
+    - Displays introduction text based on selected language.
+    - Texts are stored in STRINGS and chosen using the lang parameter.
+    - User continues to notifications setup.
+    - Shows progress dots (second dot active).
+*/
 
 type LangKey = 'no' | 'en' | 'es' | 'de';
 
@@ -35,20 +44,24 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // Hent språkparameter trygt (params.lang kan være string | string[] | undefined)
+  // Safely read language parameter from URL
   const rawLang =
     typeof params.lang === 'string' ? params.lang : Array.isArray(params.lang) ? params.lang[0] : undefined;
 
-  // Sjekk at rawLang er et gyldig nøkkel i STRINGS; ellers fallback til 'en'
-  const lang = (rawLang && (rawLang === 'no' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'en';
+  // Validate that the language exists in STRINGS, otherwise default to Norwegian
+  const lang = (rawLang && (rawLang === 'no' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'no';
   const strings = STRINGS[lang];
 
+  // Navigate to the notifications screen
   function goNext() {
     router.replace('/(onboarding)/notifications');
   }
 
   return (
     <SafeAreaView style={styles.safe}>
+
+      <OnboardingDots activeIndex={1} />
+      
       <View style={styles.container}>
         <Text style={styles.title}>{strings.title}</Text>
 
