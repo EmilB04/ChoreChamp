@@ -14,11 +14,11 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import Header from './Header';
 
-interface MinKontoScreenProps {
+interface MyAccountScreenProps {
     onBack: () => void;
 }
 
-export default function MinKontoScreen({ onBack }: MinKontoScreenProps) {
+export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
     

@@ -9,11 +9,11 @@ import {
 import { useTheme } from '@/contexts/ThemeContext';
 import Header from './Header';
 
-interface AppInnstillingerScreenProps {
+interface AppSettingsScreenProps {
     onBack: () => void;
 }
 
-export default function AppInnstillingerScreen({ onBack }: AppInnstillingerScreenProps) {
+export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
     const { colors } = useTheme();
     
     // State for each toggle
