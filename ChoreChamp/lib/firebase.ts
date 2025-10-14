@@ -3,6 +3,8 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// https://firebase.google.com/docs/web/setup
+
 const firebaseConfig = {
   apiKey: "AIzaSyA_bhFiyDRwsswKsxgsBKQVP20O68oKOSs",
   authDomain: "chorechamp-a000a.firebaseapp.com",
