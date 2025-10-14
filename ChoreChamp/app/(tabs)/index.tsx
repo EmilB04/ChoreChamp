@@ -1,19 +1,19 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import React, { useState, useEffect } from "react";
-import { Image } from "expo-image";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
-import commonStyles from "../commonStyles";
-import WelcomeGreeting from "../../components/index/WelcomeGreeting";
-import SvgFigures from "../../components/svg/SvgFigures";
-import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import type { Task } from "@/types/task";
+import { Image } from "expo-image";
+import React, { useEffect, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import WelcomeGreeting from "../../components/index/WelcomeGreeting";
+import SvgFigures from "../../components/index/svg/SvgFigures";
+import TaskDetailModal from "../../components/modals/TaskDetailModal";
+import commonStyles from "../commonStyles";
 
 // TODO:
 // 1. Fetch user data dynamically

@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import Header from './Header';
 
-interface MineHusstanderScreenProps {
+interface MyHouseholdsScreenProps {
     onBack: () => void;
 }
 
@@ -32,7 +32,7 @@ interface Household {
     members: Member[];
 }
 
-export default function MineHusstanderScreen({ onBack }: MineHusstanderScreenProps) {
+export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) {
     const { colors } = useTheme();
     
     // Sample household data generated with ai

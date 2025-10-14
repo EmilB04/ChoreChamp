@@ -14,9 +14,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import commonStyles from "../commonStyles";
 import EditProfileModal from '@/components/profile/EditProfileModal';
-import MinKontoScreen from '@/components/profile/MinKontoScreen';
-import MineHusstanderScreen from '@/components/profile/MineHusstanderScreen';
-import AppInnstillingerScreen from '@/components/profile/AppInnstillingerScreen';
+import MinKontoScreen from '@/components/profile/MyAccountScreen';
+import MineHusstanderScreen from '@/components/profile/MyHouseholdsScreen';
+import AppInnstillingerScreen from '@/components/profile/AppSettingsScreen';
 
 //TODO: Implement log out functionality
 
