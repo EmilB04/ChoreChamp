@@ -1,7 +1,7 @@
+import { useRouter } from 'expo-router';
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Image } from "react-native";
-import {useRouter} from 'expo-router';
-import OnboardingDots from "../../components/OnboardingDots";
+import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import OnboardingDots from "../../components/onBoarding/OnboardingDots";
 
 /*
 Notifications Screen
