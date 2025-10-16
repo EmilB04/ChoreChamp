@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import OnboardingDots from '../../components/OnboardingDots';
-
+import { useTheme } from '@/contexts/ThemeContext';
 /*
 Language Selection Screen
     - Lets the user choose their preferred language.
@@ -13,16 +13,17 @@ Language Selection Screen
 
 export default function LanguageSelection() {
     const router = useRouter();
+    const { colors } = useTheme();
 
     // Navigates to the Welcome screen and sends selected language as query parameter
     function select(langCode: string){
         
         //navigate to welcome screen and pass language as query parameter
-        router.push(`/(onboarding)/welcome?lang=${encodeURIComponent(langCode)}`);
+        router.push(`/(onboarding)/WelcomeScreen?lang=${encodeURIComponent(langCode)}`);
     }
 
     return(
-        <SafeAreaView style={styles.safe}>
+        <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
 
             <OnboardingDots activeIndex={0} />
             
@@ -35,7 +36,7 @@ export default function LanguageSelection() {
                         accessible
                         accessibilityLabel ="ChoreChamp logo"
                     />
-                    <Text style={styles.title}>Select your language</Text>  
+                    <Text style={[styles.title, { color: colors.text }]}>Select your language</Text>  
                 </View>
 
 
@@ -44,7 +45,7 @@ export default function LanguageSelection() {
                     <TouchableOpacity
                         accessibilityLabel = "English"
                         accessibilityRole = "button"
-                        style={styles.langBtn}
+                        style={[styles.langBtn, { backgroundColor: colors.tint }]} 
                         onPress={() => select('en')}
                     >
                     <Image
@@ -52,13 +53,13 @@ export default function LanguageSelection() {
                         style={styles.flagImage}
                         accessibilityLabel ="British flag"
                     />
-                    <Text style={styles.langText}>English</Text>
+                    <Text style={[styles.langText, { color: colors.text }]}>English</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         accessibilityLabel = "Norsk"
                         accessibilityRole = "button"
-                        style={styles.langBtn}
+                        style={[styles.langBtn, { backgroundColor: colors.tint }]} 
                         onPress={() => select('no')}
                     >
                     <Image
@@ -66,13 +67,13 @@ export default function LanguageSelection() {
                         style={styles.flagImage}
                         accessibilityLabel ="Norwegian flag"
                     />
-                    <Text style={styles.langText}>Norsk</Text>
+                    <Text style={[styles.langText, { color: colors.text }]}>Norsk</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         accessibilityLabel = "Español"
                         accessibilityRole = "button"
-                        style={styles.langBtn}
+                        style={[styles.langBtn, { backgroundColor: colors.tint }]} 
                         onPress={() => select('es')}
                     >
                     <Image
@@ -80,13 +81,13 @@ export default function LanguageSelection() {
                         style={styles.flagImage}
                         accessibilityLabel ="Spanish flag"
                     />
-                    <Text style={styles.langText}>Español</Text>
+                    <Text style={[styles.langText, { color: colors.text }]}>Español</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         accessibilityLabel = "Deutsch"
                         accessibilityRole = "button"
-                        style={styles.langBtn}
+                        style={[styles.langBtn, { backgroundColor: colors.tint }]}  
                         onPress={() => select('de')}
                     >
                     <Image
@@ -94,7 +95,7 @@ export default function LanguageSelection() {
                         style={styles.flagImage}
                         accessibilityLabel ="German flag"
                     />
-                    <Text style={styles.langText}>Deutsch</Text>
+                    <Text style={[styles.langText, { color: colors.text }]}>Deutsch</Text>
                     </TouchableOpacity>
 
                 </View>
@@ -105,25 +106,24 @@ export default function LanguageSelection() {
 
 const styles = StyleSheet.create({
 
-  safe: { flex: 1, backgroundColor: '#000' },
+  safe: { flex: 1 },
   container: { flex: 1, padding: 20, justifyContent: 'center', alignItems: 'center' },
   header: { marginBottom: 24, alignItems: 'center' },
-  title: { color: '#fff', fontSize: 28, fontWeight: '700', marginBottom: 8 },
+  title: {fontSize: 28, fontWeight: '700', marginBottom: 8 },
   buttons: { width: '100%', gap: 20 },
 
   langBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFC107', 
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 28,
     width: '100%',
   },
 
-    flagImage: { width: 30, height: 30, marginRight: 12, borderRadius: 2 }, // NEW:
+    flagImage: { width: 30, height: 30, marginRight: 12, borderRadius: 2 },
     flag: { fontSize: 22, marginRight: 12 },
-    langText: { fontSize: 18, color: '#000', fontWeight: '600' },
+    langText: { fontSize: 18, fontWeight: '600' },
 
     logo: { width: 200, height: 200, marginBottom: 12 },
 });

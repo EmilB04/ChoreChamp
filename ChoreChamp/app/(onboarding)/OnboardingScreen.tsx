@@ -1,7 +1,7 @@
 import { StyleSheet, View, Image, Text, Animated } from 'react-native';
 import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'expo-router';
-
+import { useTheme } from '@/contexts/ThemeContext';
 /*
 Onboarding Screen
     - Displays the app logo when the user first opens the app.
@@ -11,6 +11,7 @@ Onboarding Screen
 
 const OnboardingScreen = () => {
     const router = useRouter();
+    const { colors } = useTheme();
     const translateY = useRef(new Animated.Value(0)).current;
     const opacity = useRef(new Animated.Value(1)).current;
     
@@ -37,7 +38,7 @@ const OnboardingScreen = () => {
 
             // Navigate to the main app screen after animation
             navTimer = setTimeout(() => { 
-                router.replace('/(onboarding)/language');
+                router.replace('/(onboarding)/LanguageSelection');
             }, ANIM_DURATION + 300); 
         }, INITIAL_DELAY);  
 
@@ -50,7 +51,7 @@ const OnboardingScreen = () => {
     }, [router, translateY, opacity]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.tint }]}>
         <Animated.Image
             source={require('../../assets/images/Logo.gif')}
             style = {[styles.logo, { transform: [{ translateY }], opacity }]}
@@ -67,7 +68,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFB40E',
     },
     logo: {
         width: 400,

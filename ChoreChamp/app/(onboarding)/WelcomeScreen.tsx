@@ -3,6 +3,8 @@ import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import OnboardingDots from '../../components/OnboardingDots';
+import { useTheme } from '@/contexts/ThemeContext'; 
+import { Ionicons } from '@expo/vector-icons';
 
 /*
 Welcome Screen
@@ -44,6 +46,7 @@ const STRINGS: Record<LangKey, { title: string; subtitle: string; copy: string; 
 export default function WelcomeScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { colors } = useTheme();
 
   // Safely read language parameter from URL
   const rawLang =
@@ -55,18 +58,28 @@ export default function WelcomeScreen() {
 
   // Navigate to the notifications screen
   function goNext() {
-    router.replace('/(onboarding)/notifications');
+    router.replace('/(onboarding)/NotificationsScreen');
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
+      <View style={styles.headerRow}>
+        <OnboardingDots activeIndex={1} />
 
-      <OnboardingDots activeIndex={1} />
-      
-      <View style={styles.container}>
-        <Text style={styles.title}>{strings.title}</Text>
+        <TouchableOpacity
+          onPress={() => router.replace('/(onboarding)/LanguageSelection')}
+          accessibilityRole='button'
+          hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back" size={22} color={colors.tint} />
+        </TouchableOpacity>
+      </View>
 
-        <Text style={styles.subtitle}>{strings.subtitle}</Text>
+      <View style={[styles.container]}>
+        <Text style={[styles.title, { color: colors.text }]}>{strings.title}</Text>
+
+        <Text style={[styles.subtitle, { color: colors.tint }]}>{strings.subtitle}</Text> 
 
         <Image
           source={require('../../assets/images/WelcomeAvatar.png')}
@@ -75,15 +88,15 @@ export default function WelcomeScreen() {
           accessibilityLabel="Welcome illustration"
         />
 
-        <Text style={styles.copy}>{strings.copy}</Text>
+         <Text style={[styles.copy, { color: colors.text }]}>{strings.copy}</Text>
 
         <TouchableOpacity
-          style={styles.nextBtn}
+          style={[styles.nextBtn, { backgroundColor: colors.tint }]}
           onPress={goNext}
           accessibilityLabel={strings.next}
           accessibilityRole="button"
         >
-          <Text style={styles.nextText}>{strings.next}</Text>
+          <Text style={[styles.nextText, { color: colors.darkText }]}>{strings.next}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -91,17 +104,18 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#000' },
+  safe: { flex: 1},
+  headerRow: { width: '100%', paddingHorizontal: 24, height: 56, alignItems: 'center', justifyContent: 'center', position: 'relative' }, // new
+  backButton: { position: 'absolute', left: 16, height: '100%', justifyContent: 'center', padding: 8 }, // new
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
-  title: { color: '#fff', fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 12 },
-  subtitle: { color: '#FFC107', fontSize: 16, textAlign: 'center', marginBottom: 24 },
+  title: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 12 },
+  subtitle: {fontSize: 16, textAlign: 'center', marginBottom: 24 },
   illustration: { width: 150, height: 150, marginBottom: 24 },
-  copy: { color: '#fff', fontSize: 16, textAlign: 'center', marginBottom: 30 },
+  copy: {fontSize: 16, textAlign: 'center', marginBottom: 30 },
   nextBtn: {
-    backgroundColor: '#FFC107',
     paddingVertical: 14,
     paddingHorizontal: 40,
     borderRadius: 30,
   },
-  nextText: { color: '#000', fontSize: 18, fontWeight: '700' },
+  nextText: {fontSize: 18, fontWeight: '700' },
 });
