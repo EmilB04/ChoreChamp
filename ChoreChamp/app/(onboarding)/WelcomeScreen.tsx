@@ -1,18 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import OnboardingDots from '../../components/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext'; 
 import { Ionicons } from '@expo/vector-icons';
-
-/*
-Welcome Screen
-    - Displays introduction text based on selected language.
-    - Texts are stored in STRINGS and chosen using the lang parameter.
-    - User continues to notifications setup.
-    - Shows progress dots (second dot active).
-*/
 
 type LangKey = 'no' | 'en' | 'es' | 'de';
 
@@ -48,15 +40,12 @@ export default function WelcomeScreen() {
   const params = useLocalSearchParams();
   const { colors } = useTheme();
 
-  // Safely read language parameter from URL
   const rawLang =
     typeof params.lang === 'string' ? params.lang : Array.isArray(params.lang) ? params.lang[0] : undefined;
 
-  // Validate that the language exists in STRINGS, otherwise default to Norwegian
   const lang = (rawLang && (rawLang === 'no' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'no';
   const strings = STRINGS[lang];
 
-  // Navigate to the notifications screen
   function goNext() {
     router.replace('/(onboarding)/NotificationsScreen');
   }
@@ -76,37 +65,39 @@ export default function WelcomeScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.container]}>
-        <Text style={[styles.title, { color: colors.text }]}>{strings.title}</Text>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
+        <View style={[styles.container]}>
+          <Text style={[styles.title, { color: colors.text }]}>{strings.title}</Text>
 
-        <Text style={[styles.subtitle, { color: colors.tint }]}>{strings.subtitle}</Text> 
+          <Text style={[styles.subtitle, { color: colors.tint }]}>{strings.subtitle}</Text> 
 
-        <Image
-          source={require('../../assets/images/WelcomeAvatar.png')}
-          style={styles.illustration}
-          resizeMode="contain"
-          accessibilityLabel="Welcome illustration"
-        />
+          <Image
+            source={require('../../assets/images/WelcomeAvatar.png')}
+            style={styles.illustration}
+            resizeMode="contain"
+            accessibilityLabel="Welcome illustration"
+          />
 
-         <Text style={[styles.copy, { color: colors.text }]}>{strings.copy}</Text>
+          <Text style={[styles.copy, { color: colors.text }]}>{strings.copy}</Text>
 
-        <TouchableOpacity
-          style={[styles.nextBtn, { backgroundColor: colors.tint }]}
-          onPress={goNext}
-          accessibilityLabel={strings.next}
-          accessibilityRole="button"
-        >
-          <Text style={[styles.nextText, { color: colors.darkText }]}>{strings.next}</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={[styles.nextBtn, { backgroundColor: colors.tint }]}
+            onPress={goNext}
+            accessibilityLabel={strings.next}
+            accessibilityRole="button"
+          >
+            <Text style={[styles.nextText, { color: colors.darkText }]}>{strings.next}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1},
-  headerRow: { width: '100%', paddingHorizontal: 24, height: 56, alignItems: 'center', justifyContent: 'center', position: 'relative' }, // new
-  backButton: { position: 'absolute', left: 16, height: '100%', justifyContent: 'center', padding: 8 }, // new
+  headerRow: { width: '100%', paddingHorizontal: 24, height: 56, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  backButton: { position: 'absolute', left: 5, height: '100%', justifyContent: 'center', padding: 8 },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   title: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 12 },
   subtitle: {fontSize: 16, textAlign: 'center', marginBottom: 24 },

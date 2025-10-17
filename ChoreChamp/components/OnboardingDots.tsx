@@ -3,18 +3,20 @@ import { StyleSheet, View} from "react-native";
 
 /*
 OnboardingDots Component
-    - Displays 3 dots to represent onboarding progress.
+    - Displays 4 dots to represent onboarding progress.
     - Highlights the active dot based on the activeIndex prop.
 */
 
 type props = {
     activeIndex: number;
+    total?: number;
 };
 
-export default function OnboardingDots({activeIndex}: props) {
-    return(
+export default function OnboardingDots({activeIndex, total = 4}: props) {
+    const items = Array.from({ length: total }, (_, i) => i);
+    return (
         <View style={styles.container}>
-            {[0,1,2].map((i) => (
+            {items.map((i) => (
                 <View
                     key={i}
                     style={[
