@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from '../../../components/OnboardingDots';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function Register() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
   const [birth, setBirth] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -34,6 +36,19 @@ export default function Register() {
       setLoading(false);
     }
   }
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (event.type === 'dismissed') {
+      setShowDatePicker(false);
+      return;
+    }
+    const currentDate = selectedDate || new Date();
+    const day = currentDate.getDate().toString().padStart(2, '0');
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const year = currentDate.getFullYear();
+    setBirth(`${day}/${month}/${year}`);
+    setShowDatePicker(false);
+  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -68,27 +83,59 @@ export default function Register() {
             onChangeText={setUsername}
             placeholder="Legg til brukernavn"
             placeholderTextColor="#BDBDBD"
-            style={[styles.input, { backgroundColor: colors.white, color: colors.text }]}
+            style={[styles.input, { backgroundColor: colors.white, color: '#000000' }]}
           />
 
           <Text style={[styles.label, { color: colors.tint, marginTop: 12 }]}>Mobilnummer</Text>
           <TextInput
             value={phone}
             onChangeText={setPhone}
-            placeholder="Legg til mobilnummer"
+            placeholder="Skriv inn mobilnummer"
             placeholderTextColor="#BDBDBD"
             keyboardType="phone-pad"
-            style={[styles.input, { backgroundColor: colors.white, color: colors.text }]}
+            style={[
+              styles.input,
+              { backgroundColor: colors.white, color: '#000000', borderWidth: 1, borderColor: colors.tint },
+            ]}
           />
 
           <Text style={[styles.label, { color: colors.tint, marginTop: 12 }]}>Fødselsdato</Text>
-          <TextInput
-            value={birth}
-            onChangeText={setBirth}
-            placeholder="DD/MM/YYYY"
-            placeholderTextColor="#BDBDBD"
-            style={[styles.input, { backgroundColor: colors.white, color: colors.text }]}
-          />
+          {Platform.OS === 'web' ? (
+            <TextInput
+              value={birth}
+              onChangeText={setBirth}
+              placeholder="DD/MM/YYYY"
+              placeholderTextColor="#BDBDBD"
+              style={[styles.input, { backgroundColor: colors.white, color: '#000000' }]}
+            />
+          ) : (
+            <>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                <View pointerEvents="none">
+                  <TextInput
+                    value={birth}
+                    placeholder="DD/MM/YYYY"
+                    placeholderTextColor="#BDBDBD"
+                    editable={false}
+                    style={[
+                      styles.input,
+                      { backgroundColor: colors.white, color: '#000000', borderWidth: 1, borderColor: colors.tint },
+                    ]}
+                  />
+                </View>
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={birth ? new Date(birth.split('/').reverse().join('-')) : new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={handleDateChange}
+                  maximumDate={new Date()}
+                />
+              )}
+            </>
+          )}
 
           {error && <Text style={[styles.error, { color: colors.statusFailedText }]}>{error}</Text>}
 
@@ -110,23 +157,20 @@ export default function Register() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+    width: '100%',
+    paddingHorizontal: 24,
     height: 56,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    zIndex: 10,
+    position: 'relative',
   },
-  backButton: { position: 'absolute', left: 8, justifyContent: 'center', height: '100%' },
+  backButton: { position: 'absolute', left: 8, height: '100%', justifyContent: 'center', padding: 8 },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 80, 
+    paddingTop: 80,
     paddingBottom: 40,
   },
   title: { fontSize: 22, fontWeight: '700', textAlign: 'center', marginBottom: 18 },

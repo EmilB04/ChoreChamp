@@ -117,18 +117,14 @@ export default function Login() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+    width: '100%',
+    paddingHorizontal: 24,
     height: 56,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    zIndex: 10,
+    position: 'relative',
   },
-  backButton: { position: 'absolute', left: 8, justifyContent: 'center', height: '100%' },
+  backButton: { position: 'absolute', left: 8, height: '100%', justifyContent: 'center', padding: 8 },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',

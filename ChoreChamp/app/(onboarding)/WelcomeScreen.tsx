@@ -95,18 +95,21 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1},
-  headerRow: { width: '100%', paddingHorizontal: 24, height: 56, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  safe: { flex: 1 },
+  headerRow: {
+    width: '100%',
+    paddingHorizontal: 24,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
   backButton: { position: 'absolute', left: 5, height: '100%', justifyContent: 'center', padding: 8 },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   title: { fontSize: 28, fontWeight: '700', textAlign: 'center', marginBottom: 12 },
-  subtitle: {fontSize: 16, textAlign: 'center', marginBottom: 24 },
+  subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 24 },
   illustration: { width: 150, height: 150, marginBottom: 24 },
-  copy: {fontSize: 16, textAlign: 'center', marginBottom: 30 },
-  nextBtn: {
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 30,
-  },
-  nextText: {fontSize: 18, fontWeight: '700' },
+  copy: { fontSize: 16, textAlign: 'center', marginBottom: 30 },
+  nextBtn: { paddingVertical: 14, paddingHorizontal: 40, borderRadius: 30 },
+  nextText: { fontSize: 18, fontWeight: '700' },
 });
