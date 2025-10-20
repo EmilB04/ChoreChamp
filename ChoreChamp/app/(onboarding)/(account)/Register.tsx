@@ -54,14 +54,14 @@ export default function Register() {
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.replace('/(onboarding)/(account)/Login')}
+          onPress={() => router.back()}
           accessibilityRole="button"
           style={styles.backButton}
           hitSlop={10}
         >
           <Ionicons name="chevron-back" size={22} color={colors.tint} />
         </TouchableOpacity>
-        <OnboardingDots activeIndex={3} total={4} />
+        <OnboardingDots activeIndex={4} total={5} />
       </View>
 
       <ScrollView

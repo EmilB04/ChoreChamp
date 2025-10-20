@@ -17,6 +17,7 @@ import EditProfileModal from '@/components/profile/EditProfileModal';
 import MinKontoScreen from '@/components/profile/MinKontoScreen';
 import MineHusstanderScreen from '@/components/profile/MineHusstanderScreen';
 import AppInnstillingerScreen from '@/components/profile/AppInnstillingerScreen';
+import { router } from 'expo-router';
 
 //TODO: Implement log out functionality
 
@@ -114,6 +115,10 @@ export default function Profile() {
                     icon="log-out"
                     title="Logg ut"
                     description="Logg ut av din konto"
+                    onPress={() => {
+                        // Navigate to WelcomeScreen
+                        router.push('/WelcomeScreen');
+                    }}
                 />
 
                 <Text style={[styles.more, { color: colors.lightDarkText }]}>Mer</Text>

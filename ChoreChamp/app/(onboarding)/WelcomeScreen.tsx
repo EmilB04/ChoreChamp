@@ -3,8 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import OnboardingDots from '../../components/OnboardingDots';
-import { useTheme } from '@/contexts/ThemeContext'; 
-import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type LangKey = 'no' | 'en' | 'es' | 'de';
 
@@ -47,22 +46,13 @@ export default function WelcomeScreen() {
   const strings = STRINGS[lang];
 
   function goNext() {
-    router.replace('/(onboarding)/NotificationsScreen');
+    router.push('/(onboarding)/LoginCheckScreen');
   }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <View style={styles.headerRow}>
-        <OnboardingDots activeIndex={1} />
-
-        <TouchableOpacity
-          onPress={() => router.replace('/(onboarding)/LanguageSelection')}
-          accessibilityRole='button'
-          hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back" size={22} color={colors.tint} />
-        </TouchableOpacity>
+        <OnboardingDots activeIndex={0} total={5} />
       </View>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>

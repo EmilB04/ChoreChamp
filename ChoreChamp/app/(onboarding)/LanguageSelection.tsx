@@ -10,12 +10,25 @@ export default function LanguageSelection() {
     const { colors } = useTheme();
 
     function select(langCode: string){
-        router.push(`/(onboarding)/WelcomeScreen?lang=${encodeURIComponent(langCode)}`);
+        router.push(`/(onboarding)/NotificationsScreen?lang=${encodeURIComponent(langCode)}`);
     }
 
     return(
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-            <OnboardingDots activeIndex={0} />
+            <View style={styles.headerRow}>
+                <OnboardingDots activeIndex={2} total={5} />
+                
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    accessibilityRole="button"
+                    hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
+                    style={styles.backButton}
+                >
+                    <View style={{ width: 22, height: 22, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 22, color: colors.tint }}>‹</Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
             <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }} showsVerticalScrollIndicator={false}>
                 <View style={styles.container}>
                     <View style={styles.header}>
@@ -74,6 +87,21 @@ export default function LanguageSelection() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  headerRow: {
+    width: '100%',
+    paddingHorizontal: 24,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 5,
+    height: '100%',
+    justifyContent: 'center',
+    padding: 8,
+  },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   header: { marginBottom: 24, alignItems: 'center' },
   title: { fontSize: 28, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
