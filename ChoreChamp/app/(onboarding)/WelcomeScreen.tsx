@@ -73,8 +73,8 @@ export default function WelcomeScreen() {
           <OnboardingDots activeIndex={0} total={5} />
         </View>
 
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           <Animated.View style={[styles.container, {
@@ -98,7 +98,7 @@ export default function WelcomeScreen() {
               <Text style={[styles.title, { color: colors.text }]}>
                 {strings.title}
               </Text>
-              
+
               <View style={[styles.highlightBox, { backgroundColor: colors.contextBackground }]}>
                 <Ionicons name="trophy" size={20} color={colors.tint} style={styles.highlightIcon} />
                 <Text style={[styles.subtitle, { color: colors.text }]}>
@@ -153,7 +153,7 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { 
+  safe: {
     flex: 1,
   },
   headerBackground: {
@@ -184,9 +184,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
-  container: { 
-    flex: 1, 
-    justifyContent: 'center', 
+  container: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     gap: 24,
   },
@@ -214,9 +214,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
   },
-  title: { 
-    fontSize: 32, 
-    fontWeight: '700', 
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
     textAlign: 'center',
     letterSpacing: -0.5,
   },
@@ -236,14 +236,14 @@ const styles = StyleSheet.create({
   highlightIcon: {
     marginRight: 4,
   },
-  subtitle: { 
-    fontSize: 15, 
+  subtitle: {
+    fontSize: 15,
     textAlign: 'center',
     fontWeight: '500',
     lineHeight: 22,
   },
-  illustration: { 
-    width: 180, 
+  illustration: {
+    width: 180,
     height: 180,
     marginVertical: 8,
   },
@@ -258,18 +258,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  copy: { 
-    fontSize: 16, 
+  copy: {
+    fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
     fontWeight: '500',
   },
-  nextBtn: { 
+  nextBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16, 
-    paddingHorizontal: 32, 
+    paddingVertical: 16,
+    paddingHorizontal: 32,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -278,8 +278,8 @@ const styles = StyleSheet.create({
     elevation: 4,
     gap: 8,
   },
-  nextText: { 
-    fontSize: 18, 
+  nextText: {
+    fontSize: 18,
     fontWeight: '700',
   },
   arrowIcon: {

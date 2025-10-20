@@ -41,7 +41,7 @@ export default function LanguageSelection() {
         }
     }
 
-    return(
+    return (
         <View style={[styles.safe, { backgroundColor: colors.background }]}>
             {/* Gradient Header Background */}
             <View style={styles.headerBackground}>
@@ -71,7 +71,7 @@ export default function LanguageSelection() {
                     </Animated.View>
 
                     {/* Title with Icon */}
-                    <Animated.View style={[styles.titleContainer, { 
+                    <Animated.View style={[styles.titleContainer, {
                         transform: [{ scale: titleSlideAnim }],
                     }]}>
                         <View style={[styles.titleBadge, { backgroundColor: colors.contextBackground }]}>
@@ -84,17 +84,17 @@ export default function LanguageSelection() {
                     {/* Language Options */}
                     <View style={styles.buttons}>
                         <Animated.View style={{ transform: [{ scale: button1ScaleAnim }] }}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[
-                                    styles.langBtn, 
-                                    { 
+                                    styles.langBtn,
+                                    {
                                         backgroundColor: colors.contextBackground,
                                         borderColor: selected === 'en' ? colors.tint : 'transparent',
                                         borderWidth: 2,
                                     }
-                                ]} 
-                                onPress={() => setSelected('en')} 
-                                accessibilityRole="button" 
+                                ]}
+                                onPress={() => setSelected('en')}
+                                accessibilityRole="button"
                                 accessibilityLabel="English"
                                 activeOpacity={0.7}
                             >
@@ -105,17 +105,17 @@ export default function LanguageSelection() {
                         </Animated.View>
 
                         <Animated.View style={{ transform: [{ scale: button2ScaleAnim }] }}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[
-                                    styles.langBtn, 
-                                    { 
+                                    styles.langBtn,
+                                    {
                                         backgroundColor: colors.contextBackground,
                                         borderColor: selected === 'no' ? colors.tint : 'transparent',
                                         borderWidth: 2,
                                     }
-                                ]} 
-                                onPress={() => setSelected('no')} 
-                                accessibilityRole="button" 
+                                ]}
+                                onPress={() => setSelected('no')}
+                                accessibilityRole="button"
                                 accessibilityLabel="Norsk"
                                 activeOpacity={0.7}
                             >
@@ -126,17 +126,17 @@ export default function LanguageSelection() {
                         </Animated.View>
 
                         <Animated.View style={{ transform: [{ scale: button3ScaleAnim }] }}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[
-                                    styles.langBtn, 
-                                    { 
+                                    styles.langBtn,
+                                    {
                                         backgroundColor: colors.contextBackground,
                                         borderColor: selected === 'es' ? colors.tint : 'transparent',
                                         borderWidth: 2,
                                     }
-                                ]} 
-                                onPress={() => setSelected('es')} 
-                                accessibilityRole="button" 
+                                ]}
+                                onPress={() => setSelected('es')}
+                                accessibilityRole="button"
                                 accessibilityLabel="Español"
                                 activeOpacity={0.7}
                             >
@@ -147,17 +147,17 @@ export default function LanguageSelection() {
                         </Animated.View>
 
                         <Animated.View style={{ transform: [{ scale: button4ScaleAnim }] }}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={[
-                                    styles.langBtn, 
-                                    { 
+                                    styles.langBtn,
+                                    {
                                         backgroundColor: colors.contextBackground,
                                         borderColor: selected === 'de' ? colors.tint : 'transparent',
                                         borderWidth: 2,
                                     }
-                                ]} 
-                                onPress={() => setSelected('de')} 
-                                accessibilityRole="button" 
+                                ]}
+                                onPress={() => setSelected('de')}
+                                accessibilityRole="button"
                                 accessibilityLabel="Deutsch"
                                 activeOpacity={0.7}
                             >
@@ -202,114 +202,114 @@ export default function LanguageSelection() {
 }
 
 const styles = StyleSheet.create({
-  safe: { 
-    flex: 1,
-  },
-  headerBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 300,
-    overflow: 'hidden',
-  },
-  gradient: {
-    flex: 1,
-  },
-  safeContent: {
-    flex: 1,
-  },
-  headerRow: {
-    width: '100%',
-    paddingHorizontal: 24,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  container: { 
-    flex: 1, 
-    justifyContent: 'space-evenly', 
-    alignItems: 'center', 
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-  },
-  logoBadge: {
-    width: 140,
-    height: 140,
-    borderRadius: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  iconInner: {
-    width: 120,
-    height: 120,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  titleContainer: {
-    alignItems: 'center',
-  },
-  titleBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  title: { 
-    fontSize: 18, 
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  buttons: { 
-    width: '100%', 
-    gap: 12,
-  },
-  langBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    gap: 16,
-  },
-  flagImage: { 
-    width: 32, 
-    height: 32, 
-    borderRadius: 16,
-  },
-  langText: { 
-    fontSize: 16, 
-    fontWeight: '600',
-    flex: 1,
-  },
-  nextBtn: {
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 30,
-    minWidth: 200,
-    alignItems: 'center',
-  },
-  nextText: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
+    safe: {
+        flex: 1,
+    },
+    headerBackground: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 300,
+        overflow: 'hidden',
+    },
+    gradient: {
+        flex: 1,
+    },
+    safeContent: {
+        flex: 1,
+    },
+    headerRow: {
+        width: '100%',
+        paddingHorizontal: 24,
+        height: 56,
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+    },
+    container: {
+        flex: 1,
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 20,
+    },
+    logoBadge: {
+        width: 140,
+        height: 140,
+        borderRadius: 35,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    iconInner: {
+        width: 120,
+        height: 120,
+        borderRadius: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    titleContainer: {
+        alignItems: 'center',
+    },
+    titleBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 16,
+        gap: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    buttons: {
+        width: '100%',
+        gap: 12,
+    },
+    langBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 14,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+        gap: 16,
+    },
+    flagImage: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+    },
+    langText: {
+        fontSize: 16,
+        fontWeight: '600',
+        flex: 1,
+    },
+    nextBtn: {
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 30,
+        minWidth: 200,
+        alignItems: 'center',
+    },
+    nextText: {
+        fontSize: 18,
+        fontWeight: '700',
+    },
 });
