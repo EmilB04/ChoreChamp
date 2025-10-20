@@ -11,11 +11,11 @@ export default function NotificationsScreen() {
     const { colors } = useTheme();
 
     function handleAllow() {
-        router.push('/(onboarding)/(account)/Login');
+        router.push('/(onboarding)/(account)/Register');
     }
 
     function handleSkip() {
-        router.push('/(onboarding)/(account)/Login');
+        router.push('/(onboarding)/(account)/Register');
     }
 
     return (
