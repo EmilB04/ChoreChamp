@@ -1,10 +1,12 @@
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import { Ionicons } from '@expo/vector-icons';
+import { useEntranceAnimation, useStaggeredAnimation, useButtonPressAnimation } from '@/hooks/useEntranceAnimation';
+import BackButton from '@/components/onBoarding/BackButton';
 
 type SocialButtonProps = {
   label: string;
@@ -15,66 +17,32 @@ type SocialButtonProps = {
 
 const SocialButton = ({ label, icon, onPress, index }: SocialButtonProps) => {
   const { colors } = useTheme();
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    // Stagger the entrance animations
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        delay: index * 100,
-        tension: 80,
-        friction: 8,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        delay: index * 100,
-        duration: 400,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.95,
-      useNativeDriver: true,
-      tension: 100,
-      friction: 3,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      tension: 100,
-      friction: 3,
-    }).start();
-  };
+  const staggeredAnims = useStaggeredAnimation(1, index * 100);
+  const scaleAnim = staggeredAnims[0];
+  const { scaleAnim: pressScaleAnim, handlePressIn, handlePressOut } = useButtonPressAnimation();
 
   return (
     <Animated.View style={{
-      opacity: fadeAnim,
       transform: [{ scale: scaleAnim }],
     }}>
-      <TouchableOpacity
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={1}
-        style={[
-          styles.socialBtn,
-          { backgroundColor: colors.contextBackground }
-        ]}
-      >
-        {icon && <View style={styles.socialIconWrap}>{icon}</View>}
-        <Text style={[styles.socialText, { color: colors.text }]}>{label}</Text>
-        <Ionicons name="arrow-forward" size={20} color={colors.tint} style={styles.arrowIcon} />
-      </TouchableOpacity>
+      <Animated.View style={{
+        transform: [{ scale: pressScaleAnim }],
+      }}>
+        <TouchableOpacity
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
+          style={[
+            styles.socialBtn,
+            { backgroundColor: colors.contextBackground }
+          ]}
+        >
+          {icon && <View style={styles.socialIconWrap}>{icon}</View>}
+          <Text style={[styles.socialText, { color: colors.text }]}>{label}</Text>
+          <Ionicons name="arrow-forward" size={20} color={colors.tint} style={styles.arrowIcon} />
+        </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 };
@@ -82,37 +50,12 @@ const SocialButton = ({ label, icon, onPress, index }: SocialButtonProps) => {
 export default function Login() {
   const router = useRouter();
   const { colors } = useTheme();
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const titleSlideAnim = useRef(new Animated.Value(30)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(titleSlideAnim, {
-        toValue: 0,
-        tension: 80,
-        friction: 8,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { fadeAnim: headerFadeAnim, slideAnim: titleSlideAnim } = useEntranceAnimation();
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          style={styles.backButton}
-          hitSlop={10}
-        >
-          <Ionicons name="chevron-back" size={22} color={colors.tint} />
-        </TouchableOpacity>
+        <BackButton />
         <OnboardingDots activeIndex={4} total={5} />
       </View>
 
@@ -147,15 +90,21 @@ export default function Login() {
           />
           <SocialButton
             label="Logg inn med Facebook"
-            icon={<Image source={require('@/assets/images/Facebook.png')} style={styles.socialIcon} />}
+            icon={<Ionicons name="logo-facebook" size={24} color="#4267B2" />}
             onPress={() => console.log('Facebook login')}
             index={1}
           />
           <SocialButton
             label="Logg inn med Apple"
-            icon={<Image source={require('@/assets/images/Apple.png')} style={styles.socialIcon} />}
+            icon={<Ionicons name="logo-apple" size={24} color="#fff" />}
             onPress={() => console.log('Apple login')}
             index={2}
+          />
+          <SocialButton
+            label="Logg inn med telefonnummer"
+            icon={<Ionicons name="call" size={24} color="#34A853" />}
+            onPress={() => console.log('Phone login')}
+            index={3}
           />
         </View>
 
@@ -192,13 +141,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-  },
-  backButton: { 
-    position: 'absolute', 
-    left: 8, 
-    height: '100%', 
-    justifyContent: 'center', 
-    padding: 8 
   },
   scrollContent: {
     flexGrow: 1,
