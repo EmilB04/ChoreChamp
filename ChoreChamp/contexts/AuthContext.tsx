@@ -12,7 +12,7 @@ import type { User as FirebaseUser } from "firebase/auth";
 import type { AppUser } from "@/types/types";   
 import { createContext, useEffect, useState, useMemo } from "react";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
 import { useContext } from "react";
 
 export type AuthContextType = {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         profilePicture: firebaseUser.photoURL ?? "",
                         householdId: [],
                         role: { admin: true },
-                        createdAt: serverTimestamp() as any,
+                        createdAt: serverTimestamp() as unknown as Timestamp,
                     };
                     await setDoc(ref, docData);
                 }
