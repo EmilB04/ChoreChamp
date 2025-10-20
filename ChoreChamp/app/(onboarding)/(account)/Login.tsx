@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView, Animated }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
-import OnboardingDots from '../../../components/OnboardingDots';
+import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import { Ionicons } from '@expo/vector-icons';
 
 type SocialButtonProps = {

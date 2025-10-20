@@ -1,14 +1,20 @@
 import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Animated } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import OnboardingDots from "../../components/OnboardingDots";
+import OnboardingDots from "../../components/onBoarding/OnboardingDots";
 import { useTheme } from '@/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
+import BackButton from '@/components/onBoarding/BackButton';
 
 export default function NotificationsScreen() {
     const router = useRouter();
     const { colors } = useTheme();
+
+    const { fadeAnim } = useEntranceAnimation();
+    const iconScaleAnim = useScaleAnimation(100);
+    const titleSlideAnim = useScaleAnimation(200, 1);
+    const [button1SlideAnim, button2SlideAnim] = useStaggeredAnimation(2, 300, 100);
 
     function handleAllow() {
         router.push('/(onboarding)/(account)/Register');
@@ -22,48 +28,59 @@ export default function NotificationsScreen() {
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
             <View style={styles.headerRow}>
                 <OnboardingDots activeIndex={3} total={5} />
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    accessibilityRole='button'
-                    hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
-                    style={styles.backButton}
-                >
-                    <Ionicons name="chevron-back" size={22} color={colors.tint} />
-                </TouchableOpacity>
+                <BackButton />
             </View>
 
             <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
-                <View style={styles.container}>
-                    <Image
+                <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+                    <Animated.Image
                         source={require('../../assets/images/bell.png')}
-                        style={styles.icon}
+                        style={[styles.icon, {
+                            transform: [{ scale: iconScaleAnim }],
+                        }]}
                         resizeMode='contain'
                         accessibilityLabel="Notifications bell icon"
                     />
 
-                    <Text style={[styles.title, { color: colors.text }]}>Skru på varsler?</Text>
-                    <Text style={[styles.subtitle, { color: colors.lightNonInteractiveText }]}>Få påminnelser når det er din tur til å gjøre en oppgave.</Text>
+                    <Animated.View style={{
+                        transform: [{ scale: titleSlideAnim }],
+                    }}>
+                        <Text style={[styles.title, { color: colors.text }]}>Skru på varsler?</Text>
+                        <Text style={[styles.subtitle, { color: colors.lightNonInteractiveText }]}>Få påminnelser når det er din tur til å gjøre en oppgave.</Text>
+                    </Animated.View>
 
-                    <TouchableOpacity
-                        style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
-                        onPress={handleAllow}
-                        accessibilityLabel="Skru på varsler"
-                        accessibilityRole="button"
-                    >
-                        <Text style={[styles.primaryText, { color: colors.darkText }]}>Ja</Text>
-                    </TouchableOpacity>
+                    <Animated.View style={{
+                        opacity: fadeAnim,
+                        transform: [{ scale: button1SlideAnim }],
+                    }}>
+                        <TouchableOpacity
+                            style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
+                            onPress={handleAllow}
+                            accessibilityLabel="Skru på varsler"
+                            accessibilityRole="button"
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[styles.primaryText, { color: colors.darkText }]}>Ja</Text>
+                        </TouchableOpacity>
+                    </Animated.View>
 
-                    <TouchableOpacity
-                        style={[styles.secondaryBtn, { backgroundColor: colors.contextBackground }]}
-                        onPress={handleSkip}
-                        accessibilityLabel="Ikke nå"
-                        accessibilityRole="button"
-                    >
-                        <Text style={[styles.secondaryText, { color: colors.text }]}>Ikke nå</Text>
-                    </TouchableOpacity>
+                    <Animated.View style={{
+                        opacity: fadeAnim,
+                        transform: [{ scale: button2SlideAnim }],
+                    }}>
+                        <TouchableOpacity
+                            style={[styles.secondaryBtn, { backgroundColor: colors.contextBackground }]}
+                            onPress={handleSkip}
+                            accessibilityLabel="Ikke nå"
+                            accessibilityRole="button"
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[styles.secondaryText, { color: colors.text }]}>Ikke nå</Text>
+                        </TouchableOpacity>
+                    </Animated.View>
 
                     <Text style={[styles.footer, { color: colors.lightNonInteractiveText }]}>Du kan endre dette i innstillinger senere.</Text>
-                </View>
+                </Animated.View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -79,7 +96,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         position: 'relative',
     },
-    backButton: { position: 'absolute', left: 5, height: '100%', justifyContent: 'center', padding: 8 },
     container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
     icon: { width: 100, height: 100, marginBottom: 32 },
     title: { fontSize: 24, fontWeight: '700', marginBottom: 8, textAlign: 'center' },

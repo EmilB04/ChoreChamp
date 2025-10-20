@@ -1,9 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import OnboardingDots from '../../components/OnboardingDots';
+import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useEntranceAnimation, useScaleAnimation } from '@/hooks/useEntranceAnimation';
 
 type LangKey = 'no' | 'en' | 'es' | 'de';
 
@@ -39,6 +40,10 @@ export default function WelcomeScreen() {
   const params = useLocalSearchParams();
   const { colors } = useTheme();
 
+  const { fadeAnim, slideAnim } = useEntranceAnimation();
+  const imageScaleAnim = useScaleAnimation(200);
+  const buttonSlideAnim = useScaleAnimation(400, 1);
+
   const rawLang =
     typeof params.lang === 'string' ? params.lang : Array.isArray(params.lang) ? params.lang[0] : undefined;
 
@@ -56,29 +61,40 @@ export default function WelcomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 }} showsVerticalScrollIndicator={false}>
-        <View style={[styles.container]}>
+        <Animated.View style={[styles.container, {
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+        }]}>
           <Text style={[styles.title, { color: colors.text }]}>{strings.title}</Text>
 
           <Text style={[styles.subtitle, { color: colors.tint }]}>{strings.subtitle}</Text> 
 
-          <Image
+          <Animated.Image
             source={require('../../assets/images/WelcomeAvatar.png')}
-            style={styles.illustration}
+            style={[styles.illustration, {
+              transform: [{ scale: imageScaleAnim }],
+            }]}
             resizeMode="contain"
             accessibilityLabel="Welcome illustration"
           />
 
           <Text style={[styles.copy, { color: colors.text }]}>{strings.copy}</Text>
 
-          <TouchableOpacity
-            style={[styles.nextBtn, { backgroundColor: colors.tint }]}
-            onPress={goNext}
-            accessibilityLabel={strings.next}
-            accessibilityRole="button"
-          >
-            <Text style={[styles.nextText, { color: colors.darkText }]}>{strings.next}</Text>
-          </TouchableOpacity>
-        </View>
+          <Animated.View style={{
+            opacity: fadeAnim,
+            transform: [{ translateY: buttonSlideAnim }],
+          }}>
+            <TouchableOpacity
+              style={[styles.nextBtn, { backgroundColor: colors.tint }]}
+              onPress={goNext}
+              accessibilityLabel={strings.next}
+              accessibilityRole="button"
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.nextText, { color: colors.darkText }]}>{strings.next}</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );

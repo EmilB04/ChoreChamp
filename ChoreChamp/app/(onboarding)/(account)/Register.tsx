@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import OnboardingDots from '../../../components/OnboardingDots';
+import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function Register() {

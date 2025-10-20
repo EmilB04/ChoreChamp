@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import OnboardingDots from '../../components/OnboardingDots';
+import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
+import BackButton from '@/components/onBoarding/BackButton';
 
 /**
  * LoginCheckScreen
@@ -15,6 +17,10 @@ export default function LoginCheckScreen() {
     const router = useRouter();
     const { colors } = useTheme();
     const [selected, setSelected] = useState<'existing' | 'new' | null>(null);
+
+    const { fadeAnim, slideAnim } = useEntranceAnimation();
+    const [card1ScaleAnim, card2ScaleAnim] = useStaggeredAnimation(2, 200, 100);
+    const buttonSlideAnim = useStaggeredAnimation(1, 400)[0];
 
     function handleContinue() {
         if (selected === 'existing') {
@@ -30,15 +36,7 @@ export default function LoginCheckScreen() {
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
             <View style={styles.headerRow}>
                 <OnboardingDots activeIndex={1} total={5} />
-
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    accessibilityRole="button"
-                    hitSlop={{ top: 10, left: 10, right: 10, bottom: 10 }}
-                    style={styles.backButton}
-                >
-                    <Ionicons name="chevron-back" size={22} color={colors.tint} />
-                </TouchableOpacity>
+                <BackButton />
             </View>
 
             <ScrollView
@@ -50,7 +48,10 @@ export default function LoginCheckScreen() {
                 }}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={styles.container}>
+                <Animated.View style={[styles.container, {
+                    opacity: fadeAnim,
+                    transform: [{ translateY: slideAnim }],
+                }]}>
                     <Text style={[styles.title, { color: colors.text }]}>
                         Har du allerede en konto?
                     </Text>
@@ -60,81 +61,97 @@ export default function LoginCheckScreen() {
                     </Text>
 
                     <View style={styles.optionsContainer}>
-                        <TouchableOpacity
-                            style={[
-                                styles.optionCard,
-                                {
-                                    backgroundColor: colors.contextBackground,
-                                    borderColor: selected === 'existing' ? colors.tint : 'transparent',
-                                    borderWidth: 2,
-                                },
-                            ]}
-                            onPress={() => setSelected('existing')}
-                            accessibilityLabel="Jeg har allerede en konto"
-                            accessibilityRole="button"
-                        >
-                            <Ionicons
-                                name="person-circle-outline"
-                                size={48}
-                                color={selected === 'existing' ? colors.tint : colors.text}
-                            />
-                            <Text style={[styles.optionTitle, { color: colors.text }]}>
-                                Jeg har allerede en konto
-                            </Text>
-                            <Text style={[styles.optionSubtitle, { color: colors.lightDarkText }]}>
-                                Logg inn for å fortsette
-                            </Text>
-                        </TouchableOpacity>
+                        <Animated.View style={{
+                            transform: [{ scale: card1ScaleAnim }],
+                        }}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.optionCard,
+                                    {
+                                        backgroundColor: colors.contextBackground,
+                                        borderColor: selected === 'existing' ? colors.tint : 'transparent',
+                                        borderWidth: 2,
+                                    },
+                                ]}
+                                onPress={() => setSelected('existing')}
+                                accessibilityLabel="Jeg har allerede en konto"
+                                accessibilityRole="button"
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons
+                                    name="person-circle-outline"
+                                    size={48}
+                                    color={selected === 'existing' ? colors.tint : colors.text}
+                                />
+                                <Text style={[styles.optionTitle, { color: colors.text }]}>
+                                    Jeg har allerede en konto
+                                </Text>
+                                <Text style={[styles.optionSubtitle, { color: colors.lightDarkText }]}>
+                                    Logg inn for å fortsette
+                                </Text>
+                            </TouchableOpacity>
+                        </Animated.View>
 
-                        <TouchableOpacity
-                            style={[
-                                styles.optionCard,
-                                {
-                                    backgroundColor: colors.contextBackground,
-                                    borderColor: selected === 'new' ? colors.tint : 'transparent',
-                                    borderWidth: 2,
-                                },
-                            ]}
-                            onPress={() => setSelected('new')}
-                            accessibilityLabel="Jeg er ny bruker"
-                            accessibilityRole="button"
-                        >
-                            <Ionicons
-                                name="add-circle-outline"
-                                size={48}
-                                color={selected === 'new' ? colors.tint : colors.text}
-                            />
-                            <Text style={[styles.optionTitle, { color: colors.text }]}>
-                                Jeg er ny bruker
-                            </Text>
-                            <Text style={[styles.optionSubtitle, { color: colors.lightDarkText }]}>
-                                Opprett en ny konto
-                            </Text>
-                        </TouchableOpacity>
+                        <Animated.View style={{
+                            transform: [{ scale: card2ScaleAnim }],
+                        }}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.optionCard,
+                                    {
+                                        backgroundColor: colors.contextBackground,
+                                        borderColor: selected === 'new' ? colors.tint : 'transparent',
+                                        borderWidth: 2,
+                                    },
+                                ]}
+                                onPress={() => setSelected('new')}
+                                accessibilityLabel="Jeg er ny bruker"
+                                accessibilityRole="button"
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons
+                                    name="add-circle-outline"
+                                    size={48}
+                                    color={selected === 'new' ? colors.tint : colors.text}
+                                />
+                                <Text style={[styles.optionTitle, { color: colors.text }]}>
+                                    Jeg er ny bruker
+                                </Text>
+                                <Text style={[styles.optionSubtitle, { color: colors.lightDarkText }]}>
+                                    Opprett en ny konto
+                                </Text>
+                            </TouchableOpacity>
+                        </Animated.View>
                     </View>
 
-                    <TouchableOpacity
-                        style={[
-                            styles.nextBtn,
-                            {
-                                backgroundColor: selected ? colors.tint : colors.lightNonInteractiveText,
-                            },
-                        ]}
-                        onPress={handleContinue}
-                        disabled={!selected}
-                        accessibilityLabel="Fortsett"
-                        accessibilityRole="button"
-                    >
-                        <Text
+                    <Animated.View style={{
+                        opacity: fadeAnim,
+                        transform: [{ translateY: buttonSlideAnim }],
+                    }}>
+                        <TouchableOpacity
                             style={[
-                                styles.nextText,
-                                { color: selected ? colors.darkText : colors.text },
+                                styles.nextBtn,
+                                {
+                                    backgroundColor: selected ? colors.tint : colors.lightNonInteractiveText,
+                                },
                             ]}
+                            onPress={handleContinue}
+                            disabled={!selected}
+                            accessibilityLabel="Fortsett"
+                            accessibilityRole="button"
+                            activeOpacity={0.7}
                         >
-                            Fortsett
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                            <Text
+                                style={[
+                                    styles.nextText,
+                                    { color: selected ? colors.darkText : colors.text },
+                                ]}
+                            >
+                                Fortsett
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                </Animated.View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -149,13 +166,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-    },
-    backButton: {
-        position: 'absolute',
-        left: 5,
-        height: '100%',
-        justifyContent: 'center',
-        padding: 8,
     },
     container: {
         flex: 1,
