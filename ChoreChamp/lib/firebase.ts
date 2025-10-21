@@ -1,6 +1,8 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import * as FirebaseAuth from "firebase/auth"; 
+import type { Auth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // https://firebase.google.com/docs/web/setup
 // https://docs.expo.dev/guides/using-firebase/ 
@@ -16,5 +18,14 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);    
-export const db = getFirestore(app)
+let auth: Auth;
+try {
+  auth = (FirebaseAuth as any).initializeAuth(app, {
+    persistence: (FirebaseAuth as any).getReactNativePersistence(AsyncStorage),
+  });
+} catch {
+  auth = FirebaseAuth.getAuth(app);
+}
+
+export { auth };
+export const db = getFirestore(app);

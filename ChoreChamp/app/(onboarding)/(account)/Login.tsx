@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +8,7 @@ import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import { Ionicons } from '@expo/vector-icons';
 import { useEntranceAnimation, useStaggeredAnimation, useButtonPressAnimation } from '@/hooks/useEntranceAnimation';
 import BackButton from '@/components/onBoarding/BackButton';
-import { useAuth } from '@/contexts/AuthContext';
+
 
 type SocialButtonProps = {
   label: string;
@@ -15,8 +16,7 @@ type SocialButtonProps = {
   onPress?: () => void;
   index: number;
 };
-
-const { signInWithGoogle } = useAuth();  
+ 
 
 const SocialButton = ({ label, icon, onPress, index }: SocialButtonProps) => {
   const { colors } = useTheme();
@@ -54,6 +54,7 @@ export default function Login() {
   const router = useRouter();
   const { colors } = useTheme();
   const { fadeAnim: headerFadeAnim, slideAnim: titleSlideAnim } = useEntranceAnimation();
+  const { signInWithGoogle } = useAuth(); 
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
