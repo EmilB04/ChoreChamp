@@ -59,6 +59,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     useEffect(() => {
+        (async () => {
+            if (googleResponse?.type === 'success') {
+                const idToken = googleResponse.authentication?.idToken ?? googleResponse.params?.id_token;
+                if (idToken) {
+                    const credential = GoogleAuthProvider.credential(idToken);
+                    await signInWithCredential(auth, credential);
+                }
+            }
+        })();
+    }, [googleResponse]);
+
+
+    useEffect(() => {
         const unsubscribeAuthListener = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
             setLoading(false);
@@ -99,6 +112,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       async logOut() {
         await signOut(auth);
       },
+      async signInWithGoogle() {
+        await googlePromptAsync({ showInRecents: true });
+      }
     }),
     [user, loading]
   );
