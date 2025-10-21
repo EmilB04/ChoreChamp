@@ -2,7 +2,6 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-
 // https://firebase.google.com/docs/web/setup
 // https://docs.expo.dev/guides/using-firebase/ 
 

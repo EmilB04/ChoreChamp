@@ -7,6 +7,7 @@ import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import { Ionicons } from '@expo/vector-icons';
 import { useEntranceAnimation, useStaggeredAnimation, useButtonPressAnimation } from '@/hooks/useEntranceAnimation';
 import BackButton from '@/components/onBoarding/BackButton';
+import { useAuth } from '@/contexts/AuthContext';
 
 type SocialButtonProps = {
   label: string;
@@ -14,6 +15,8 @@ type SocialButtonProps = {
   onPress?: () => void;
   index: number;
 };
+
+const { signInWithGoogle } = useAuth();  
 
 const SocialButton = ({ label, icon, onPress, index }: SocialButtonProps) => {
   const { colors } = useTheme();
@@ -85,7 +88,7 @@ export default function Login() {
           <SocialButton
             label="Logg inn med Google"
             icon={<Image source={require('@/assets/images/Google.png')} style={styles.socialIcon} />}
-            onPress={() => console.log('Google login')}
+            onPress={signInWithGoogle}
             index={0}
           />
           <SocialButton
