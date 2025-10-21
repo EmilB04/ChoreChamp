@@ -1,9 +1,10 @@
-// lib/firebase.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+
 // https://firebase.google.com/docs/web/setup
+// https://docs.expo.dev/guides/using-firebase/ 
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_bhFiyDRwsswKsxgsBKQVP20O68oKOSs",
@@ -16,5 +17,5 @@ const firebaseConfig = {
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = getAuth(app);    
+export const db = getFirestore(app)
