@@ -9,6 +9,7 @@
 // https://docs.expo.dev/versions/latest/sdk/auth-session/ 
 // https://docs.expo.dev/guides/authentication/
 // https://firebase.google.com/docs/auth/web/google-signin/
+// https://docs.expo.dev/versions/latest/sdk/constants/
 
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import type { User as FirebaseUser } from "firebase/auth";
@@ -17,6 +18,19 @@ import { createContext, useEffect, useState, useMemo } from "react";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
 import { useContext } from "react";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
+import Constants from "expo-constants";
+
+WebBrowser.maybeCompleteAuthSession();
+
+// Load client IDs from app config for google login
+const EXTRA = (Constants.expoConfig?.extra ?? {}) as {
+    ANDROID_CLIENT_ID: string;
+    IOS_CLIENT_ID: string;
+    WEB_CLIENT_ID: string;
+}
 
 export type AuthContextType = {
     user: FirebaseUser | null; 
@@ -24,6 +38,7 @@ export type AuthContextType = {
     signUp: (email: string, password: string, displayName?: string) => Promise<void>;
     logOut: () => Promise<void>;
     loading: boolean;
+    signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -35,6 +50,13 @@ type AuthProviderProps = {
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
+        androidClientId: EXTRA.ANDROID_CLIENT_ID,
+        iosClientId: EXTRA.IOS_CLIENT_ID,
+        webClientId: EXTRA.WEB_CLIENT_ID,
+        scopes: ['profile', 'email'],
+    });
 
     useEffect(() => {
         const unsubscribeAuthListener = onAuthStateChanged(auth, async (firebaseUser) => {
