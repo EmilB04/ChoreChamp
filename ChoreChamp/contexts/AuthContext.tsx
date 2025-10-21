@@ -6,6 +6,9 @@
 // https://modularfirebase.web.app/reference/auth/
 // https://firebase.google.com/docs/firestore/manage-data/add-data/
 // https://modularfirebase.web.app/common-use-cases/firestore/
+// https://docs.expo.dev/versions/latest/sdk/auth-session/ 
+// https://docs.expo.dev/guides/authentication/
+// https://firebase.google.com/docs/auth/web/google-signin/
 
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import type { User as FirebaseUser } from "firebase/auth";

@@ -1,3 +1,5 @@
+// https://docs.expo.dev/versions/latest/config/app/
+
 {
   "expo": {
     "name": "ChoreChamp",
@@ -21,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.chorechamp.app" 
+      "package": "com.chorechamp.app"
     },
     "web": {
       "output": "static",
@@ -45,6 +47,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8c0242d7-83a7-4d69-a8c7-0802f032601d"
+      }
     }
   }
 }
