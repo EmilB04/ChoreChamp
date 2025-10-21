@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
-import BackButton from '@/components/onBoarding/BackButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import OnboardingDots from '../../components/onBoarding/OnboardingDots';
+import BackButton from '@/components/onBoarding/BackButton';
 
 // TODO: Remove when language is incorporated throughout app
 const CHOOSE_LANGUAGE_TEXTS: Record<string, string> = {

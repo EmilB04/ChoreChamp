@@ -7,8 +7,6 @@ export default function Notifications() {
     const { colors } = useTheme();
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
 
-
-
     // Simulated notification data - Replace with real data from DB or API
     const [notifications] = useState([
         {

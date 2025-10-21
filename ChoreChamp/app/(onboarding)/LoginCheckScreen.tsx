@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
+import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 import BackButton from '@/components/onBoarding/BackButton';
 
 /**

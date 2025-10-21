@@ -14,9 +14,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import commonStyles from "../commonStyles";
 import EditProfileModal from '@/components/profile/EditProfileModal';
-import MinKontoScreen from '@/components/profile/MinKontoScreen';
-import MineHusstanderScreen from '@/components/profile/MineHusstanderScreen';
-import AppInnstillingerScreen from '@/components/profile/AppInnstillingerScreen';
+import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
+import MyAccountScreen from '../../components/profile/MyAccountScreen';
+import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
 import { router } from 'expo-router';
 
 //TODO: Implement log out functionality
@@ -26,9 +26,9 @@ export default function Profile() {
     const { userData, updateUserData } = useUser();
     const insets = useSafeAreaInsets();
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-    const [showMinKonto, setShowMinKonto] = useState(false);
-    const [showMineHusstander, setShowMineHusstander] = useState(false);
-    const [showAppInnstillinger, setShowAppInnstillinger] = useState(false);
+    const [showMyAccount, setShowMyAccount] = useState(false);
+    const [showMyHouseholds, setShowMyHouseholds] = useState(false);
+    const [showAppSettings, setShowAppSettings] = useState(false);
     const [showHelpSupport, setShowHelpSupport] = useState(false);
     const [showAboutApp, setShowAboutApp] = useState(false);
 
@@ -50,19 +50,19 @@ export default function Profile() {
         console.log('Profile updated:', { name: newName, image: newImageUri });
     };
 
-    // If showing Min Konto screen, render it instead
-    if (showMinKonto) {
-        return <MinKontoScreen onBack={() => setShowMinKonto(false)} />;
+    // If showing My Account screen, render it instead
+    if (showMyAccount) {
+        return <MyAccountScreen onBack={() => setShowMyAccount(false)} />;
     }
 
-    // If showing Mine Husstander screen, render it instead
-    if (showMineHusstander) {
-        return <MineHusstanderScreen onBack={() => setShowMineHusstander(false)} />;
+    // If showing My Households screen, render it instead
+    if (showMyHouseholds) {
+        return <MyHouseholdsScreen onBack={() => setShowMyHouseholds(false)} />;
     }
 
-    // If showing App Innstillinger screen, render it instead
-    if (showAppInnstillinger) {
-        return <AppInnstillingerScreen onBack={() => setShowAppInnstillinger(false)} />;
+    // If showing App Settings screen, render it instead
+    if (showAppSettings) {
+        return <AppSettingsScreen onBack={() => setShowAppSettings(false)} />;
     }
 
     return (
@@ -93,22 +93,22 @@ export default function Profile() {
                 <MenuItem
                     icon="person-circle"
                     title="Min konto"
-                    description="Administrer kontoinformasjon og personlige innstillinger"
-                    onPress={() => setShowMinKonto(true)}
+                    description="Administrer konto informasjon og personlige innstillinger"
+                    onPress={() => setShowMyAccount(true)}
                 />
 
                 <MenuItem
                     icon="people"
                     title="Mine husstander"
                     description="Se og administrer dine tilknyttede husstander"
-                    onPress={() => setShowMineHusstander(true)}
+                    onPress={() => setShowMyHouseholds(true)}
                 />
 
                 <MenuItem
                     icon="cog"
                     title="App innstillinger"
                     description="Tilpass appens funksjonalitet og utseende"
-                    onPress={() => setShowAppInnstillinger(true)}
+                    onPress={() => setShowAppSettings(true)}
                 />
 
                 <MenuItem

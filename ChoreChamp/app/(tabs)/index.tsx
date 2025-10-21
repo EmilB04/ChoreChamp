@@ -40,7 +40,7 @@ export default function Dashboard() {
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
 
-  // Sample tasks data - replace with database fetch
+  // TODO: Replace with database fetch
   const todayTasks: Task[] = [
     {
       id: 1,
@@ -83,7 +83,7 @@ export default function Dashboard() {
     },
   ];
 
-  // Sample Leaderboard data - replace with database fetch
+  // TODO: Replace with database fetch
   const rawLeaderboardData = [
     { id: 1, name: "Ola Nordmann", points: 43, avatar: require("@/assets/images/icon.png") },
     { id: 2, name: "Andreas B. Olaussen", points: 40, avatar: require("@/assets/images/icon.png") },
