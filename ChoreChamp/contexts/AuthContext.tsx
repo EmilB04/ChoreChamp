@@ -11,17 +11,32 @@
 // https://firebase.google.com/docs/auth/web/google-signin/
 // https://docs.expo.dev/versions/latest/sdk/constants/
 
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
+// React imports
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
+
+// Firebase Auth imports
+import {
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    updateProfile,
+    GoogleAuthProvider,
+    signInWithCredential,
+} from "firebase/auth";
 import type { User as FirebaseUser } from "firebase/auth";
-import type { AppUser } from "@/types/types";   
-import { createContext, useEffect, useState, useMemo } from "react";
-import { auth, db } from "@/lib/firebase";
+
+// Firebase Firestore imports
 import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
-import { useContext } from "react";
+
+// Expo imports
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";
 import Constants from "expo-constants";
+
+// Local imports
+import { auth, db } from "@/lib/firebase";
+import type { AppUser } from "@/types/types";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -33,7 +48,7 @@ const EXTRA = (Constants.expoConfig?.extra ?? {}) as {
 }
 
 export type AuthContextType = {
-    user: FirebaseUser | null; 
+    user: FirebaseUser | null;
     signIn: (email: string, password: string) => Promise<void>;
     signUp: (email: string, password: string, displayName?: string) => Promise<void>;
     logOut: () => Promise<void>;
@@ -83,7 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
                 if (!snapshot.exists()) {
                     const docData: AppUser = {
-                        name: firebaseUser.displayName ?? "", 
+                        name: firebaseUser.displayName ?? "",
                         language: "nb",
                         profilePicture: firebaseUser.photoURL ?? "",
                         householdId: [],
@@ -109,27 +124,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (displayName) {
                 await updateProfile(credential.user, { displayName });
             }
-      },
-      async logOut() {
-        await signOut(auth);
-      },
-      async signInWithGoogle() {
-        await googlePromptAsync({ showInRecents: true});
-      }
+        },
+        async logOut() {
+            await signOut(auth);
+        },
+        async signInWithGoogle() {
+            await googlePromptAsync({ showInRecents: true });
+        }
     }),
-    [user, loading]
-  );
+        [user, loading]
+    );
 
-  return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
 }
-      
+
