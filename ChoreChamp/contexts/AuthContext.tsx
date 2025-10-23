@@ -55,7 +55,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         androidClientId: EXTRA.ANDROID_CLIENT_ID,
         iosClientId: EXTRA.IOS_CLIENT_ID,
         webClientId: EXTRA.WEB_CLIENT_ID,
-        scopes: ['profile', 'email'],
+        scopes: ['openid', 'profile', 'email'],
+
     });
 
     useEffect(() => {
@@ -113,7 +114,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         await signOut(auth);
       },
       async signInWithGoogle() {
-        await googlePromptAsync({ showInRecents: true });
+        await googlePromptAsync({ showInRecents: true});
       }
     }),
     [user, loading]

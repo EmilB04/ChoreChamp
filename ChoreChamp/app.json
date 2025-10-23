@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.ChoreChamp.app"
+      "package": "com.chorechamp.app"
     },
     "web": {
       "output": "static",
