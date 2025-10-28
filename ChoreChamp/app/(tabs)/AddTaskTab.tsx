@@ -1,5 +1,6 @@
 import Calendar from "@/components/ui/Calendar";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from "react";
 import {
     ScrollView,
@@ -41,7 +42,17 @@ export default function AddTask() {
     const [startTime, setStartTime] = useState(calculateTimes().currentTime);
     const [endTime, setEndTime] = useState(calculateTimes().futureTime);
     const [selectedTimePreset, setSelectedTimePreset] = useState<string | null>(null);
+    const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
+    // TODO: Mock person data - replace with actual data from your user context/database
+    const people = [
+        { id: '1', name: 'Emil B.' },
+        { id: '2', name: 'Ida K.' },
+        { id: '3', name: 'Andreas O.' },
+        { id: '4', name: 'Sebastian W.' },
+        { id: '5', name: 'Lina S.' },
+        { id: '6', name: 'Marius T.' },
+    ];
 
     // Get current date and calculate next two days (normalized to midnight)
     const now = new Date();
@@ -214,7 +225,7 @@ export default function AddTask() {
                             // You can set specific times here if needed
                         }}
                     >
-                        <Text style={[styles.presetIcon, { color: colors.darkText }]}>💡</Text>
+                        <Ionicons name="notifications-outline" size={20} color={colors.darkText} />
                         <Text style={[styles.presetText, { color: colors.darkText }]}>Forvarsel</Text>
                     </TouchableOpacity>
                     
@@ -227,23 +238,51 @@ export default function AddTask() {
                             setSelectedTimePreset('gjenta');
                         }}
                     >
-                        <Text style={[styles.presetIcon, { color: colors.darkText }]}>🔄</Text>
+                        <Ionicons name="repeat-outline" size={20} color={colors.darkText} />
                         <Text style={[styles.presetText, { color: colors.darkText }]}>Gjenta</Text>
                     </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                        style={[
-                            styles.timePresetButton,
-                            { backgroundColor: selectedTimePreset === 'sted' ? colors.tint : colors.interactiveBackground }
-                        ]}
-                        onPress={() => {
-                            setSelectedTimePreset('sted');
-                        }}
-                    >
-                        <Text style={[styles.presetIcon, { color: colors.darkText }]}>📍</Text>
-                        <Text style={[styles.presetText, { color: colors.darkText }]}>Sted</Text>
-                    </TouchableOpacity>
                 </View>
+            </View>
+
+            {/* Person Assignment Section */}
+            <View style={styles.personSection}>
+                <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+                    Tilordne
+                </Text>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}
+                    contentContainerStyle={styles.personContainer}
+                >
+                    {people.map((person) => (
+                        <TouchableOpacity
+                            key={person.id}
+                            style={styles.personItem}
+                            onPress={() => setSelectedPerson(person.id)}
+                        >
+                            <View style={[
+                                styles.personAvatar,
+                                { backgroundColor: selectedPerson === person.id ? colors.tint : colors.nonInteractiveBackground },
+                                selectedPerson === person.id && styles.personAvatarSelected
+                            ]}>
+                                <Text style={[
+                                    styles.personInitial,
+                                    { color: selectedPerson === person.id ? colors.darkText : colors.text }
+                                ]}>
+                                    {person.name.charAt(0)}
+                                </Text>
+                            </View>
+                            <Text style={[
+                                styles.personName,
+                                { color: colors.text },
+                                selectedPerson === person.id && { fontWeight: '600' }
+                            ]}>
+                                {person.name}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
 
         </ScrollView>
@@ -358,11 +397,46 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 8,
     },
-    presetIcon: {
-        fontSize: 16,
-    },
     presetText: {
         fontSize: 14,
         fontWeight: '600',
+    },
+    
+    // Person Assignment Styles
+    personSection: {
+        marginTop: 25,
+    },
+    personScrollView: {
+        borderRadius: 12,
+        marginTop: 15,
+    },
+    personContainer: {
+        padding: 16,
+        flexDirection: 'row',
+        gap: 16,
+    },
+    personItem: {
+        alignItems: 'center',
+        width: 80,
+    },
+    personAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    personAvatarSelected: {
+        borderWidth: 3,
+        borderColor: '#fff',
+    },
+    personInitial: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    personName: {
+        fontSize: 12,
+        textAlign: 'center',
     },
 });

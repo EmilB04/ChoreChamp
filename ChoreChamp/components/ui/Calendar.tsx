@@ -236,7 +236,7 @@ export default function Calendar({
                                 }}
                                 style={[
                                     styles.footerButton,
-                                    { backgroundColor: colors.interactiveBackground },
+                                    { backgroundColor: colors.tint },
                                 ]}
                             >
                                 <Text style={[styles.footerButtonText, { color: colors.darkText }]}>
@@ -248,7 +248,7 @@ export default function Calendar({
                                 onPress={onClose}
                                 style={[
                                     styles.footerButton,
-                                    { backgroundColor: colors.interactiveBackground },
+                                    { backgroundColor: colors.statusFailedText },
                                 ]}
                             >
                                 <Text style={[styles.footerButtonText, { color: colors.darkText }]}>
