@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     },
     more: {
         paddingLeft: 0,
-        paddingTop: 10,
+        paddingBlock: 10,
     },
     actionButton: {
         flexDirection: 'row',
