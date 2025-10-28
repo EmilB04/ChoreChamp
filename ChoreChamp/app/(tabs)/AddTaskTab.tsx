@@ -1,11 +1,12 @@
+import Calendar from "@/components/ui/Calendar";
 import { useTheme } from "@/contexts/ThemeContext";
 import React, { useEffect, useState } from "react";
 import {
+    ScrollView,
     StyleSheet,
     Text,
-    View,
-    ScrollView,
     TouchableOpacity,
+    View,
 } from "react-native";
 import commonStyles from "../commonStyles";
 
@@ -14,7 +15,14 @@ import commonStyles from "../commonStyles";
 
 export default function AddTask() {
     const { colors } = useTheme();
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    
+    // Initialize selectedDate normalized to midnight
+    const [selectedDate, setSelectedDate] = useState<Date>(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    });
+    const [showCalendar, setShowCalendar] = useState(false);
+    
     function calculateTimes() {
         const currentHour = new Date().getHours();
         const currentMinute = new Date().getMinutes();
@@ -35,12 +43,11 @@ export default function AddTask() {
     const [selectedTimePreset, setSelectedTimePreset] = useState<string | null>(null);
 
 
-    // Get current date and calculate next two days
-    const today = new Date();
-    const tomorrow = new Date(today);
-    const dayAfterTomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    dayAfterTomorrow.setDate(today.getDate() + 2);
+    // Get current date and calculate next two days (normalized to midnight)
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const dayAfterTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
 
     const dateOptions = [
         {
@@ -65,11 +72,22 @@ export default function AddTask() {
         return days[date.getDay()];
     }
 
-    function formatDate(date: Date): string {
-        return date.toISOString().split('T')[0];
-    }
+    // Check if selected date is one of the preset dates
+    const isPresetDate = dateOptions.some(option => option.date.getTime() === selectedDate.getTime());
+    
+    // Check if "Annen dato" button should be active
+    const isCustomDateActive = !isPresetDate;
+
+    const openCalendar = () => {
+        setShowCalendar(true);
+    };
+
+    const handleDateSelect = (date: Date) => {
+        setSelectedDate(date);
+    };
 
     return (
+        <>
         <ScrollView
             style={[commonStyles.container, { backgroundColor: colors.background }]}
         >
@@ -90,19 +108,22 @@ export default function AddTask() {
                             key={index}
                             style={[
                                 styles.dateOption,
-                                formatDate(selectedDate) === formatDate(option.date) && styles.dateOptionSelected
+                                { backgroundColor: colors.nonInteractiveBackground },
+                                selectedDate.getTime() === option.date.getTime() && { backgroundColor: colors.tint }
                             ]}
                             onPress={() => setSelectedDate(option.date)}
                         >
                             <Text style={[
                                 styles.dateNumber,
-                                (formatDate(selectedDate) === formatDate(option.date)) && styles.dateNumberSelected
+                                { color: colors.text },
+                                selectedDate.getTime() === option.date.getTime() && { color: colors.darkText }
                             ]}>
                                 {option.label}
                             </Text>
                             <Text style={[
                                 styles.dayName,
-                                (formatDate(selectedDate) === formatDate(option.date)) && styles.dayNameSelected
+                                { color: colors.lightDarkText },
+                                selectedDate.getTime() === option.date.getTime() && { color: colors.darkText }
                             ]}>
                                 {option.dayName}
                             </Text>
@@ -112,15 +133,31 @@ export default function AddTask() {
                     <TouchableOpacity
                         style={[
                             styles.dateOption,
-                            styles.anyDateOption
+                            { backgroundColor: isCustomDateActive ? colors.tint : colors.nonInteractiveBackground }
                         ]}
-                        onPress={() => {
-                            // TODO: Open date picker modal
-                            console.log("Open date picker");
-                        }}
+                        onPress={openCalendar}
                     >
-                        <Text style={styles.anyDateText}>Annen</Text>
-                        <Text style={styles.anyDateSubText}>dato</Text>
+                        {isCustomDateActive ? (
+                            <>
+                                <Text style={[
+                                    styles.dateNumber,
+                                    { color: colors.darkText }
+                                ]}>
+                                    {selectedDate.getDate()}
+                                </Text>
+                                <Text style={[
+                                    styles.dayName,
+                                    { color: colors.darkText }
+                                ]}>
+                                    {getDayName(selectedDate)}
+                                </Text>
+                            </>
+                        ) : (
+                            <>
+                                <Text style={[styles.anyDateText, { color: colors.lightDarkText }]}>Annen</Text>
+                                <Text style={[styles.anyDateSubText, { color: colors.lightDarkText }]}>dato</Text>
+                            </>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
@@ -170,7 +207,7 @@ export default function AddTask() {
                     <TouchableOpacity
                         style={[
                             styles.timePresetButton,
-                            selectedTimePreset === 'forvarsel' && styles.timePresetSelected
+                            { backgroundColor: selectedTimePreset === 'forvarsel' ? colors.tint : colors.interactiveBackground }
                         ]}
                         onPress={() => {
                             setSelectedTimePreset('forvarsel');
@@ -184,7 +221,7 @@ export default function AddTask() {
                     <TouchableOpacity
                         style={[
                             styles.timePresetButton,
-                            selectedTimePreset === 'gjenta' && styles.timePresetSelected
+                            { backgroundColor: selectedTimePreset === 'gjenta' ? colors.tint : colors.interactiveBackground }
                         ]}
                         onPress={() => {
                             setSelectedTimePreset('gjenta');
@@ -197,7 +234,7 @@ export default function AddTask() {
                     <TouchableOpacity
                         style={[
                             styles.timePresetButton,
-                            selectedTimePreset === 'sted' && styles.timePresetSelected
+                            { backgroundColor: selectedTimePreset === 'sted' ? colors.tint : colors.interactiveBackground }
                         ]}
                         onPress={() => {
                             setSelectedTimePreset('sted');
@@ -210,6 +247,16 @@ export default function AddTask() {
             </View>
 
         </ScrollView>
+        
+        {/* Cross-platform Calendar */}
+        <Calendar
+            visible={showCalendar}
+            selectedDate={selectedDate}
+            onDateSelect={handleDateSelect}
+            onClose={() => setShowCalendar(false)}
+            minDate={new Date()}
+        />
+        </>
     );
 }
 
@@ -231,43 +278,26 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         paddingHorizontal: 10,
         borderRadius: 12,
-        backgroundColor: "#E5E5EA",
         alignItems: "center",
         justifyContent: "center",
         minHeight: 80,
     },
-    dateOptionSelected: {
-        backgroundColor: "#F59E0B", // Amber/yellow color like in the image
-    },
     dateNumber: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#000",
         marginBottom: 4,
-    },
-    dateNumberSelected: {
-        color: "#FFF",
     },
     dayName: {
         fontSize: 14,
-        color: "#666",
         fontWeight: "500",
-    },
-    dayNameSelected: {
-        color: "#FFF",
-    },
-    anyDateOption: {
-        backgroundColor: "#E5E5EA",
     },
     anyDateText: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#666",
         marginBottom: 2,
     },
     anyDateSubText: {
         fontSize: 14,
-        color: "#666",
         fontWeight: "500",
     },
     
@@ -320,7 +350,6 @@ const styles = StyleSheet.create({
     },
     timePresetButton: {
         flex: 1,
-        backgroundColor: '#F59E0B',
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 25,
@@ -328,9 +357,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
-    },
-    timePresetSelected: {
-        backgroundColor: '#D97706',
     },
     presetIcon: {
         fontSize: 16,
