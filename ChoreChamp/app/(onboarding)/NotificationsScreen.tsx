@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import BackButton from '@/components/onBoarding/BackButton';
 import { LinearGradient } from 'expo-linear-gradient';
+import LottieView from 'lottie-react-native';
 
 export default function NotificationsScreen() {
     const router = useRouter();
@@ -45,14 +46,14 @@ export default function NotificationsScreen() {
                 </View>
 
                 <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-                    {/* Icon Badge */}
-                    <Animated.View style={[styles.iconBadge, {
-                        backgroundColor: colors.background,
-                        transform: [{ scale: iconScaleAnim }],
-                    }]}>
-                        <View style={[styles.iconInner, { backgroundColor: colors.tint }]}>
-                            <Ionicons name="notifications" size={70} color={colors.darkText} />
-                        </View>
+                    {/* Notification animation */}
+                    <Animated.View>
+                        <LottieView
+                            source={require('../../assets/lottie/notification-bell.json')}
+                            autoPlay
+                            loop
+                            style={{ width: 200, height: 200 }}
+                        />
                     </Animated.View>
 
                     {/* Title Section */}

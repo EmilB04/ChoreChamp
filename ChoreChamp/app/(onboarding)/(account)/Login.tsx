@@ -8,6 +8,7 @@ import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import { Ionicons } from '@expo/vector-icons';
 import { useEntranceAnimation, useStaggeredAnimation, useButtonPressAnimation } from '@/hooks/useEntranceAnimation';
 import BackButton from '@/components/onBoarding/BackButton';
+import LottieView from "lottie-react-native";
 
 
 type SocialButtonProps = {
@@ -74,11 +75,12 @@ export default function Login() {
             transform: [{ translateY: titleSlideAnim }],
           }
         ]}>
-          <View style={[styles.iconWrapper]}>
-            <View style={[styles.loginIcon, { backgroundColor: colors.tint }]}>
-              <Ionicons name="log-in" size={40} color={colors.darkText} />
-            </View>
-          </View>
+            <LottieView
+                source={require('../../../assets/lottie/log-in.json')}
+                autoPlay
+                loop
+                style={{ width: 200, height: 100 }}
+            />
           <Text style={[styles.title, { color: colors.text }]}>Velkommen tilbake!</Text>
           <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
             Velg en metode for å logge inn
