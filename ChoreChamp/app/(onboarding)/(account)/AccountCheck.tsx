@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useTheme } from '@/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
-import { useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
-import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 import BackButton from '@/components/onBoarding/BackButton';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 
 /**
  * LoginCheckScreen
  * - Asks user if they already have an account (logged in) or are new
  * - Directs to appropriate flow based on selection
  */
-export default function LoginCheckScreen() {
+export default function AccountCheck() {
     const router = useRouter();
     const { colors } = useTheme();
     const [selected, setSelected] = useState<'existing' | 'new' | null>(null);
@@ -25,7 +25,7 @@ export default function LoginCheckScreen() {
     function handleContinue() {
         if (selected === 'existing') {
             // Navigate to login screen
-            router.push('/(onboarding)/(account)/Login');
+            router.push('/(onboarding)/(account)/LoginChoice');
         } else if (selected === 'new') {
             // New users go to language selection first
             router.push('/(onboarding)/LanguageSelection');
