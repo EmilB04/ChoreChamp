@@ -1,0 +1,9 @@
+{
+  "notifications": {
+    "title": "Turn on notifications?",
+    "pill": "Get reminders when it’s your turn to do a chore.",
+    "enableButton": "Yes, turn on notifications",
+    "skipButton": "Not now",
+    "footer": "You can change this later in settings."
+  }
+}

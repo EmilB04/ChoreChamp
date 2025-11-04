@@ -1,0 +1,9 @@
+{
+  "notifications": {
+    "title": "Skru på varsler?",
+    "pill": "Få påminnelser når det er din tur til å gjøre en oppgave.",
+    "enableButton": "Ja, skru på varsler",
+    "skipButton": "Ikke nå",
+    "footer": "Du kan endre dette i innstillinger senere."
+  }
+}

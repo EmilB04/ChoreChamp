@@ -1,0 +1,9 @@
+{
+  "notifications": {
+    "title": "¿Activar notificaciones?",
+    "pill": "Recibe recordatorios cuando sea tu turno para hacer una tarea.",
+    "enableButton": "Sí, activar notificaciones",
+    "skipButton": "Ahora no",
+    "footer": "Puedes cambiar esto más tarde en los ajustes."
+  }
+}

@@ -1,22 +1,46 @@
 import React from "react";
+import { useEffect } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Animated } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import OnboardingDots from "../../components/onBoarding/OnboardingDots";
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import BackButton from '@/components/onBoarding/BackButton';
 import { LinearGradient } from 'expo-linear-gradient';
+import i18n from '../i18n/i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
 
 export default function NotificationsScreen() {
     const router = useRouter();
     const { colors } = useTheme();
 
+    const { t } = useTranslation('onboarding');
+
+    const params = useLocalSearchParams();
+    const langParam = typeof params.lang === 'string' ? params.lang : undefined;
+
     const { fadeAnim } = useEntranceAnimation();
     const iconScaleAnim = useScaleAnimation(100);
     const titleSlideAnim = useScaleAnimation(200, 1);
     const [button1SlideAnim, button2SlideAnim] = useStaggeredAnimation(2, 300, 100);
+
+    useEffect(() => {
+      async function applyLanguage() {
+        if (!langParam) return;
+        if (i18n.language === langParam) return; // already set
+        try {
+          await i18n.changeLanguage(langParam); // triggers re-render of t()
+          await AsyncStorage.setItem('appLanguage', langParam); // persist choice
+        } catch (e) {
+          console.warn('Language change failed', e);
+        }
+      }
+      applyLanguage();
+    }, [langParam]);
+
 
     function handleAllow() {
         router.push('/(onboarding)/(account)/Register');
@@ -60,13 +84,13 @@ export default function NotificationsScreen() {
                         transform: [{ scale: titleSlideAnim }],
                     }]}>
                         <Text style={[styles.title, { color: colors.text }]}>
-                            Skru på varsler?
+                            {t('notifications.title')}
                         </Text>
                         
                         <View style={[styles.descriptionCard, { backgroundColor: colors.contextBackground }]}>
                             <Ionicons name="alarm" size={20} color={colors.tint} style={styles.descIcon} />
                             <Text style={[styles.subtitle, { color: colors.text }]}>
-                                Få påminnelser når det er din tur til å gjøre en oppgave.
+                                {t('notifications.pill')}
                             </Text>
                         </View>
                     </Animated.View>
@@ -79,13 +103,13 @@ export default function NotificationsScreen() {
                             <TouchableOpacity
                                 style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
                                 onPress={handleAllow}
-                                accessibilityLabel="Skru på varsler"
+                                accessibilityLabel={t('notifications.enableButton')}
                                 accessibilityRole="button"
                                 activeOpacity={0.7}
                             >
                                 <Ionicons name="notifications" size={20} color={colors.darkText} style={styles.btnIcon} />
                                 <Text style={[styles.primaryText, { color: colors.darkText }]}>
-                                    Ja, skru på varsler
+                                    {t('notifications.enableButton')}
                                 </Text>
                             </TouchableOpacity>
                         </Animated.View>
@@ -96,12 +120,12 @@ export default function NotificationsScreen() {
                             <TouchableOpacity
                                 style={[styles.secondaryBtn, { backgroundColor: colors.contextBackground }]}
                                 onPress={handleSkip}
-                                accessibilityLabel="Ikke nå"
+                                accessibilityLabel={t('notifications.skipButton')}
                                 accessibilityRole="button"
                                 activeOpacity={0.7}
                             >
                                 <Text style={[styles.secondaryText, { color: colors.text }]}>
-                                    Ikke nå
+                                    {t('notifications.skipButton')}
                                 </Text>
                             </TouchableOpacity>
                         </Animated.View>
@@ -113,8 +137,8 @@ export default function NotificationsScreen() {
                         opacity: fadeAnim,
                     }]}>
                         <Ionicons name="information-circle" size={16} color={colors.tint} />
-                        <Text style={[styles.footer, { color: colors.lightDarkText }]}>
-                            Du kan endre dette i innstillinger senere.
+                        <Text style={[styles.footer, { color: colors.lightNonInteractiveText }]}>
+                            {t('notifications.footer')}
                         </Text>
                     </Animated.View>
                 </Animated.View>

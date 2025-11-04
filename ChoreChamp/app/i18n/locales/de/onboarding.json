@@ -1,0 +1,9 @@
+{
+  "notifications": {
+    "title": "Benachrichtigungen aktivieren?",
+    "pill": "Erhalte Erinnerungen, wenn du an der Reihe bist, eine Aufgabe zu erledigen.",
+    "enableButton": "Ja, Benachrichtigungen aktivieren",
+    "skipButton": "Nicht jetzt",
+    "footer": "Du kannst dies später in den Einstellungen ändern."
+  }
+}
