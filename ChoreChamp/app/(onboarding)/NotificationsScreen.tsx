@@ -1,21 +1,21 @@
-import React from "react";
-import { useEffect } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Animated } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import OnboardingDots from "../../components/onBoarding/OnboardingDots";
-import { useTheme } from '@/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
-import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import BackButton from '@/components/onBoarding/BackButton';
+import OnboardingDots from '@/components/onBoarding/OnboardingDots';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useUser } from '@/contexts/UserContext';
+import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import i18n from '../i18n/i18n';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
+import LottieView from 'lottie-react-native';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NotificationsScreen() {
     const router = useRouter();
     const { colors } = useTheme();
+    const { updateUserData } = useUser();
 
     const { t } = useTranslation('onboarding');
 
@@ -43,10 +43,12 @@ export default function NotificationsScreen() {
 
 
     function handleAllow() {
+        updateUserData({ notificationsEnabled: true });
         router.push('/(onboarding)/(account)/Register');
     }
 
     function handleSkip() {
+        updateUserData({ notificationsEnabled: false });
         router.push('/(onboarding)/(account)/Register');
     }
 
@@ -69,14 +71,14 @@ export default function NotificationsScreen() {
                 </View>
 
                 <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-                    {/* Icon Badge */}
-                    <Animated.View style={[styles.iconBadge, {
-                        backgroundColor: colors.background,
-                        transform: [{ scale: iconScaleAnim }],
-                    }]}>
-                        <View style={[styles.iconInner, { backgroundColor: colors.tint }]}>
-                            <Ionicons name="notifications" size={70} color={colors.darkText} />
-                        </View>
+                    {/* Notification animation */}
+                    <Animated.View>
+                        <LottieView
+                            source={require('../../assets/lottie/notification-bell.json')}
+                            autoPlay
+                            loop
+                            style={{ width: 200, height: 200 }}
+                        />
                     </Animated.View>
 
                     {/* Title Section */}

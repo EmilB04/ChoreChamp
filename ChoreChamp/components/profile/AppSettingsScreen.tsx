@@ -1,12 +1,13 @@
+import { useTheme } from '@/contexts/ThemeContext';
+import { useUser } from '@/contexts/UserContext';
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
     ScrollView,
+    StyleSheet,
     Switch,
+    Text,
+    View,
 } from 'react-native';
-import { useTheme } from '@/contexts/ThemeContext';
 import Header from './Header';
 
 interface AppSettingsScreenProps {
@@ -15,12 +16,25 @@ interface AppSettingsScreenProps {
 
 export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
     const { colors } = useTheme();
+    const { userData, updateUserData } = useUser();
     
-    // State for each toggle
-    const [notifications, setNotifications] = useState(false);
-    const [location, setLocation] = useState(false);
+    // State for toggles - initialize from userData, with fallbacks for legacy data
+    const [notifications, setNotifications] = useState(userData.notificationsEnabled ?? false);
+    const [location, setLocation] = useState(userData.locationEnabled ?? false);
     const [dataAnalysis, setDataAnalysis] = useState(false);
     const [autoUpdates, setAutoUpdates] = useState(false);
+
+    // Update UserContext when notifications toggle changes
+    const handleNotificationsChange = (value: boolean) => {
+        setNotifications(value);
+        updateUserData({ notificationsEnabled: value });
+    };
+
+    // Update UserContext when location toggle changes
+    const handleLocationChange = (value: boolean) => {
+        setLocation(value);
+        updateUserData({ locationEnabled: value });
+    };
 
     return(
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -47,7 +61,7 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
                         </View>
                         <Switch
                             value={notifications}
-                            onValueChange={setNotifications}
+                            onValueChange={handleNotificationsChange}
                             trackColor={{ false: colors.lightDarkText, true: colors.tint }}
                             thumbColor={colors.background}
                         />
@@ -64,7 +78,7 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
                         </View>
                         <Switch
                             value={location}
-                            onValueChange={setLocation}
+                            onValueChange={handleLocationChange}
                             trackColor={{ false: colors.lightDarkText, true: colors.tint }}
                             thumbColor={colors.background}
                         />

@@ -1,11 +1,13 @@
+import Calendar from "@/components/ui/Calendar";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from "react";
 import {
+    ScrollView,
     StyleSheet,
     Text,
-    View,
-    ScrollView,
     TouchableOpacity,
+    View,
 } from "react-native";
 import commonStyles from "../commonStyles";
 
@@ -14,7 +16,14 @@ import commonStyles from "../commonStyles";
 
 export default function AddTask() {
     const { colors } = useTheme();
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+    // Initialize selectedDate normalized to midnight
+    const [selectedDate, setSelectedDate] = useState<Date>(() => {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    });
+    const [showCalendar, setShowCalendar] = useState(false);
+
     function calculateTimes() {
         const currentHour = new Date().getHours();
         const currentMinute = new Date().getMinutes();
@@ -33,14 +42,23 @@ export default function AddTask() {
     const [startTime, setStartTime] = useState(calculateTimes().currentTime);
     const [endTime, setEndTime] = useState(calculateTimes().futureTime);
     const [selectedTimePreset, setSelectedTimePreset] = useState<string | null>(null);
+    const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
+    // TODO: Mock person data - replace with actual data from your user context/database
+    const people = [
+        { id: '1', name: 'Emil B.' },
+        { id: '2', name: 'Ida K.' },
+        { id: '3', name: 'Andreas O.' },
+        { id: '4', name: 'Sebastian W.' },
+        { id: '5', name: 'Lina S.' },
+        { id: '6', name: 'Marius T.' },
+    ];
 
-    // Get current date and calculate next two days
-    const today = new Date();
-    const tomorrow = new Date(today);
-    const dayAfterTomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    dayAfterTomorrow.setDate(today.getDate() + 2);
+    // Get current date and calculate next two days (normalized to midnight)
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const dayAfterTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
 
     const dateOptions = [
         {
@@ -65,151 +83,241 @@ export default function AddTask() {
         return days[date.getDay()];
     }
 
-    function formatDate(date: Date): string {
-        return date.toISOString().split('T')[0];
-    }
+    // Check if selected date is one of the preset dates
+    const isPresetDate = dateOptions.some(option => option.date.getTime() === selectedDate.getTime());
+
+    // Check if "Annen dato" button should be active
+    const isCustomDateActive = !isPresetDate;
+
+    const openCalendar = () => {
+        setShowCalendar(true);
+    };
+
+    const handleDateSelect = (date: Date) => {
+        setSelectedDate(date);
+    };
 
     return (
-        <ScrollView
-            style={[commonStyles.container, { backgroundColor: colors.background }]}
-        >
-            <View>
-                <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
-                    Opprett nytt {"\n"}gjøremål
-                </Text>
-            </View>
+        <>
+            <ScrollView
+                style={[commonStyles.container, { backgroundColor: colors.background }]}
+            >
+                <View>
+                    <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
+                        Opprett nytt {"\n"}gjøremål
+                    </Text>
+                </View>
 
-            {/* Date Selection */}
-            <View style={styles.dateSection}>
-                <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-                    Velg dato
-                </Text>
-                <View style={[styles.dateOptionsContainer, { backgroundColor: colors.contextBackground }]}>
-                    {dateOptions.map((option, index) => (
+                {/* Date Selection */}
+                <View style={styles.dateSection}>
+                    <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+                        Velg dato
+                    </Text>
+                    <View style={[styles.dateOptionsContainer, { backgroundColor: colors.contextBackground }]}>
+                        {dateOptions.map((option, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={[
+                                    styles.dateOption,
+                                    { backgroundColor: colors.nonInteractiveBackground },
+                                    selectedDate.getTime() === option.date.getTime() && { backgroundColor: colors.tint }
+                                ]}
+                                onPress={() => setSelectedDate(option.date)}
+                            >
+                                <Text style={[
+                                    styles.dateNumber,
+                                    { color: colors.text },
+                                    selectedDate.getTime() === option.date.getTime() && { color: colors.darkText }
+                                ]}>
+                                    {option.label}
+                                </Text>
+                                <Text style={[
+                                    styles.dayName,
+                                    { color: colors.lightDarkText },
+                                    selectedDate.getTime() === option.date.getTime() && { color: colors.darkText }
+                                ]}>
+                                    {option.dayName}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+
                         <TouchableOpacity
-                            key={index}
                             style={[
                                 styles.dateOption,
-                                formatDate(selectedDate) === formatDate(option.date) && styles.dateOptionSelected
+                                { backgroundColor: isCustomDateActive ? colors.tint : colors.nonInteractiveBackground }
                             ]}
-                            onPress={() => setSelectedDate(option.date)}
+                            onPress={openCalendar}
                         >
-                            <Text style={[
-                                styles.dateNumber,
-                                (formatDate(selectedDate) === formatDate(option.date)) && styles.dateNumberSelected
-                            ]}>
-                                {option.label}
-                            </Text>
-                            <Text style={[
-                                styles.dayName,
-                                (formatDate(selectedDate) === formatDate(option.date)) && styles.dayNameSelected
-                            ]}>
-                                {option.dayName}
-                            </Text>
+                            {isCustomDateActive ? (
+                                <>
+                                    <Text style={[
+                                        styles.dateNumber,
+                                        { color: colors.darkText }
+                                    ]}>
+                                        {selectedDate.getDate()}
+                                    </Text>
+                                    <Text style={[
+                                        styles.dayName,
+                                        { color: colors.darkText }
+                                    ]}>
+                                        {getDayName(selectedDate)}
+                                    </Text>
+                                </>
+                            ) : (
+                                <>
+                                    <Text style={[styles.anyDateText, { color: colors.lightDarkText }]}>Annen</Text>
+                                    <Text style={[styles.anyDateSubText, { color: colors.lightDarkText }]}>dato</Text>
+                                </>
+                            )}
                         </TouchableOpacity>
-                    ))}
-
-                    <TouchableOpacity
-                        style={[
-                            styles.dateOption,
-                            styles.anyDateOption
-                        ]}
-                        onPress={() => {
-                            // TODO: Open date picker modal
-                            console.log("Open date picker");
-                        }}
-                    >
-                        <Text style={styles.anyDateText}>Annen</Text>
-                        <Text style={styles.anyDateSubText}>dato</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* Time Selection */}
-            <View style={styles.timeSection}>
-                <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-                    Velg tid
-                </Text>
-                
-                {/* Time Range Display */}
-                <View style={[styles.timeRangeContainer, { backgroundColor: colors.contextBackground }]}>
-                    <View style={styles.timeRangeHeader}>
-                        <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>Fra</Text>
-                        <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>Til</Text>
                     </View>
-                    
-                    <View style={styles.timeRangeValues}>
-                        <TouchableOpacity 
-                            style={styles.timeInput}
-                            onPress={() => {
-                                // TODO: Open time picker for start time
-                                console.log("Open start time picker");
-                            }}
-                        >
-                            <Text style={[styles.timeText, { color: colors.text }]}>{startTime}</Text>
-                        </TouchableOpacity>
-                        
-                        <View style={styles.timeArrow}>
-                            <Text style={[styles.arrowText, { color: colors.text }]}>›</Text>
+                </View>
+
+                {/* Time Selection */}
+                <View style={styles.timeSection}>
+                    <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+                        Velg tid
+                    </Text>
+
+                    {/* Time Range Display */}
+                    <View style={[styles.timeRangeContainer, { backgroundColor: colors.contextBackground }]}>
+                        <View style={styles.timeRangeHeader}>
+                            <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>Fra</Text>
+                            <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>Til</Text>
                         </View>
-                        
-                        <TouchableOpacity 
-                            style={styles.timeInput}
+
+                        <View style={styles.timeRangeValues}>
+                            <TouchableOpacity
+                                style={styles.timeInput}
+                                onPress={() => {
+                                    // TODO: Open time picker for start time
+                                    console.log("Open start time picker");
+                                }}
+                            >
+                                <Text style={[styles.timeText, { color: colors.text }]}>{startTime}</Text>
+                            </TouchableOpacity>
+
+                            <View style={styles.timeArrow}>
+                                <Text style={[styles.arrowText, { color: colors.text }]}>›</Text>
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.timeInput}
+                                onPress={() => {
+                                    // TODO: Open time picker for end time
+                                    console.log("Open end time picker");
+                                }}
+                            >
+                                <Text style={[styles.timeText, { color: colors.text }]}>{endTime}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Time Preset Buttons */}
+                    <View style={styles.timePresetsContainer}>
+                        <TouchableOpacity
+                            style={[
+                                styles.timePresetButton,
+                                { backgroundColor: selectedTimePreset === 'forvarsel' ? colors.tint : colors.interactiveBackground }
+                            ]}
                             onPress={() => {
-                                // TODO: Open time picker for end time
-                                console.log("Open end time picker");
+                                setSelectedTimePreset('forvarsel');
+                                // You can set specific times here if needed
                             }}
                         >
-                            <Text style={[styles.timeText, { color: colors.text }]}>{endTime}</Text>
+                            <Ionicons name="notifications-outline" size={20} color={colors.darkText} />
+                            <Text style={[styles.presetText, { color: colors.darkText }]}>Forvarsel</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                styles.timePresetButton,
+                                { backgroundColor: selectedTimePreset === 'gjenta' ? colors.tint : colors.interactiveBackground }
+                            ]}
+                            onPress={() => {
+                                setSelectedTimePreset('gjenta');
+                            }}
+                        >
+                            <Ionicons name="repeat-outline" size={20} color={colors.darkText} />
+                            <Text style={[styles.presetText, { color: colors.darkText }]}>Gjenta</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-                
-                {/* Time Preset Buttons */}
-                <View style={styles.timePresetsContainer}>
+
+                {/* Person Assignment Section */}
+                <View style={styles.personSection}>
+                    <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+                        Tilordne
+                    </Text>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}
+                        contentContainerStyle={styles.personContainer}
+                    >
+                        {people.map((person) => (
+                            <TouchableOpacity
+                                key={person.id}
+                                style={styles.personItem}
+                                onPress={() => setSelectedPerson(person.id)}
+                            >
+                                <View style={[
+                                    styles.personAvatar,
+                                    { backgroundColor: selectedPerson === person.id ? colors.tint : colors.nonInteractiveBackground },
+                                    selectedPerson === person.id && styles.personAvatarSelected
+                                ]}>
+                                    <Text style={[
+                                        styles.personInitial,
+                                        { color: selectedPerson === person.id ? colors.darkText : colors.text }
+                                    ]}>
+                                        {person.name.charAt(0)}
+                                    </Text>
+                                </View>
+                                <Text style={[
+                                    styles.personName,
+                                    { color: colors.text },
+                                    selectedPerson === person.id && { fontWeight: '600' }
+                                ]}>
+                                    {person.name}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
+
+
+                {/* Save button */}
+                <View>
                     <TouchableOpacity
                         style={[
-                            styles.timePresetButton,
-                            selectedTimePreset === 'forvarsel' && styles.timePresetSelected
+                            commonStyles.saveButton,
+                            { backgroundColor: colors.tint, marginTop: 30, marginBottom: 40 }
                         ]}
                         onPress={() => {
-                            setSelectedTimePreset('forvarsel');
-                            // You can set specific times here if needed
+                            // Handle save action
+                            console.log('Saving task...', {
+                                date: selectedDate,
+                                startTime,
+                                endTime,
+                                assignedTo: selectedPerson,
+                                presets: selectedTimePreset
+                            });
                         }}
                     >
-                        <Text style={[styles.presetIcon, { color: colors.darkText }]}>💡</Text>
-                        <Text style={[styles.presetText, { color: colors.darkText }]}>Forvarsel</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                        style={[
-                            styles.timePresetButton,
-                            selectedTimePreset === 'gjenta' && styles.timePresetSelected
-                        ]}
-                        onPress={() => {
-                            setSelectedTimePreset('gjenta');
-                        }}
-                    >
-                        <Text style={[styles.presetIcon, { color: colors.darkText }]}>🔄</Text>
-                        <Text style={[styles.presetText, { color: colors.darkText }]}>Gjenta</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                        style={[
-                            styles.timePresetButton,
-                            selectedTimePreset === 'sted' && styles.timePresetSelected
-                        ]}
-                        onPress={() => {
-                            setSelectedTimePreset('sted');
-                        }}
-                    >
-                        <Text style={[styles.presetIcon, { color: colors.darkText }]}>📍</Text>
-                        <Text style={[styles.presetText, { color: colors.darkText }]}>Sted</Text>
+                        <Text style={[commonStyles.saveButtonText, { color: colors.darkText }]}>Lagre</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </ScrollView>
 
-        </ScrollView>
+            {/* Cross-platform Calendar */}
+            <Calendar
+                visible={showCalendar}
+                selectedDate={selectedDate}
+                onDateSelect={handleDateSelect}
+                onClose={() => setShowCalendar(false)}
+                minDate={new Date()}
+            />
+        </>
     );
 }
 
@@ -231,46 +339,29 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         paddingHorizontal: 10,
         borderRadius: 12,
-        backgroundColor: "#E5E5EA",
         alignItems: "center",
         justifyContent: "center",
         minHeight: 80,
     },
-    dateOptionSelected: {
-        backgroundColor: "#F59E0B", // Amber/yellow color like in the image
-    },
     dateNumber: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#000",
         marginBottom: 4,
-    },
-    dateNumberSelected: {
-        color: "#FFF",
     },
     dayName: {
         fontSize: 14,
-        color: "#666",
         fontWeight: "500",
-    },
-    dayNameSelected: {
-        color: "#FFF",
-    },
-    anyDateOption: {
-        backgroundColor: "#E5E5EA",
     },
     anyDateText: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#666",
         marginBottom: 2,
     },
     anyDateSubText: {
         fontSize: 14,
-        color: "#666",
         fontWeight: "500",
     },
-    
+
     // Time Selection Styles
     timeSection: {
         marginTop: 25,
@@ -320,7 +411,6 @@ const styles = StyleSheet.create({
     },
     timePresetButton: {
         flex: 1,
-        backgroundColor: '#F59E0B',
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 25,
@@ -329,14 +419,46 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 8,
     },
-    timePresetSelected: {
-        backgroundColor: '#D97706',
-    },
-    presetIcon: {
-        fontSize: 16,
-    },
     presetText: {
         fontSize: 14,
         fontWeight: '600',
+    },
+
+    // Person Assignment Styles
+    personSection: {
+        marginTop: 25,
+    },
+    personScrollView: {
+        borderRadius: 12,
+        marginTop: 15,
+    },
+    personContainer: {
+        padding: 16,
+        flexDirection: 'row',
+        gap: 16,
+    },
+    personItem: {
+        alignItems: 'center',
+        width: 80,
+    },
+    personAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 8,
+    },
+    personAvatarSelected: {
+        borderWidth: 3,
+        borderColor: '#fff',
+    },
+    personInitial: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    personName: {
+        fontSize: 12,
+        textAlign: 'center',
     },
 });
