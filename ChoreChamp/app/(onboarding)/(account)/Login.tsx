@@ -1,5 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation } from '@/hooks/useEntranceAnimation';
+import { useBorderAnimations, useFormAnimations, usePickerAnimations } from '@/hooks/useFormAnimations';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -36,94 +37,31 @@ export default function Login() {
     // Use entrance animation hook for initial page load
     const { fadeAnim, slideAnim } = useEntranceAnimation();
 
-    // Animated values for smooth transitions
-    const phoneBorderAnim = useRef(new Animated.Value(0)).current;
-    const passwordBorderAnim = useRef(new Animated.Value(0)).current;
-    const buttonOpacityAnim = useRef(new Animated.Value(0.5)).current;
-    const errorAnim = useRef(new Animated.Value(0)).current;
-    const phoneErrorAnim = useRef(new Animated.Value(0)).current;
-    const passwordErrorAnim = useRef(new Animated.Value(0)).current;
-    const countryPickerAnim = useRef(new Animated.Value(0)).current;
-    const countryChevronAnim = useRef(new Animated.Value(0)).current;
+    // Use form animations hook
+    const { buttonOpacityAnim, errorAnim, fieldErrorAnims, animateButtonOpacity } = useFormAnimations({
+        errorCount: 2,
+        hasError: !!error,
+        fieldErrors: [phoneError, passwordError],
+    });
+    const [phoneErrorAnim, passwordErrorAnim] = fieldErrorAnims;
+
+    // Use border animations hook
+    const { borderAnims, animateBorder } = useBorderAnimations({ fieldCount: 2 });
+    const [phoneBorderAnim, passwordBorderAnim] = borderAnims;
+
+    // Use picker animations hook
+    const { pickerAnim: countryPickerAnim, chevronAnim: countryChevronAnim, animatePicker } = usePickerAnimations();
 
     // Animate button opacity when form validity changes
     useEffect(() => {
-        const isValid = phone.trim() && password.trim() && password.length >= 6;
-
-        Animated.timing(buttonOpacityAnim, {
-            toValue: isValid ? 1 : 0.5,
-            duration: 300,
-            useNativeDriver: true,
-        }).start();
-    }, [phone, password, buttonOpacityAnim]);
-
-    // Animate error message appearance
-    useEffect(() => {
-        if (error) {
-            Animated.spring(errorAnim, {
-                toValue: 1,
-                useNativeDriver: true,
-                tension: 100,
-                friction: 8,
-            }).start();
-        } else {
-            Animated.timing(errorAnim, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [error, errorAnim]);
-
-    // Animate phone error
-    useEffect(() => {
-        if (phoneError) {
-            Animated.spring(phoneErrorAnim, {
-                toValue: 1,
-                useNativeDriver: true,
-                tension: 100,
-                friction: 8,
-            }).start();
-        } else {
-            Animated.timing(phoneErrorAnim, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [phoneError, phoneErrorAnim]);    // Animate password error
-    useEffect(() => {
-        if (passwordError) {
-            Animated.spring(passwordErrorAnim, {
-                toValue: 1,
-                useNativeDriver: true,
-                tension: 100,
-                friction: 8,
-            }).start();
-        } else {
-            Animated.timing(passwordErrorAnim, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-            }).start();
-        }
-    }, [passwordError, passwordErrorAnim]);
+        const isValid = !!(phone.trim() && password.trim() && password.length >= 6);
+        animateButtonOpacity(isValid);
+    }, [phone, password, animateButtonOpacity]);
 
     // Animate country picker
     useEffect(() => {
-        Animated.timing(countryPickerAnim, {
-            toValue: showCountryPicker ? 1 : 0,
-            duration: 200,
-            useNativeDriver: false,
-        }).start();
-
-        // Also animate chevron
-        Animated.timing(countryChevronAnim, {
-            toValue: showCountryPicker ? 1 : 0,
-            duration: 200,
-            useNativeDriver: true,
-        }).start();
-    }, [showCountryPicker, countryPickerAnim, countryChevronAnim]);
+        animatePicker(showCountryPicker);
+    }, [showCountryPicker, animatePicker]);
 
     // Check if form is valid
     const isFormValid = (): boolean => {
@@ -207,14 +145,6 @@ export default function Login() {
             setLoading(false);
         }
     }
-
-    const animateBorder = (animValue: Animated.Value, toValue: number) => {
-        Animated.timing(animValue, {
-            toValue,
-            duration: 200,
-            useNativeDriver: false,
-        }).start();
-    };
 
     const openField = (fieldName: 'phone' | 'password') => {
         animateBorder(phoneBorderAnim, fieldName === 'phone' ? 1 : 0);
