@@ -6,4 +6,70 @@
     "skipButton": "Nicht jetzt",
     "footer": "Du kannst dies später in den Einstellungen ändern."
   }
+  ,
+  "accountcheck": {
+    "title": "Hast du bereits ein Konto?",
+    "subtitle": "Wähle, ob du dich anmelden oder ein neues Konto erstellen möchtest",
+    "existingTitle": "Ich habe bereits ein Konto",
+    "existingSubtitle": "Melde dich an, um fortzufahren",
+    "newTitle": "Ich bin ein neuer Nutzer",
+    "newSubtitle": "Erstelle ein neues Konto",
+    "continue": "Weiter"
+  }
+  ,
+  "register": {
+    "title": "Erstelle dein Profil",
+    "subtitle": "Gib deine Daten ein, um zu beginnen",
+    "firstNameLabel": "Vorname",
+    "firstNamePlaceholder": "Vorname",
+    "lastNameLabel": "Nachname",
+    "lastNamePlaceholder": "Nachname",
+    "phoneLabel": "Telefonnummer",
+    "phonePlaceholder": "12345678",
+    "birthLabel": "Geburtsdatum",
+    "birthPlaceholder": "DD/MM/YYYY",
+    "orContinueWith": "Oder fortfahren mit",
+    "submit": "Registrierung abschließen",
+    "error": "Etwas ist schief gelaufen. Bitte versuche es erneut.",
+    "errorFirstNameRequired": "Bitte gib einen Vornamen ein",
+    "errorFirstNameMin": "Der Vorname muss mindestens 2 Zeichen haben",
+    "errorLastNameRequired": "Bitte gib einen Nachnamen ein",
+    "errorLastNameMin": "Der Nachname muss mindestens 2 Zeichen haben",
+    "errorPhoneRequired": "Bitte gib eine Telefonnummer ein",
+    "errorPhoneMin": "Die Telefonnummer muss mindestens {{min}} Ziffern haben",
+    "errorPhoneMax": "Die Telefonnummer ist zu lang",
+    "errorPhoneDigits": "Die Telefonnummer darf nur Ziffern enthalten",
+    "errorBirthRequired": "Bitte wähle dein Geburtsdatum",
+    "errorBirthInvalid": "Ungültiges Datum",
+    "errorTooYoung": "Du musst mindestens 6 Jahre alt sein",
+    "errorBirthYearInvalid": "Ungültiges Geburtsjahr",
+    "alreadyHaveAccount": "Hast du bereits ein Konto?",
+    "loginLink": "Anmelden"
+  },
+  "login": {
+    "title": "Willkommen zurück",
+    "subtitle": "Melde dich an, um fortzufahren",
+    "phoneLabel": "Telefonnummer",
+    "phonePlaceholder": "12345678",
+    "passwordLabel": "Passwort",
+    "passwordPlaceholder": "Passwort",
+    "forgotPassword": "Passwort vergessen?",
+    "loggingIn": "Anmeldung läuft",
+    "login": "Anmelden",
+    "errorInvalidPhone": "Ungültige Telefonnummer",
+    "errorPasswordMin": "Das Passwort muss mindestens 6 Zeichen haben",
+    "errorPhoneRequired": "Bitte gib eine Telefonnummer ein",
+    "errorPasswordRequired": "Bitte gib dein Passwort ein",
+    "errorInvalidCredentials": "Falsche Telefonnummer oder Passwort"
+  },
+  "loginchoice": {
+    "title": "Willkommen zurück!",
+    "subtitle": "Wähle eine Methode zum Anmelden",
+    "google": "Mit Google anmelden",
+    "facebook": "Mit Facebook anmelden",
+    "apple": "Mit Apple anmelden",
+    "phone": "Mit Telefonnummer anmelden",
+    "or": "oder",
+    "createAccount": "Neues Konto erstellen"
+  }
 }

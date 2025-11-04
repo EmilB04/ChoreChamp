@@ -36,10 +36,10 @@ const OnboardingScreen = () => {
                 useNativeDriver: true,
             }).start();
 
-            // Navigate to the main app screen after animation
-            navTimer = setTimeout(() => {
-                router.replace('/(onboarding)/WelcomeScreen');
-            }, ANIM_DURATION + 300);
+                // Navigate to the first onboarding step (language selection) after animation
+                navTimer = setTimeout(() => {
+                    router.replace('/(onboarding)/LanguageSelection');
+                }, ANIM_DURATION + 300);
         }, INITIAL_DELAY);
 
         return () => {

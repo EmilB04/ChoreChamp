@@ -5,7 +5,7 @@ import 'react-native-reanimated';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { UserProvider } from '@/contexts/UserContext';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { useEffect, useState } from 'react';
+import { initI18n } from './i18n/i18n';
 import * as SplashScreen from 'expo-splash-screen';
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
@@ -24,9 +24,11 @@ export default function RootLayout() {
     async function prepare() {
       try {
         // Load fonts (including Ionicons for web)
-        await Font.loadAsync({
-          ...Ionicons.font,
-        });
+        // Initialize i18n and load fonts in parallel
+        await Promise.all([
+          initI18n(),
+          Font.loadAsync({ ...Ionicons.font }),
+        ]);
       } catch (e) {
         console.warn(e);
       } finally {

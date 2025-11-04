@@ -2,16 +2,22 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation } from '@/hooks/useEntranceAnimation';
 import { useBorderAnimations, useFormAnimations, usePickerAnimations } from '@/hooks/useFormAnimations';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import { formatPhoneNumber, stripCountryCode, validatePhone } from './FormValidation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/i18n';
 
 export default function Login() {
     const router = useRouter();
     const { colors } = useTheme();
+    const { t } = useTranslation('onboarding');
+    const params = useLocalSearchParams();
+    const langParam = typeof params.lang === 'string' ? params.lang : undefined;
     const scrollViewRef = useRef<ScrollView>(null);
     const phoneRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
@@ -58,6 +64,20 @@ export default function Login() {
         animateButtonOpacity(isValid);
     }, [phone, password, animateButtonOpacity]);
 
+    useEffect(() => {
+        async function applyLanguage() {
+            if (!langParam) return;
+            if (i18n.language === langParam) return;
+            try {
+                await i18n.changeLanguage(langParam);
+                await AsyncStorage.setItem('appLanguage', langParam);
+            } catch (e) {
+                console.warn('Language change failed', e);
+            }
+        }
+        applyLanguage();
+    }, [langParam]);
+
     // Animate country picker
     useEffect(() => {
         animatePicker(showCountryPicker);
@@ -87,7 +107,7 @@ export default function Login() {
             if (formatted.trim()) {
                 const validation = validatePhone(formatted, countryCode);
                 if (!validation.isValid) {
-                    setPhoneError(validation.error || 'Ugyldig telefonnummer');
+                    setPhoneError(validation.error || t('login.errorInvalidPhone'));
                 } else {
                     setPhoneError(null);
                 }
@@ -102,7 +122,7 @@ export default function Login() {
         setTimeout(() => {
             if (password.trim()) {
                 if (password.length < 6) {
-                    setPasswordError('Passordet må være minst 6 tegn');
+                    setPasswordError(t('login.errorPasswordMin'));
                 } else {
                     setPasswordError(null);
                 }
@@ -116,20 +136,20 @@ export default function Login() {
     async function handleLogin() {
         // Validate
         if (!phone.trim()) {
-            setError('Vennligst skriv inn telefonnummer');
+            setError(t('login.errorPhoneRequired'));
             return;
         }
         const phoneValidation = validatePhone(phone, countryCode);
         if (!phoneValidation.isValid) {
-            setError(phoneValidation.error || 'Ugyldig telefonnummer');
+            setError(phoneValidation.error || t('login.errorInvalidPhone'));
             return;
         }
         if (!password.trim()) {
-            setError('Vennligst skriv inn passord');
+            setError(t('login.errorPasswordRequired'));
             return;
         }
         if (password.length < 6) {
-            setError('Passordet må være minst 6 tegn');
+            setError(t('login.errorPasswordMin'));
             return;
         }
 
@@ -140,7 +160,7 @@ export default function Login() {
             // TODO: Implement actual login logic
             router.replace('/(tabs)');
         } catch {
-            setError('Feil telefonnummer eller passord');
+            setError(t('login.errorInvalidCredentials'));
         } finally {
             setLoading(false);
         }
@@ -200,9 +220,9 @@ export default function Login() {
                         opacity: fadeAnim,
                         transform: [{ translateY: slideAnim }],
                     }}>
-                        <Text style={[styles.title, { color: colors.text }]}>Velkommen tilbake</Text>
+                        <Text style={[styles.title, { color: colors.text }]}>{t('login.title')}</Text>
                         <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
-                            Logg inn for å fortsette
+                            {t('login.subtitle')}
                         </Text>
 
                         <View style={styles.iconWrapper}>
@@ -216,7 +236,7 @@ export default function Login() {
                             <View style={styles.inputGroup}>
                                 <View style={[styles.inputLabelRow]}>
                                     <Ionicons name="call-outline" size={18} color={colors.tint} />
-                                    <Text style={[styles.label, { color: colors.text }]}>Telefonnummer</Text>
+                                    <Text style={[styles.label, { color: colors.text }]}>{t('login.phoneLabel')}</Text>
                                 </View>
                                 <Animated.View style={[
                                     styles.inputContainer,
@@ -258,7 +278,7 @@ export default function Login() {
                                             ref={phoneRef}
                                             value={phone}
                                             onChangeText={handlePhoneChange}
-                                            placeholder="12345678"
+                                            placeholder={t('login.phonePlaceholder')}
                                             placeholderTextColor={colors.lightDarkText}
                                             keyboardType="phone-pad"
                                             textContentType="telephoneNumber"
@@ -341,7 +361,7 @@ export default function Login() {
                             <View style={styles.inputGroup}>
                                 <View style={[styles.inputLabelRow]}>
                                     <Ionicons name="lock-closed-outline" size={18} color={colors.tint} />
-                                    <Text style={[styles.label, { color: colors.text }]}>Passord</Text>
+                                    <Text style={[styles.label, { color: colors.text }]}>{t('login.passwordLabel')}</Text>
                                 </View>
                                 <Animated.View style={[
                                     styles.inputContainer,
@@ -363,7 +383,7 @@ export default function Login() {
                                                 setError(null);
                                                 setPasswordError(null);
                                             }}
-                                            placeholder="Passord"
+                                            placeholder={t('login.passwordPlaceholder')}
                                             placeholderTextColor={colors.lightDarkText}
                                             secureTextEntry={!showPassword}
                                             autoCapitalize="none"
@@ -413,14 +433,14 @@ export default function Login() {
                             </View>
 
                             {/* Forgot Password */}
-                            <TouchableOpacity
-                                onPress={() => console.log('Forgot password')}
-                                style={styles.forgotPasswordButton}
-                            >
-                                <Text style={[styles.forgotPasswordText, { color: colors.tint }]}>
-                                    Glemt passord?
-                                </Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => console.log('Forgot password')}
+                                    style={styles.forgotPasswordButton}
+                                >
+                                    <Text style={[styles.forgotPasswordText, { color: colors.tint }]}>
+                                        {t('login.forgotPassword')}
+                                    </Text>
+                                </TouchableOpacity>
                         </View>
 
                         {error && (
@@ -458,7 +478,7 @@ export default function Login() {
                             ]}>
                                 {loading ? (
                                     <View style={styles.loadingContainer}>
-                                        <Text style={[styles.loginText, { color: colors.darkText }]}>Logger inn</Text>
+                                        <Text style={[styles.loginText, { color: colors.darkText }]}>{t('login.loggingIn')}</Text>
                                         <View style={styles.loadingDots}>
                                             <View style={[styles.dot, { backgroundColor: colors.darkText }]} />
                                             <View style={[styles.dot, { backgroundColor: colors.darkText }]} />
@@ -467,7 +487,7 @@ export default function Login() {
                                     </View>
                                 ) : (
                                     <View style={styles.buttonContent}>
-                                        <Text style={[styles.loginText, { color: isFormValid() ? colors.darkText : colors.text }]}>Logg inn</Text>
+                                        <Text style={[styles.loginText, { color: isFormValid() ? colors.darkText : colors.text }]}>{t('login.login')}</Text>
                                         <Ionicons name="arrow-forward" size={20} color={isFormValid() ? colors.darkText : colors.text} />
                                     </View>
                                 )}

@@ -3,10 +3,14 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/i18n';
+import { useLocalSearchParams } from 'expo-router';
 
 /**
  * LoginCheckScreen
@@ -17,26 +21,44 @@ export default function AccountCheck() {
     const router = useRouter();
     const { colors } = useTheme();
     const [selected, setSelected] = useState<'existing' | 'new' | null>(null);
+    const { t } = useTranslation('onboarding');
+
+    const params = useLocalSearchParams();
+    const langParam = typeof params.lang === 'string' ? params.lang : undefined;
 
     const { fadeAnim, slideAnim } = useEntranceAnimation();
     const [card1ScaleAnim, card2ScaleAnim] = useStaggeredAnimation(2, 200, 100);
     const buttonSlideAnim = useStaggeredAnimation(1, 400)[0];
+
+    useEffect(() => {
+        async function applyLanguage() {
+            if (!langParam) return;
+            if (i18n.language === langParam) return;
+            try {
+                await i18n.changeLanguage(langParam);
+                await AsyncStorage.setItem('appLanguage', langParam);
+            } catch (e) {
+                console.warn('Language change failed', e);
+            }
+        }
+        applyLanguage();
+    }, [langParam]);
 
     function handleContinue() {
         if (selected === 'existing') {
             // Navigate to login screen
             router.push('/(onboarding)/(account)/LoginChoice');
         } else if (selected === 'new') {
-            // New users go to language selection first
-            router.push('/(onboarding)/LanguageSelection');
+            // --- CHANGED: New users should proceed to Register
+            router.push('/(onboarding)/(account)/Register');
         }
     }
 
     return (
         <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
             <View style={styles.headerRow}>
-                <OnboardingDots activeIndex={1} total={5} />
-                <BackButton />
+                <OnboardingDots activeIndex={3} total={5} />
+                <BackButton onPress={() => router.replace('/(onboarding)/NotificationsScreen')} />
             </View>
 
             <ScrollView
@@ -53,11 +75,11 @@ export default function AccountCheck() {
                     transform: [{ translateY: slideAnim }],
                 }]}>
                     <Text style={[styles.title, { color: colors.text }]}>
-                        Har du allerede en konto?
+                        {t('accountcheck.title')}
                     </Text>
 
                     <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
-                        Velg om du vil logge inn eller opprette en ny konto
+                        {t('accountcheck.subtitle')}
                     </Text>
 
                     <View style={styles.optionsContainer}>
@@ -84,10 +106,10 @@ export default function AccountCheck() {
                                     color={selected === 'existing' ? colors.tint : colors.text}
                                 />
                                 <Text style={[styles.optionTitle, { color: colors.text }]}>
-                                    Jeg har allerede en konto
+                                    {t('accountcheck.existingTitle')}
                                 </Text>
                                 <Text style={[styles.optionSubtitle, { color: colors.lightDarkText }]}>
-                                    Logg inn for å fortsette
+                                    {t('accountcheck.existingSubtitle')}
                                 </Text>
                             </TouchableOpacity>
                         </Animated.View>
@@ -115,10 +137,10 @@ export default function AccountCheck() {
                                     color={selected === 'new' ? colors.tint : colors.text}
                                 />
                                 <Text style={[styles.optionTitle, { color: colors.text }]}>
-                                    Jeg er ny bruker
+                                    {t('accountcheck.newTitle')}
                                 </Text>
                                 <Text style={[styles.optionSubtitle, { color: colors.lightDarkText }]}>
-                                    Opprett en ny konto
+                                    {t('accountcheck.newSubtitle')}
                                 </Text>
                             </TouchableOpacity>
                         </Animated.View>
@@ -147,7 +169,7 @@ export default function AccountCheck() {
                                     { color: selected ? colors.darkText : colors.text },
                                 ]}
                             >
-                                Fortsett
+                                {t('accountcheck.continue')}
                             </Text>
                         </TouchableOpacity>
                     </Animated.View>

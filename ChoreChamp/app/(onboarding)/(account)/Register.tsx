@@ -8,6 +8,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/i18n';
+import { useLocalSearchParams } from 'expo-router';
 import {
   formatPhoneNumber,
   isFormComplete,
@@ -23,6 +27,10 @@ import {
 export default function Register() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useTranslation('onboarding');
+
+  const params = useLocalSearchParams();
+  const langParam = typeof params.lang === 'string' ? params.lang : undefined;
   const scrollViewRef = useRef<ScrollView>(null);
   const birthFieldRef = useRef<View>(null);
   const firstNameRef = useRef<TextInput>(null);
@@ -87,6 +95,20 @@ export default function Register() {
     animateButtonOpacity(isValid);
   }, [firstName, lastName, phone, countryCode, birth, animateButtonOpacity]);
 
+  useEffect(() => {
+    async function applyLanguage() {
+      if (!langParam) return;
+      if (i18n.language === langParam) return;
+      try {
+        await i18n.changeLanguage(langParam);
+        await AsyncStorage.setItem('appLanguage', langParam);
+      } catch (e) {
+        console.warn('Language change failed', e);
+      }
+    }
+    applyLanguage();
+  }, [langParam]);
+
   // Check if all fields are filled and valid
   function isFormValid(): boolean {
     const formData: RegisterFormData = {
@@ -111,7 +133,7 @@ export default function Register() {
     };
 
     const validation = validateRegistrationForm(formData);
-    return validation.isValid ? null : validation.error || 'Vennligst fyll ut alle feltene';
+    return validation.isValid ? null : validation.error || t('register.error');
   }
 
   // TODO: Implement actual registration logic
@@ -125,7 +147,7 @@ export default function Register() {
       // TODO: Save user data
       router.replace('/(tabs)');
     } catch {
-      setError('Noe gikk galt. Prøv igjen.');
+      setError(t('register.error') ?? 'Noe gikk galt. Prøv igjen.');
     } finally {
       setLoading(false);
     }
@@ -148,7 +170,7 @@ export default function Register() {
     // Validate immediately after selection
     const validation = validateBirthDate(formattedDate);
     if (!validation.isValid) {
-      setBirthError(validation.error || 'Ugyldig fødselsdato');
+      setBirthError(validation.error || t('register.error'));
     }
   };
 
@@ -183,7 +205,7 @@ export default function Register() {
     if (formatted.trim()) {
       const validation = validatePhone(formatted, countryCode);
       if (!validation.isValid) {
-        setPhoneError(validation.error || 'Ugyldig telefonnummer');
+        setPhoneError(validation.error || t('register.error'));
       } else {
         setPhoneError(null);
       }
@@ -198,7 +220,7 @@ export default function Register() {
       if (firstName.trim()) {
         const validation = validateFirstName(firstName);
         if (!validation.isValid) {
-          setFirstNameError(validation.error || 'Ugyldig fornavn');
+          setFirstNameError(validation.error || t('register.error'));
         } else {
           setFirstNameError(null);
         }
@@ -213,7 +235,7 @@ export default function Register() {
       if (lastName.trim()) {
         const validation = validateLastName(lastName);
         if (!validation.isValid) {
-          setLastNameError(validation.error || 'Ugyldig etternavn');
+          setLastNameError(validation.error || t('register.error'));
         } else {
           setLastNameError(null);
         }
@@ -228,7 +250,7 @@ export default function Register() {
       if (birth) {
         const validation = validateBirthDate(birth);
         if (!validation.isValid) {
-          setBirthError(validation.error || 'Ugyldig fødselsdato');
+          setBirthError(validation.error || t('register.error'));
         } else {
           setBirthError(null);
         }
@@ -335,9 +357,9 @@ export default function Register() {
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }],
             }}>
-              <Text style={[styles.title, { color: colors.text }]}>Lag din profil</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t('register.title')}</Text>
               <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
-                Fyll inn informasjonen din for å komme i gang
+                {t('register.subtitle')}
               </Text>
 
               <View style={styles.iconWrapper}>
@@ -353,7 +375,7 @@ export default function Register() {
                   <View style={styles.nameInputGroup}>
                     <View style={[styles.inputLabelRow]}>
                       <Ionicons name="person-outline" size={18} color={colors.tint} />
-                      <Text style={[styles.label, { color: colors.text }]}>Fornavn</Text>
+                      <Text style={[styles.label, { color: colors.text }]}>{t('register.firstNameLabel')}</Text>
                     </View>
                     <Animated.View style={[
                       styles.inputContainer,
@@ -379,7 +401,7 @@ export default function Register() {
                             setTimeout(() => lastNameRef.current?.focus(), 100);
                           }
                         }}
-                        placeholder="Fornavn"
+                        placeholder={t('register.firstNamePlaceholder')}
                         placeholderTextColor={colors.lightDarkText}
                         style={[styles.input, { color: colors.text }]}
                         onFocus={() => openField('firstName')}
@@ -419,7 +441,7 @@ export default function Register() {
                   <View style={styles.nameInputGroup}>
                     <View style={[styles.inputLabelRow]}>
                       <Ionicons name="person-outline" size={18} color={colors.tint} />
-                      <Text style={[styles.label, { color: colors.text }]}>Etternavn</Text>
+                      <Text style={[styles.label, { color: colors.text }]}>{t('register.lastNameLabel')}</Text>
                     </View>
                     <Animated.View style={[
                       styles.inputContainer,
@@ -445,7 +467,7 @@ export default function Register() {
                             setTimeout(() => phoneRef.current?.focus(), 100);
                           }
                         }}
-                        placeholder="Etternavn"
+                        placeholder={t('register.lastNamePlaceholder')}
                         placeholderTextColor={colors.lightDarkText}
                         style={[styles.input, { color: colors.text }]}
                         onFocus={() => openField('lastName')}
@@ -484,9 +506,9 @@ export default function Register() {
 
                 {/* Phone Number */}
                 <View style={styles.inputGroup}>
-                  <View style={[styles.inputLabelRow]}>
+                    <View style={[styles.inputLabelRow]}>
                     <Ionicons name="call-outline" size={18} color={colors.tint} />
-                    <Text style={[styles.label, { color: colors.text }]}>Telefonnummer</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>{t('register.phoneLabel')}</Text>
                   </View>
                   <Animated.View style={[
                     styles.inputContainer,
@@ -528,7 +550,7 @@ export default function Register() {
                         ref={phoneRef}
                         value={phone}
                         onChangeText={handlePhoneChange}
-                        placeholder="12345678"
+                        placeholder={t('register.phonePlaceholder')}
                         placeholderTextColor={colors.lightDarkText}
                         keyboardType="phone-pad"
                         textContentType="telephoneNumber"
@@ -612,9 +634,9 @@ export default function Register() {
 
                 {/* Date of Birth */}
                 <View ref={birthFieldRef} style={styles.inputGroup}>
-                  <View style={[styles.inputLabelRow]}>
+                    <View style={[styles.inputLabelRow]}>
                     <Ionicons name="calendar-outline" size={18} color={colors.tint} />
-                    <Text style={[styles.label, { color: colors.text }]}>Fødselsdato</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>{t('register.birthLabel')}</Text>
                   </View>
                   {Platform.OS === 'web' ? (
                     <Animated.View style={[
@@ -628,14 +650,14 @@ export default function Register() {
                         borderWidth: 2,
                       }
                     ]}>
-                      <TextInput
+                        <TextInput
                         value={birth}
                         onChangeText={(text) => {
                           setBirth(text);
                           setError(null);
                           setBirthError(null);
                         }}
-                        placeholder="DD/MM/YYYY"
+                        placeholder={t('register.birthPlaceholder')}
                         placeholderTextColor={colors.lightDarkText}
                         style={[styles.input, { color: colors.text }]}
                         onFocus={() => openField('birth')}
@@ -757,9 +779,9 @@ export default function Register() {
                 </Animated.View>
               )}
 
-              <View style={styles.dividerContainer}>
+                <View style={styles.dividerContainer}>
                 <View style={[styles.dividerLine, { backgroundColor: colors.lightDarkText }]} />
-                <Text style={[styles.dividerText, { color: colors.lightDarkText }]}>Eller fortsett med</Text>
+                <Text style={[styles.dividerText, { color: colors.lightDarkText }]}>{t('register.orContinueWith')}</Text>
                 <View style={[styles.dividerLine, { backgroundColor: colors.lightDarkText }]} />
               </View>
 
@@ -812,7 +834,7 @@ export default function Register() {
                     </View>
                   ) : (
                     <View style={styles.buttonContent}>
-                      <Text style={[styles.nextText, { color: isFormValid() ? colors.darkText : colors.text }]}>Fullfør registrering</Text>
+                      <Text style={[styles.nextText, { color: isFormValid() ? colors.darkText : colors.text }]}>{t('register.submit')}</Text>
                       <Ionicons name="arrow-forward" size={20} color={isFormValid() ? colors.darkText : colors.text} />
                     </View>
                   )}
@@ -821,12 +843,12 @@ export default function Register() {
 
               <View style={styles.loginHintContainer}>
                 <Text style={[styles.loginHintText, { color: colors.lightDarkText }]}>
-                  Har du allerede en konto?{' '}
+                  {t('register.alreadyHaveAccount')}{' '}
                   <Text
                     style={[styles.loginLink, { color: colors.tint }]}
                     onPress={() => router.replace('/(onboarding)/(account)/LoginChoice')}
                   >
-                    Logg inn
+                    {t('register.loginLink')}
                   </Text>
                 </Text>
               </View>

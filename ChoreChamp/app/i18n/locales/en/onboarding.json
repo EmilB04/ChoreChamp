@@ -6,4 +6,70 @@
     "skipButton": "Not now",
     "footer": "You can change this later in settings."
   }
+  ,
+  "accountcheck": {
+    "title": "Do you already have an account?",
+    "subtitle": "Choose whether to sign in or create a new account",
+    "existingTitle": "I already have an account",
+    "existingSubtitle": "Sign in to continue",
+    "newTitle": "I'm a new user",
+    "newSubtitle": "Create a new account",
+    "continue": "Continue"
+  }
+  ,
+  "register": {
+    "title": "Create your profile",
+    "subtitle": "Fill in your details to get started",
+    "firstNameLabel": "First name",
+    "firstNamePlaceholder": "First name",
+    "lastNameLabel": "Last name",
+    "lastNamePlaceholder": "Last name",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "12345678",
+    "birthLabel": "Date of birth",
+    "birthPlaceholder": "DD/MM/YYYY",
+    "orContinueWith": "Or continue with",
+    "submit": "Complete registration",
+    "error": "Something went wrong. Please try again.",
+    "errorFirstNameRequired": "Please enter a first name",
+    "errorFirstNameMin": "First name must be at least 2 characters",
+    "errorLastNameRequired": "Please enter a last name",
+    "errorLastNameMin": "Last name must be at least 2 characters",
+    "errorPhoneRequired": "Please enter a phone number",
+    "errorPhoneMin": "Phone number must be at least {{min}} digits",
+    "errorPhoneMax": "Phone number is too long",
+    "errorPhoneDigits": "Phone number may contain digits only",
+    "errorBirthRequired": "Please choose a date of birth",
+    "errorBirthInvalid": "Invalid date",
+    "errorTooYoung": "You must be at least 6 years old",
+    "errorBirthYearInvalid": "Invalid birth year",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginLink": "Sign in"
+  },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to continue",
+    "phoneLabel": "Phone number",
+    "phonePlaceholder": "12345678",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "forgotPassword": "Forgot password?",
+    "loggingIn": "Logging in",
+    "login": "Log in",
+    "errorInvalidPhone": "Invalid phone number",
+    "errorPasswordMin": "Password must be at least 6 characters",
+    "errorPhoneRequired": "Please enter a phone number",
+    "errorPasswordRequired": "Please enter your password",
+    "errorInvalidCredentials": "Incorrect phone number or password"
+  },
+  "loginchoice": {
+    "title": "Welcome back!",
+    "subtitle": "Choose a method to sign in",
+    "google": "Sign in with Google",
+    "facebook": "Sign in with Facebook",
+    "apple": "Sign in with Apple",
+    "phone": "Sign in with phone number",
+    "or": "or",
+    "createAccount": "Create new account"
+  }
 }

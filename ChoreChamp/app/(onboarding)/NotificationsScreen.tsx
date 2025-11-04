@@ -1,3 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/i18n';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
 import BackButton from '@/components/onBoarding/BackButton';
 import OnboardingDots from '@/components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -30,10 +35,10 @@ export default function NotificationsScreen() {
     useEffect(() => {
       async function applyLanguage() {
         if (!langParam) return;
-        if (i18n.language === langParam) return; // already set
+        if (i18n.language === langParam) return; 
         try {
-          await i18n.changeLanguage(langParam); // triggers re-render of t()
-          await AsyncStorage.setItem('appLanguage', langParam); // persist choice
+          await i18n.changeLanguage(langParam); 
+          await AsyncStorage.setItem('appLanguage', langParam); 
         } catch (e) {
           console.warn('Language change failed', e);
         }
@@ -44,12 +49,14 @@ export default function NotificationsScreen() {
 
     function handleAllow() {
         updateUserData({ notificationsEnabled: true });
-        router.push('/(onboarding)/(account)/Register');
+        // --- CHANGED: after notifications step, go to AccountCheck
+        router.push('/(onboarding)/(account)/AccountCheck');
     }
 
     function handleSkip() {
         updateUserData({ notificationsEnabled: false });
-        router.push('/(onboarding)/(account)/Register');
+        // --- CHANGED: after skipping, go to AccountCheck
+        router.push('/(onboarding)/(account)/AccountCheck');
     }
 
     return (
@@ -66,8 +73,8 @@ export default function NotificationsScreen() {
 
             <SafeAreaView style={styles.safeContent}>
                 <View style={styles.headerRow}>
-                    <OnboardingDots activeIndex={3} total={5} />
-                    <BackButton />
+                    <OnboardingDots activeIndex={2} total={5} />
+                    <BackButton onPress={() => router.replace('/(onboarding)/WelcomeScreen')} />
                 </View>
 
                 <Animated.View style={[styles.container, { opacity: fadeAnim }]}>

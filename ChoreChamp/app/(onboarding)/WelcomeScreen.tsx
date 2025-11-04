@@ -1,4 +1,5 @@
 import OnboardingDots from '@/components/onBoarding/OnboardingDots';
+import BackButton from '@/components/onBoarding/BackButton';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
@@ -55,7 +56,8 @@ export default function WelcomeScreen() {
   const strings = STRINGS[lang];
 
   function goNext() {
-    router.push('/(onboarding)/(account)/AccountCheck');
+    // --- CHANGED: go to NotificationsScreen next, preserving the selected language
+    router.push(`/(onboarding)/NotificationsScreen?lang=${lang}`);
   }
 
   return (
@@ -72,7 +74,8 @@ export default function WelcomeScreen() {
 
       <SafeAreaView style={styles.safeContent}>
         <View style={styles.headerRow}>
-          <OnboardingDots activeIndex={0} total={5} />
+          <OnboardingDots activeIndex={1} total={5} />
+          <BackButton onPress={() => router.replace('/(onboarding)/LanguageSelection')} />
         </View>
 
         <ScrollView

@@ -3,6 +3,8 @@
  * Centralized validation logic for form fields
  */
 
+import i18n from '../../i18n/i18n';
+
 // Validation result interface
 export interface ValidationResult {
     isValid: boolean;
@@ -27,17 +29,11 @@ export function validateFirstName(firstName: string): ValidationResult {
     const trimmedName = firstName.trim();
 
     if (!trimmedName) {
-        return {
-            isValid: false,
-            error: 'Vennligst skriv inn fornavn',
-        };
+        return { isValid: false, error: i18n.t('register.errorFirstNameRequired') };
     }
 
     if (trimmedName.length < 2) {
-        return {
-            isValid: false,
-            error: 'Fornavn må være minst 2 tegn',
-        };
+        return { isValid: false, error: i18n.t('register.errorFirstNameMin') };
     }
 
     return { isValid: true };
@@ -52,17 +48,11 @@ export function validateLastName(lastName: string): ValidationResult {
     const trimmedName = lastName.trim();
 
     if (!trimmedName) {
-        return {
-            isValid: false,
-            error: 'Vennligst skriv inn etternavn',
-        };
+        return { isValid: false, error: i18n.t('register.errorLastNameRequired') };
     }
 
     if (trimmedName.length < 2) {
-        return {
-            isValid: false,
-            error: 'Etternavn må være minst 2 tegn',
-        };
+        return { isValid: false, error: i18n.t('register.errorLastNameMin') };
     }
 
     return { isValid: true };
@@ -78,10 +68,7 @@ export function validatePhone(phone: string, countryCode: string): ValidationRes
     const trimmedPhone = phone.trim();
 
     if (!trimmedPhone) {
-        return {
-            isValid: false,
-            error: 'Vennligst skriv inn telefonnummer',
-        };
+        return { isValid: false, error: i18n.t('register.errorPhoneRequired') };
     }
 
     // Remove all non-numeric characters
@@ -90,26 +77,17 @@ export function validatePhone(phone: string, countryCode: string): ValidationRes
     // Validate minimum length based on country code
     const minLength = getMinPhoneLength(countryCode);
     if (cleanPhone.length < minLength) {
-        return {
-            isValid: false,
-            error: `Telefonnummer må være minst ${minLength} siffer`,
-        };
+        return { isValid: false, error: i18n.t('register.errorPhoneMin', { min: minLength }) };
     }
 
     // Validate maximum length
     if (cleanPhone.length > 15) {
-        return {
-            isValid: false,
-            error: 'Telefonnummer er for langt',
-        };
+        return { isValid: false, error: i18n.t('register.errorPhoneMax') };
     }
 
     // Check if phone contains only digits
     if (!/^\d+$/.test(cleanPhone)) {
-        return {
-            isValid: false,
-            error: 'Telefonnummer kan kun inneholde siffer',
-        };
+        return { isValid: false, error: i18n.t('register.errorPhoneDigits') };
     }
 
     return { isValid: true };
@@ -139,19 +117,13 @@ function getMinPhoneLength(countryCode: string): number {
  */
 export function validateBirthDate(birth: string): ValidationResult {
     if (!birth) {
-        return {
-            isValid: false,
-            error: 'Vennligst velg fødselsdato',
-        };
+        return { isValid: false, error: i18n.t('register.errorBirthRequired') };
     }
 
     // Parse date (assuming format DD/MM/YYYY)
     const dateParts = birth.split('/');
     if (dateParts.length !== 3) {
-        return {
-            isValid: false,
-            error: 'Ugyldig datoformat',
-        };
+        return { isValid: false, error: i18n.t('register.errorBirthInvalid') };
     }
 
     const day = parseInt(dateParts[0], 10);
@@ -160,25 +132,16 @@ export function validateBirthDate(birth: string): ValidationResult {
 
     // Validate date components
     if (isNaN(day) || isNaN(month) || isNaN(year)) {
-        return {
-            isValid: false,
-            error: 'Ugyldig dato',
-        };
+        return { isValid: false, error: i18n.t('register.errorBirthInvalid') };
     }
 
     // Check date ranges
     if (month < 1 || month > 12) {
-        return {
-            isValid: false,
-            error: 'Ugyldig måned',
-        };
+        return { isValid: false, error: i18n.t('register.errorBirthInvalid') };
     }
 
     if (day < 1 || day > 31) {
-        return {
-            isValid: false,
-            error: 'Ugyldig dag',
-        };
+        return { isValid: false, error: i18n.t('register.errorBirthInvalid') };
     }
 
     // Check if year is reasonable (must be at least 13 years old)
@@ -191,17 +154,11 @@ export function validateBirthDate(birth: string): ValidationResult {
     const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
 
     if (actualAge < 6) {
-        return {
-            isValid: false,
-            error: 'Du må være minst 6 år gammel',
-        };
+        return { isValid: false, error: i18n.t('register.errorTooYoung') };
     }
 
     if (year < 1900 || year > today.getFullYear()) {
-        return {
-            isValid: false,
-            error: 'Ugyldig fødselsår',
-        };
+        return { isValid: false, error: i18n.t('register.errorBirthYearInvalid') };
     }
 
     return { isValid: true };

@@ -3,11 +3,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useButtonPressAnimation, useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useEffect } from 'react';
 import { Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n/i18n';
 
 
 type SocialButtonProps = {
@@ -55,6 +58,24 @@ export default function LoginChoice() {
   const { colors } = useTheme();
   const { fadeAnim: headerFadeAnim, slideAnim: titleSlideAnim } = useEntranceAnimation();
   const { signInWithGoogle } = useAuth(); 
+  const { t } = useTranslation('onboarding');
+
+  const params = useLocalSearchParams();
+  const langParam = typeof params.lang === 'string' ? params.lang : undefined;
+
+  useEffect(() => {
+    async function applyLanguage() {
+      if (!langParam) return;
+      if (i18n.language === langParam) return;
+      try {
+        await i18n.changeLanguage(langParam);
+        await AsyncStorage.setItem('appLanguage', langParam);
+      } catch (e) {
+        console.warn('Language change failed', e);
+      }
+    }
+    applyLanguage();
+  }, [langParam]);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
@@ -79,33 +100,33 @@ export default function LoginChoice() {
               <Ionicons name="log-in" size={40} color={colors.darkText} />
             </View>
           </View>
-          <Text style={[styles.title, { color: colors.text }]}>Velkommen tilbake!</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('loginchoice.title')}</Text>
           <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
-            Velg en metode for å logge inn
+            {t('loginchoice.subtitle')}
           </Text>
         </Animated.View>
 
         <View style={styles.socialStack}>
           <SocialButton
-            label="Logg inn med Google"
+            label={t('loginchoice.google')}
             icon={<Image source={require('@/assets/images/Google.png')} style={styles.socialIcon} />}
             onPress={signInWithGoogle}
             index={0}
           />
           <SocialButton
-            label="Logg inn med Facebook"
+            label={t('loginchoice.facebook')}
             icon={<Ionicons name="logo-facebook" size={24} color="#4267B2" />}
             onPress={() => console.log('Facebook login')}
             index={1}
           />
           <SocialButton
-            label="Logg inn med Apple"
+            label={t('loginchoice.apple')}
             icon={<Ionicons name="logo-apple" size={24} color="#fff" />}
             onPress={() => console.log('Apple login')}
             index={2}
           />
           <SocialButton
-            label="Logg inn med telefonnummer"
+            label={t('loginchoice.phone')}
             icon={<Ionicons name="call" size={24} color="#34A853" />}
             onPress={() => router.push('/(onboarding)/(account)/Login')}
             index={3}
@@ -114,7 +135,7 @@ export default function LoginChoice() {
 
         <View style={styles.dividerContainer}>
           <View style={[styles.dividerLine, { backgroundColor: colors.lightDarkText }]} />
-          <Text style={[styles.dividerText, { color: colors.lightDarkText }]}>eller</Text>
+          <Text style={[styles.dividerText, { color: colors.lightDarkText }]}>{t('loginchoice.or')}</Text>
           <View style={[styles.dividerLine, { backgroundColor: colors.lightDarkText }]} />
         </View>
 
@@ -127,7 +148,7 @@ export default function LoginChoice() {
           <View style={styles.registerButtonContent}>
             <Ionicons name="person-add" size={20} color={colors.darkText} style={styles.registerIcon} />
             <Text style={[styles.registerButtonText, { color: colors.darkText }]}>
-              Opprett ny konto
+              {t('loginchoice.createAccount')}
             </Text>
           </View>
         </TouchableOpacity>

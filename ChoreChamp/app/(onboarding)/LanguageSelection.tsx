@@ -7,7 +7,6 @@ import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingDots from '../../components/onBoarding/OnboardingDots';
-import BackButton from '@/components/onBoarding/BackButton';
 
 // TODO: Remove when language is incorporated throughout app
 const CHOOSE_LANGUAGE_TEXTS: Record<string, string> = {
@@ -37,7 +36,8 @@ export default function LanguageSelection() {
 
     function handleContinue() {
         if (selected) {
-            router.push(`/(onboarding)/NotificationsScreen?lang=${encodeURIComponent(selected)}`);
+            // --- CHANGED: route to WelcomeScreen first, carrying the selected language
+            router.push(`/(onboarding)/WelcomeScreen?lang=${encodeURIComponent(selected)}`);
         }
     }
 
@@ -55,8 +55,7 @@ export default function LanguageSelection() {
 
             <SafeAreaView style={styles.safeContent}>
                 <View style={styles.headerRow}>
-                    <OnboardingDots activeIndex={2} total={5} />
-                    <BackButton />
+                    <OnboardingDots activeIndex={0} total={5} />
                 </View>
 
                 <Animated.View style={[styles.container, { opacity: fadeAnim }]}>

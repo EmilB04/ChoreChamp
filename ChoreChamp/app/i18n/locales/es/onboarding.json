@@ -6,4 +6,70 @@
     "skipButton": "Ahora no",
     "footer": "Puedes cambiar esto más tarde en los ajustes."
   }
+  ,
+  "accountcheck": {
+    "title": "¿Ya tienes una cuenta?",
+    "subtitle": "Elige si iniciar sesión o crear una nueva cuenta",
+    "existingTitle": "Ya tengo una cuenta",
+    "existingSubtitle": "Inicia sesión para continuar",
+    "newTitle": "Soy un usuario nuevo",
+    "newSubtitle": "Crear una cuenta nueva",
+    "continue": "Continuar"
+  }
+  ,
+  "register": {
+    "title": "Crea tu perfil",
+    "subtitle": "Rellena tus datos para comenzar",
+    "firstNameLabel": "Nombre",
+    "firstNamePlaceholder": "Nombre",
+    "lastNameLabel": "Apellidos",
+    "lastNamePlaceholder": "Apellidos",
+    "phoneLabel": "Teléfono",
+    "phonePlaceholder": "12345678",
+    "birthLabel": "Fecha de nacimiento",
+    "birthPlaceholder": "DD/MM/YYYY",
+    "orContinueWith": "O continúa con",
+    "submit": "Completar registro",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "errorFirstNameRequired": "Por favor, introduce tu nombre",
+    "errorFirstNameMin": "El nombre debe tener al menos 2 caracteres",
+    "errorLastNameRequired": "Por favor, introduce tus apellidos",
+    "errorLastNameMin": "Los apellidos deben tener al menos 2 caracteres",
+    "errorPhoneRequired": "Por favor, introduce un número de teléfono",
+    "errorPhoneMin": "El número debe tener al menos {{min}} dígitos",
+    "errorPhoneMax": "El número de teléfono es demasiado largo",
+    "errorPhoneDigits": "El número de teléfono solo puede contener dígitos",
+    "errorBirthRequired": "Por favor, elige la fecha de nacimiento",
+    "errorBirthInvalid": "Fecha no válida",
+    "errorTooYoung": "Debes tener al menos 6 años",
+    "errorBirthYearInvalid": "Año de nacimiento no válido",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "loginLink": "Iniciar sesión"
+  },
+  "login": {
+    "title": "Bienvenido de nuevo",
+    "subtitle": "Inicia sesión para continuar",
+    "phoneLabel": "Teléfono",
+    "phonePlaceholder": "12345678",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Contraseña",
+    "forgotPassword": "¿Olvidaste la contraseña?",
+    "loggingIn": "Iniciando sesión",
+    "login": "Iniciar sesión",
+    "errorInvalidPhone": "Número de teléfono inválido",
+    "errorPasswordMin": "La contraseña debe tener al menos 6 caracteres",
+    "errorPhoneRequired": "Por favor, introduce un número de teléfono",
+    "errorPasswordRequired": "Por favor, introduce tu contraseña",
+    "errorInvalidCredentials": "Número o contraseña incorrectos"
+  },
+  "loginchoice": {
+    "title": "¡Bienvenido de nuevo!",
+    "subtitle": "Elige un método para iniciar sesión",
+    "google": "Iniciar sesión con Google",
+    "facebook": "Iniciar sesión con Facebook",
+    "apple": "Iniciar sesión con Apple",
+    "phone": "Iniciar sesión con número de teléfono",
+    "or": "o",
+    "createAccount": "Crear cuenta nueva"
+  }
 }

@@ -6,4 +6,70 @@
     "skipButton": "Ikke nå",
     "footer": "Du kan endre dette i innstillinger senere."
   }
+  ,
+  "accountcheck": {
+    "title": "Har du allerede en konto?",
+    "subtitle": "Velg om du vil logge inn eller opprette en ny konto",
+    "existingTitle": "Jeg har allerede en konto",
+    "existingSubtitle": "Logg inn for å fortsette",
+    "newTitle": "Jeg er ny bruker",
+    "newSubtitle": "Opprett en ny konto",
+    "continue": "Fortsett"
+  }
+  ,
+  "register": {
+    "title": "Lag din profil",
+    "subtitle": "Fyll inn informasjonen din for å komme i gang",
+    "firstNameLabel": "Fornavn",
+    "firstNamePlaceholder": "Fornavn",
+    "lastNameLabel": "Etternavn",
+    "lastNamePlaceholder": "Etternavn",
+    "phoneLabel": "Telefonnummer",
+    "phonePlaceholder": "12345678",
+    "birthLabel": "Fødselsdato",
+    "birthPlaceholder": "DD/MM/YYYY",
+    "orContinueWith": "Eller fortsett med",
+    "submit": "Fullfør registrering",
+    "error": "Noe gikk galt. Prøv igjen.",
+    "errorFirstNameRequired": "Vennligst skriv inn fornavn",
+    "errorFirstNameMin": "Fornavn må være minst 2 tegn",
+    "errorLastNameRequired": "Vennligst skriv inn etternavn",
+    "errorLastNameMin": "Etternavn må være minst 2 tegn",
+    "errorPhoneRequired": "Vennligst skriv inn telefonnummer",
+    "errorPhoneMin": "Telefonnummer må være minst {{min}} siffer",
+    "errorPhoneMax": "Telefonnummer er for langt",
+    "errorPhoneDigits": "Telefonnummer kan kun inneholde siffer",
+    "errorBirthRequired": "Vennligst velg fødselsdato",
+    "errorBirthInvalid": "Ugyldig dato",
+    "errorTooYoung": "Du må være minst 6 år gammel",
+    "errorBirthYearInvalid": "Ugyldig fødselsår",
+    "alreadyHaveAccount": "Har du allerede en konto?",
+    "loginLink": "Logg inn"
+  },
+  "login": {
+    "title": "Velkommen tilbake",
+    "subtitle": "Logg inn for å fortsette",
+    "phoneLabel": "Telefonnummer",
+    "phonePlaceholder": "12345678",
+    "passwordLabel": "Passord",
+    "passwordPlaceholder": "Passord",
+    "forgotPassword": "Glemt passord?",
+    "loggingIn": "Logger inn",
+    "login": "Logg inn",
+    "errorInvalidPhone": "Ugyldig telefonnummer",
+    "errorPasswordMin": "Passordet må være minst 6 tegn",
+    "errorPhoneRequired": "Vennligst skriv inn telefonnummer",
+    "errorPasswordRequired": "Vennligst skriv inn passord",
+    "errorInvalidCredentials": "Feil telefonnummer eller passord"
+  },
+  "loginchoice": {
+    "title": "Velkommen tilbake!",
+    "subtitle": "Velg en metode for å logge inn",
+    "google": "Logg inn med Google",
+    "facebook": "Logg inn med Facebook",
+    "apple": "Logg inn med Apple",
+    "phone": "Logg inn med telefonnummer",
+    "or": "eller",
+    "createAccount": "Opprett ny konto"
+  }
 }
