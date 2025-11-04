@@ -1,12 +1,12 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React from 'react';
+import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 
 type LangKey = 'no' | 'en' | 'es' | 'de';
 
@@ -53,7 +53,7 @@ export default function WelcomeScreen() {
   const strings = STRINGS[lang];
 
   function goNext() {
-    router.push('/(onboarding)/LoginCheckScreen');
+    router.push('/(onboarding)/(account)/AccountCheck');
   }
 
   return (
