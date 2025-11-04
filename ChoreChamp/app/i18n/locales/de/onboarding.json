@@ -60,7 +60,9 @@
     "errorPasswordMin": "Das Passwort muss mindestens 6 Zeichen haben",
     "errorPhoneRequired": "Bitte gib eine Telefonnummer ein",
     "errorPasswordRequired": "Bitte gib dein Passwort ein",
-    "errorInvalidCredentials": "Falsche Telefonnummer oder Passwort"
+    "errorInvalidCredentials": "Falsche Telefonnummer oder Passwort",
+    "noAccount": "Hast du kein Konto?",
+    "registerLink": "Registrieren"
   },
   "loginchoice": {
     "title": "Willkommen zurück!",

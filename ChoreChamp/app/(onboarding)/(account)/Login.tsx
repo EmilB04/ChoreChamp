@@ -528,12 +528,12 @@ export default function Login() {
 
                         <View style={styles.registerHintContainer}>
                             <Text style={[styles.registerHintText, { color: colors.lightDarkText }]}>
-                                Har du ikke en konto?{' '}
+                                {t('login.noAccount')}{' '}
                                 <Text
                                     style={[styles.registerLink, { color: colors.tint }]}
                                     onPress={() => router.replace('/(onboarding)/(account)/Register')}
                                 >
-                                    Registrer deg
+                                    {t('login.registerLink')}
                                 </Text>
                             </Text>
                         </View>

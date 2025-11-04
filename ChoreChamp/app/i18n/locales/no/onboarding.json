@@ -60,7 +60,9 @@
     "errorPasswordMin": "Passordet må være minst 6 tegn",
     "errorPhoneRequired": "Vennligst skriv inn telefonnummer",
     "errorPasswordRequired": "Vennligst skriv inn passord",
-    "errorInvalidCredentials": "Feil telefonnummer eller passord"
+    "errorInvalidCredentials": "Feil telefonnummer eller passord",
+    "noAccount": "Har du ikke en konto?",
+    "registerLink": "Registrer deg"
   },
   "loginchoice": {
     "title": "Velkommen tilbake!",

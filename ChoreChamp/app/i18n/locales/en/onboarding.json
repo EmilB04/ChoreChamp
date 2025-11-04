@@ -60,7 +60,9 @@
     "errorPasswordMin": "Password must be at least 6 characters",
     "errorPhoneRequired": "Please enter a phone number",
     "errorPasswordRequired": "Please enter your password",
-    "errorInvalidCredentials": "Incorrect phone number or password"
+    "errorInvalidCredentials": "Incorrect phone number or password",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register"
   },
   "loginchoice": {
     "title": "Welcome back!",
