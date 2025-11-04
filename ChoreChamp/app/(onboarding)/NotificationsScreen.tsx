@@ -1,18 +1,21 @@
-import React from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Animated } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import OnboardingDots from "../../components/onBoarding/OnboardingDots";
-import { useTheme } from '@/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
-import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import BackButton from '@/components/onBoarding/BackButton';
+import OnboardingDots from '@/components/onBoarding/OnboardingDots';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useUser } from '@/contexts/UserContext';
+import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NotificationsScreen() {
     const router = useRouter();
     const { colors } = useTheme();
+    const { updateUserData } = useUser();
 
     const { fadeAnim } = useEntranceAnimation();
     const iconScaleAnim = useScaleAnimation(100);
@@ -20,10 +23,12 @@ export default function NotificationsScreen() {
     const [button1SlideAnim, button2SlideAnim] = useStaggeredAnimation(2, 300, 100);
 
     function handleAllow() {
+        updateUserData({ notificationsEnabled: true });
         router.push('/(onboarding)/(account)/Register');
     }
 
     function handleSkip() {
+        updateUserData({ notificationsEnabled: false });
         router.push('/(onboarding)/(account)/Register');
     }
 

@@ -5,9 +5,9 @@
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo run:web",
     "lint": "expo lint",
     "build": "expo export -p web --output-dir dist",
     "test": "jest --watchAll"
@@ -43,6 +43,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",
+    "react-native-calendars": "^1.1313.0",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-reanimated": "~4.1.0",
     "react-native-safe-area-context": "~5.6.0",

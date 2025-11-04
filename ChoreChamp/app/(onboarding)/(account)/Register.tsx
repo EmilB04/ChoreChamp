@@ -1,12 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Platform, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView, Animated, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
-import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { useEntranceAnimation } from '@/hooks/useEntranceAnimation';
+import { useBorderAnimations, useFormAnimations, usePickerAnimations } from '@/hooks/useFormAnimations';
+import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
+import {
+  formatPhoneNumber,
+  isFormComplete,
+  stripCountryCode,
+  validateBirthDate,
+  validateFirstName,
+  validateLastName,
+  validatePhone,
+  validateRegistrationForm,
+  type RegisterFormData
+} from './FormValidation';
 
 export default function Register() {
   const router = useRouter();
@@ -24,23 +36,34 @@ export default function Register() {
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [birth, setBirth] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [firstNameError, setFirstNameError] = useState<string | null>(null);
+  const [lastNameError, setLastNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [birthError, setBirthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeField, setActiveField] = useState<'firstName' | 'lastName' | 'phone' | 'birth' | null>(null);
 
   // Use entrance animation hook for initial page load
   const { fadeAnim, slideAnim } = useEntranceAnimation();
 
-  // Animated values for smooth transitions
-  const firstNameBorderAnim = useRef(new Animated.Value(0)).current;
-  const lastNameBorderAnim = useRef(new Animated.Value(0)).current;
-  const phoneBorderAnim = useRef(new Animated.Value(0)).current;
-  const birthBorderAnim = useRef(new Animated.Value(0)).current;
-  const buttonOpacityAnim = useRef(new Animated.Value(0.5)).current;
+  // Use form animations hook
+  const { buttonOpacityAnim, errorAnim, fieldErrorAnims, animateButtonOpacity } = useFormAnimations({
+    errorCount: 4,
+    hasError: !!error,
+    fieldErrors: [firstNameError, lastNameError, phoneError, birthError],
+  });
+  const [firstNameErrorAnim, lastNameErrorAnim, phoneErrorAnim, birthErrorAnim] = fieldErrorAnims;
+
+  // Use border animations hook
+  const { borderAnims, animateBorder } = useBorderAnimations({ fieldCount: 4 });
+  const [firstNameBorderAnim, lastNameBorderAnim, phoneBorderAnim, birthBorderAnim] = borderAnims;
+
+  // Use picker animations hook for country picker
+  const { pickerAnim: countryPickerAnim, chevronAnim: countryChevronAnim, animatePicker: animateCountryPicker } = usePickerAnimations();
+
+  // Separate animations for date picker (not using the hook because it has different behavior)
   const datePickerAnim = useRef(new Animated.Value(0)).current;
-  const errorAnim = useRef(new Animated.Value(0)).current;
   const chevronRotateAnim = useRef(new Animated.Value(0)).current;
-  const countryPickerAnim = useRef(new Animated.Value(0)).current;
-  const countryChevronAnim = useRef(new Animated.Value(0)).current;
 
   // Common country codes
   const countryCodes = [
@@ -52,63 +75,43 @@ export default function Register() {
 
   // Animate button opacity when form validity changes
   useEffect(() => {
-    const isValid = firstName.trim() && lastName.trim() && phone.trim() && birth && phone.replace(/\s/g, '').length >= 8;
+    const formData: RegisterFormData = {
+      firstName,
+      lastName,
+      phone,
+      countryCode,
+      birth,
+    };
 
-    Animated.timing(buttonOpacityAnim, {
-      toValue: isValid ? 1 : 0.5,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [firstName, lastName, phone, birth, buttonOpacityAnim]);
-
-  // Animate error message appearance
-  useEffect(() => {
-    if (error) {
-      Animated.spring(errorAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 100,
-        friction: 8,
-      }).start();
-    } else {
-      Animated.timing(errorAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [error, errorAnim]);
+    const isValid = isFormComplete(formData) && validateRegistrationForm(formData).isValid;
+    animateButtonOpacity(isValid);
+  }, [firstName, lastName, phone, countryCode, birth, animateButtonOpacity]);
 
   // Check if all fields are filled and valid
-  function isFormValid() {
-    // Check if all fields have values
-    if (!firstName.trim() || !lastName.trim() || !phone.trim() || !birth) {
-      return false;
-    }
+  function isFormValid(): boolean {
+    const formData: RegisterFormData = {
+      firstName,
+      lastName,
+      phone,
+      countryCode,
+      birth,
+    };
 
-    // Validate phone number format (at least 8 digits)
-    const cleanPhone = phone.replace(/\s/g, '');
-    if (cleanPhone.length < 8) {
-      return false;
-    }
-
-    return true;
+    return isFormComplete(formData) && validateRegistrationForm(formData).isValid;
   }
 
-  // Basic validation for registration fields
-  function validate() {
-    if (!firstName.trim()) return 'Vennligst skriv inn fornavn';
-    if (!lastName.trim()) return 'Vennligst skriv inn etternavn';
-    if (!phone.trim()) return 'Vennligst skriv inn telefonnummer';
-    if (!birth) return 'Vennligst velg fødselsdato';
+  // Validate registration form and return error message
+  function validate(): string | null {
+    const formData: RegisterFormData = {
+      firstName,
+      lastName,
+      phone,
+      countryCode,
+      birth,
+    };
 
-    // Basic phone validation (at least 8 digits)
-    const cleanPhone = phone.replace(/\s/g, '');
-    if (cleanPhone.length < 8) {
-      return 'Ugyldig telefonnummer';
-    }
-
-    return null;
+    const validation = validateRegistrationForm(formData);
+    return validation.isValid ? null : validation.error || 'Vennligst fyll ut alle feltene';
   }
 
   // TODO: Implement actual registration logic
@@ -131,13 +134,22 @@ export default function Register() {
   const handleDateChange = (event: any, selectedDate?: Date) => {
     if (event.type === 'dismissed') {
       setActiveField(null);
+      handleBirthBlur();
       return;
     }
     const currentDate = selectedDate || new Date();
     const day = currentDate.getDate().toString().padStart(2, '0');
     const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
     const year = currentDate.getFullYear();
-    setBirth(`${day}/${month}/${year}`);
+    const formattedDate = `${day}/${month}/${year}`;
+    setBirth(formattedDate);
+    setBirthError(null); // Clear error while selecting
+    
+    // Validate immediately after selection
+    const validation = validateBirthDate(formattedDate);
+    if (!validation.isValid) {
+      setBirthError(validation.error || 'Ugyldig fødselsdato');
+    }
   };
 
   const handlePhoneChange = (text: string) => {
@@ -145,6 +157,7 @@ export default function Register() {
     // Just store the raw input while typing
     setPhone(text);
     setError(null);
+    setPhoneError(null); // Clear phone error while typing
     
     // Auto-advance if autocomplete filled a full phone number
     // Check if length jumped significantly (autocomplete) and has at least 8 digits
@@ -158,96 +171,83 @@ export default function Register() {
   };
 
   const handlePhoneBlur = () => {
-    // Remove all non-numeric characters except + at the start
-    let cleaned = phone.replace(/[^\d+]/g, '');
+    // Strip country code and clean the input
+    const cleaned = stripCountryCode(phone);
 
-    // Strip country codes from autofill
-    const countryCodePrefixes = [
-      { prefix: '+47', length: 3 },
-      { prefix: '+44', length: 3 },
-      { prefix: '+49', length: 3 },
-      { prefix: '+34', length: 3 },
-      { prefix: '+1', length: 2, minLength: 10 },
-      { prefix: '0047', length: 4 },
-      { prefix: '0044', length: 4 },
-    ];
+    // Format with spacing when user leaves the field
+    const formatted = formatPhoneNumber(cleaned, countryCode);
 
-    for (const { prefix, length, minLength } of countryCodePrefixes) {
-      if (cleaned.startsWith(prefix)) {
-        // Only strip if minimum length requirement is met (for +1 edge case)
-        if (!minLength || cleaned.length > minLength) {
-          cleaned = cleaned.slice(length);
-          break;
-        }
+    setPhone(formatted);
+
+    // Validate phone number
+    if (formatted.trim()) {
+      const validation = validatePhone(formatted, countryCode);
+      if (!validation.isValid) {
+        setPhoneError(validation.error || 'Ugyldig telefonnummer');
+      } else {
+        setPhoneError(null);
       }
-    }
-
-    // Fallback: remove any other + prefix with digits
-    if (cleaned.startsWith('+')) {
-      cleaned = cleaned.replace(/^\+\d{1,3}/, '');
-    }
-
-    // Keep only digits
-    cleaned = cleaned.replace(/[^\d]/g, '');
-
-    // Format with spacing only when user leaves the field
-    let displayValue = '';
-    if (countryCode === '+47') {
-      // Norwegian format: 123 45 678
-      if (cleaned.length <= 3) displayValue = cleaned;
-      else if (cleaned.length <= 5) displayValue = `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`;
-      else displayValue = `${cleaned.slice(0, 3)} ${cleaned.slice(3, 5)} ${cleaned.slice(5, 8)}`;
     } else {
-      // Generic format with spacing every 3 digits
-      displayValue = cleaned.replace(/(\d{3})(?=\d)/g, '$1 ');
+      setPhoneError(null);
     }
+  };
 
-    setPhone(displayValue);
-    closeField();
+  const handleFirstNameBlur = () => {
+    // Use setTimeout to allow focus event to fire first if moving to another field
+    setTimeout(() => {
+      if (firstName.trim()) {
+        const validation = validateFirstName(firstName);
+        if (!validation.isValid) {
+          setFirstNameError(validation.error || 'Ugyldig fornavn');
+        } else {
+          setFirstNameError(null);
+        }
+      } else {
+        setFirstNameError(null);
+      }
+    }, 100);
+  };
+
+  const handleLastNameBlur = () => {
+    setTimeout(() => {
+      if (lastName.trim()) {
+        const validation = validateLastName(lastName);
+        if (!validation.isValid) {
+          setLastNameError(validation.error || 'Ugyldig etternavn');
+        } else {
+          setLastNameError(null);
+        }
+      } else {
+        setLastNameError(null);
+      }
+    }, 100);
+  };
+
+  const handleBirthBlur = () => {
+    setTimeout(() => {
+      if (birth) {
+        const validation = validateBirthDate(birth);
+        if (!validation.isValid) {
+          setBirthError(validation.error || 'Ugyldig fødselsdato');
+        } else {
+          setBirthError(null);
+        }
+      } else {
+        setBirthError(null);
+      }
+    }, 100);
   };
 
   const toggleCountryPicker = () => {
     const newValue = !showCountryPicker;
     setShowCountryPicker(newValue);
-
-    Animated.parallel([
-      Animated.spring(countryPickerAnim, {
-        toValue: newValue ? 1 : 0,
-        useNativeDriver: true,
-        tension: 100,
-        friction: 8,
-      }),
-      Animated.timing(countryChevronAnim, {
-        toValue: newValue ? 1 : 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    animateCountryPicker(newValue);
   };
 
   const selectCountryCode = (code: string) => {
     setCountryCode(code);
     setShowCountryPicker(false);
-    Animated.parallel([
-      Animated.timing(countryPickerAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(countryChevronAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const animateBorder = (animValue: Animated.Value, toValue: number) => {
-    Animated.timing(animValue, {
-      toValue,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
+    animateCountryPicker(false);
   };
 
   const openField = (fieldName: 'firstName' | 'lastName' | 'phone' | 'birth') => {
@@ -305,30 +305,6 @@ export default function Register() {
     setActiveField(activeField === fieldName ? null : fieldName);
   };
 
-  const closeField = () => {
-    // Animate all borders to closed state
-    animateBorder(firstNameBorderAnim, 0);
-    animateBorder(lastNameBorderAnim, 0);
-    animateBorder(phoneBorderAnim, 0);
-    animateBorder(birthBorderAnim, 0);
-
-    // Animate date picker disappearance
-    Animated.timing(datePickerAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-
-    // Animate chevron back
-    Animated.timing(chevronRotateAnim, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-
-    setActiveField(null);
-  };
-
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
@@ -344,20 +320,17 @@ export default function Register() {
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.select({ default: 'padding' })}
         style={styles.keyboardAvoid}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        keyboardVerticalOffset={Platform.select({ default: 0 })}
+        enabled
       >
-        <TouchableWithoutFeedback onPress={() => {
-          Keyboard.dismiss();
-          closeField();
-        }}>
-          <ScrollView
-            ref={scrollViewRef}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
             <Animated.View style={{
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }],
@@ -400,6 +373,7 @@ export default function Register() {
                           const prevLength = firstName.length;
                           setFirstName(text);
                           setError(null);
+                          setFirstNameError(null);
                           // Auto-advance if autocomplete filled a full name
                           if (prevLength === 0 && text.length > 2) {
                             setTimeout(() => lastNameRef.current?.focus(), 100);
@@ -409,7 +383,7 @@ export default function Register() {
                         placeholderTextColor={colors.lightDarkText}
                         style={[styles.input, { color: colors.text }]}
                         onFocus={() => openField('firstName')}
-                        onBlur={() => closeField()}
+                        onBlur={handleFirstNameBlur}
                         autoCapitalize="words"
                         autoComplete="name-given"
                         textContentType="givenName"
@@ -417,6 +391,28 @@ export default function Register() {
                         onSubmitEditing={() => lastNameRef.current?.focus()}
                       />
                     </Animated.View>
+
+                    {/* First Name Error Message */}
+                    {firstNameError && (
+                      <Animated.View
+                        style={[
+                          styles.fieldErrorContainer,
+                          {
+                            backgroundColor: colors.statusFailedBackground,
+                            opacity: firstNameErrorAnim,
+                            transform: [{
+                              translateY: firstNameErrorAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-10, 0],
+                              }),
+                            }],
+                          }
+                        ]}
+                      >
+                        <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                        <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{firstNameError}</Text>
+                      </Animated.View>
+                    )}
                   </View>
 
                   {/* Last Name */}
@@ -443,6 +439,7 @@ export default function Register() {
                           const prevLength = lastName.length;
                           setLastName(text);
                           setError(null);
+                          setLastNameError(null);
                           // Auto-advance if autocomplete filled a full name
                           if (prevLength === 0 && text.length > 2) {
                             setTimeout(() => phoneRef.current?.focus(), 100);
@@ -452,7 +449,7 @@ export default function Register() {
                         placeholderTextColor={colors.lightDarkText}
                         style={[styles.input, { color: colors.text }]}
                         onFocus={() => openField('lastName')}
-                        onBlur={() => closeField()}
+                        onBlur={handleLastNameBlur}
                         autoCapitalize="words"
                         autoComplete="name-family"
                         textContentType="familyName"
@@ -460,6 +457,28 @@ export default function Register() {
                         onSubmitEditing={() => phoneRef.current?.focus()}
                       />
                     </Animated.View>
+
+                    {/* Last Name Error Message */}
+                    {lastNameError && (
+                      <Animated.View
+                        style={[
+                          styles.fieldErrorContainer,
+                          {
+                            backgroundColor: colors.statusFailedBackground,
+                            opacity: lastNameErrorAnim,
+                            transform: [{
+                              translateY: lastNameErrorAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-10, 0],
+                              }),
+                            }],
+                          }
+                        ]}
+                      >
+                        <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                        <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{lastNameError}</Text>
+                      </Animated.View>
+                    )}
                   </View>
                 </View>
 
@@ -567,6 +586,28 @@ export default function Register() {
                       </ScrollView>
                     </Animated.View>
                   )}
+
+                  {/* Phone Error Message */}
+                  {phoneError && (
+                    <Animated.View
+                      style={[
+                        styles.fieldErrorContainer,
+                        {
+                          backgroundColor: colors.statusFailedBackground,
+                          opacity: phoneErrorAnim,
+                          transform: [{
+                            translateY: phoneErrorAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [-10, 0],
+                            }),
+                          }],
+                        }
+                      ]}
+                    >
+                      <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                      <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{phoneError}</Text>
+                    </Animated.View>
+                  )}
                 </View>
 
                 {/* Date of Birth */}
@@ -592,12 +633,13 @@ export default function Register() {
                         onChangeText={(text) => {
                           setBirth(text);
                           setError(null);
+                          setBirthError(null);
                         }}
                         placeholder="DD/MM/YYYY"
                         placeholderTextColor={colors.lightDarkText}
                         style={[styles.input, { color: colors.text }]}
                         onFocus={() => openField('birth')}
-                        onBlur={() => closeField()}
+                        onBlur={handleBirthBlur}
                         autoComplete="birthdate-day"
                         textContentType="none"
                       />
@@ -668,6 +710,28 @@ export default function Register() {
                         </Animated.View>
                       )}
                     </>
+                  )}
+
+                  {/* Birth Date Error Message */}
+                  {birthError && (
+                    <Animated.View
+                      style={[
+                        styles.fieldErrorContainer,
+                        {
+                          backgroundColor: colors.statusFailedBackground,
+                          opacity: birthErrorAnim,
+                          transform: [{
+                            translateY: birthErrorAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [-10, 0],
+                            }),
+                          }],
+                        }
+                      ]}
+                    >
+                      <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                      <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{birthError}</Text>
+                    </Animated.View>
                   )}
                 </View>
               </View>
@@ -760,7 +824,7 @@ export default function Register() {
                   Har du allerede en konto?{' '}
                   <Text
                     style={[styles.loginLink, { color: colors.tint }]}
-                    onPress={() => router.replace('/(onboarding)/(account)/Login')}
+                    onPress={() => router.replace('/(onboarding)/(account)/LoginChoice')}
                   >
                     Logg inn
                   </Text>
@@ -768,7 +832,6 @@ export default function Register() {
               </View>
             </Animated.View>
           </ScrollView>
-        </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -968,6 +1031,19 @@ const styles = StyleSheet.create({
   },
   error: {
     fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
+  },
+  fieldErrorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 8,
+    gap: 6,
+  },
+  fieldError: {
+    fontSize: 13,
     fontWeight: '500',
     flex: 1,
   },
