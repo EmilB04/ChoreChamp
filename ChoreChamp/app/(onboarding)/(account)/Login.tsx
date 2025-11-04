@@ -8,6 +8,51 @@ import { Animated, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import { formatPhoneNumber, stripCountryCode, validatePhone } from './FormValidation';
+import { Ionicons } from '@expo/vector-icons';
+import { useEntranceAnimation, useStaggeredAnimation, useButtonPressAnimation } from '@/hooks/useEntranceAnimation';
+import BackButton from '@/components/onBoarding/BackButton';
+import LottieView from "lottie-react-native";
+
+
+type SocialButtonProps = {
+  label: string;
+  icon?: React.ReactNode;
+  onPress?: () => void;
+  index: number;
+};
+ 
+
+const SocialButton = ({ label, icon, onPress, index }: SocialButtonProps) => {
+  const { colors } = useTheme();
+  const staggeredAnims = useStaggeredAnimation(1, index * 100);
+  const scaleAnim = staggeredAnims[0];
+  const { scaleAnim: pressScaleAnim, handlePressIn, handlePressOut } = useButtonPressAnimation();
+
+  return (
+    <Animated.View style={{
+      transform: [{ scale: scaleAnim }],
+    }}>
+      <Animated.View style={{
+        transform: [{ scale: pressScaleAnim }],
+      }}>
+        <TouchableOpacity
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
+          style={[
+            styles.socialBtn,
+            { backgroundColor: colors.contextBackground }
+          ]}
+        >
+          {icon && <View style={styles.socialIconWrap}>{icon}</View>}
+          <Text style={[styles.socialText, { color: colors.text }]}>{label}</Text>
+          <Ionicons name="arrow-forward" size={20} color={colors.tint} style={styles.arrowIcon} />
+        </TouchableOpacity>
+      </Animated.View>
+    </Animated.View>
+  );
+};
 
 export default function Login() {
     const router = useRouter();
@@ -273,6 +318,28 @@ export default function Login() {
                                         />
                                     </View>
                                 </Animated.View>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View style={[
+          styles.titleContainer,
+          {
+            opacity: headerFadeAnim,
+            transform: [{ translateY: titleSlideAnim }],
+          }
+        ]}>
+            <LottieView
+                source={require('../../../assets/lottie/log-in.json')}
+                autoPlay
+                loop
+                style={{ width: 200, height: 100 }}
+            />
+          <Text style={[styles.title, { color: colors.text }]}>Velkommen tilbake!</Text>
+          <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
+            Velg en metode for å logge inn
+          </Text>
+        </Animated.View>
 
                                 {showCountryPicker && (
                                     <Animated.View

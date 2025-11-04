@@ -33,6 +33,8 @@ import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firest
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
+import { Platform } from "react-native";
+import * as AuthSession from "expo-auth-session";
 
 // Local imports
 import { auth, db } from "@/lib/firebase";
@@ -46,6 +48,11 @@ const EXTRA = (Constants.expoConfig?.extra ?? {}) as {
     IOS_CLIENT_ID: string;
     WEB_CLIENT_ID: string;
 }
+
+// 
+const redirectUri = AuthSession.makeRedirectUri({
+    scheme: "chorechamp",
+});
 
 export type AuthContextType = {
     user: FirebaseUser | null;
@@ -66,13 +73,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
+       const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
         androidClientId: EXTRA.ANDROID_CLIENT_ID,
         iosClientId: EXTRA.IOS_CLIENT_ID,
         webClientId: EXTRA.WEB_CLIENT_ID,
         scopes: ['openid', 'profile', 'email'],
+        redirectUri
 
     });
+
+    useEffect(() => {
+  if (!googleResponse) return;
+  console.log("Google auth response:", JSON.stringify(googleResponse, null, 2));
+}, [googleResponse]);
 
     useEffect(() => {
         (async () => {

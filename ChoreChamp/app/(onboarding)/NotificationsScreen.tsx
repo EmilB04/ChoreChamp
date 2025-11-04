@@ -1,14 +1,16 @@
 import BackButton from '@/components/onBoarding/BackButton';
+import OnboardingDots from '@/components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React from "react";
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import LottieView from 'lottie-react-native';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import OnboardingDots from "../../components/onBoarding/OnboardingDots";
 
 export default function NotificationsScreen() {
     const router = useRouter();
@@ -49,14 +51,14 @@ export default function NotificationsScreen() {
                 </View>
 
                 <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-                    {/* Icon Badge */}
-                    <Animated.View style={[styles.iconBadge, {
-                        backgroundColor: colors.background,
-                        transform: [{ scale: iconScaleAnim }],
-                    }]}>
-                        <View style={[styles.iconInner, { backgroundColor: colors.tint }]}>
-                            <Ionicons name="notifications" size={70} color={colors.darkText} />
-                        </View>
+                    {/* Notification animation */}
+                    <Animated.View>
+                        <LottieView
+                            source={require('../../assets/lottie/notification-bell.json')}
+                            autoPlay
+                            loop
+                            style={{ width: 200, height: 200 }}
+                        />
                     </Animated.View>
 
                     {/* Title Section */}

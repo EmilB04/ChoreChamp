@@ -1,12 +1,14 @@
+import OnboardingDots from '@/components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import LottieView from 'lottie-react-native';
 import React from 'react';
-import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 
 type LangKey = 'no' | 'en' | 'es' | 'de';
 
@@ -107,15 +109,20 @@ export default function WelcomeScreen() {
               </View>
             </Animated.View>
 
-            {/* Illustration */}
-            <Animated.Image
-              source={require('../../assets/images/WelcomeAvatar.png')}
+            {/* Animation */}
+            <Animated.View
               style={[styles.illustration, {
                 transform: [{ scale: imageScaleAnim }],
               }]}
-              resizeMode="contain"
-              accessibilityLabel="Welcome illustration"
-            />
+              accessibilityLabel="Welcome animation"
+            >
+              <LottieView
+                source={require('../../assets/lottie/winner.json')}
+                autoPlay
+                loop
+                style={{ width: 200, height: 200 }}
+              />
+            </Animated.View>
 
             {/* Description Card */}
             <Animated.View style={[styles.descriptionCard, {
