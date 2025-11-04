@@ -83,11 +83,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     useEffect(() => {
-  if (!googleResponse) return;
-  console.log("Google auth response:", JSON.stringify(googleResponse, null, 2));
-}, [googleResponse]);
-
-    useEffect(() => {
         (async () => {
             if (googleResponse?.type === 'success') {
                 const idToken = googleResponse.authentication?.idToken ?? googleResponse.params?.id_token;
