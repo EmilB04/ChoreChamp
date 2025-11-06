@@ -53,6 +53,7 @@ const EXTRA = (Constants.expoConfig?.extra ?? {}) as {
 const redirectUri = AuthSession.makeRedirectUri({
     scheme: "chorechamp",
 });
+console.log("Actual Redirect URI for Expo Go:", redirectUri);
 
 export type AuthContextType = {
     user: FirebaseUser | null;
@@ -78,6 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         iosClientId: EXTRA.IOS_CLIENT_ID,
         webClientId: EXTRA.WEB_CLIENT_ID,
         scopes: ['openid', 'profile', 'email'],
+        
         redirectUri
 
     });

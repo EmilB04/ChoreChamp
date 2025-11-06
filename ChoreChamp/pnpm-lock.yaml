@@ -89,6 +89,9 @@ importers:
       glob:
         specifier: ^11.0.3
         version: 11.0.3
+      i18next:
+        specifier: ^25.6.0
+        version: 25.6.0(typescript@5.9.3)
       lottie-react-native:
         specifier: ~7.3.1
         version: 7.3.4(@lottiefiles/dotlottie-react@0.17.6(react@19.1.0))(react-native@0.81.4(@babel/core@7.28.4)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
