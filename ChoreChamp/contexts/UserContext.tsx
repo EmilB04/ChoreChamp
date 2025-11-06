@@ -7,13 +7,23 @@ The `useUser` hook allows easy access to the user data and update functions in a
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
 interface UserData {
-    name: string;
+    id: string;
+    firstName: string;
+    lastName: string;
     imageUri: string;
     email?: string;
     phone?: string;
+    household?: {
+        id: string;
+    };  // references household ID
+    points?: number;
+    language: 'nb' | 'en' | 'es' | 'de';
     notificationsEnabled?: boolean;
     locationEnabled?: boolean;
     darkModeEnabled?: boolean; // undefined = follow system, true = dark, false = light
+    role: {
+        admin: boolean;
+    }
 }
 
 interface UserContextType {
@@ -29,13 +39,23 @@ interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps) {
     const [userData, setUserData] = useState<UserData>({
-        name: "Emil Berglund",
-        imageUri: "https://i.pravatar.cc/150?",
-        email: "emil.berglund@email.com",
+        id: 'user-123',
+        firstName: "Emil",
+        lastName: "Berglund",
+        imageUri: "",
+        email: "emilbe@hiof.no",
         phone: "+47 123 45 678",
+        household: {
+            id: 'NMogPiBLWF4nmwsHBTlP',
+        },
+        points: 33,
+        language: 'nb',
         notificationsEnabled: true,
         locationEnabled: false,
         darkModeEnabled: true, 
+        role: {
+            admin: true,
+        },
     });
 
     const updateUserData = (data: Partial<UserData>) => {

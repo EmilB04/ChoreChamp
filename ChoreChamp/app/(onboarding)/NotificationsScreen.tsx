@@ -1,21 +1,18 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
-import i18n from '../i18n/i18n';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
 import BackButton from '@/components/onBoarding/BackButton';
 import OnboardingDots from '@/components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import i18n from '../i18n/i18n';
 
 export default function NotificationsScreen() {
     const router = useRouter();
@@ -28,7 +25,6 @@ export default function NotificationsScreen() {
     const langParam = typeof params.lang === 'string' ? params.lang : undefined;
 
     const { fadeAnim } = useEntranceAnimation();
-    const iconScaleAnim = useScaleAnimation(100);
     const titleSlideAnim = useScaleAnimation(200, 1);
     const [button1SlideAnim, button2SlideAnim] = useStaggeredAnimation(2, 300, 100);
 

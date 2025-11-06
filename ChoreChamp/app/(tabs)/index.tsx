@@ -85,16 +85,16 @@ export default function Dashboard() {
 
   // TODO: Replace with database fetch
   const rawLeaderboardData = [
-    { id: 1, name: "Ola Nordmann", points: 43, avatar: require("@/assets/images/icon.png") },
-    { id: 2, name: "Andreas B. Olaussen", points: 40, avatar: require("@/assets/images/icon.png") },
-    { id: 3, name: "Sebastian W. Thomsen", points: 38, avatar: require("@/assets/images/icon.png") },
-    { id: 4, name: "Ida K. Tollaksen", points: 36, avatar: require("@/assets/images/icon.png") },
-    { id: 5, name: "Khalid O.", points: 35, avatar: require("@/assets/images/icon.png") },
-    { id: 6, name: "Emil Berglund", points: 34, avatar: require("@/assets/images/icon.png")},
-    { id: 7, name: "Bruker", points: 33, avatar: require("@/assets/images/icon.png") },
-    { id: 8, name: "Bruker", points: 32, avatar: require("@/assets/images/icon.png") },
-    { id: 9, name: "Bruker", points: 31, avatar: require("@/assets/images/icon.png") },
-    { id: 10, name: "Bruker", points: 30, avatar: require("@/assets/images/icon.png") },
+    { id: 1, firstName: "Ola", lastName: "Nordmann", points: 43, avatar: require("@/assets/images/icon.png") },
+    { id: 2, firstName: "Andreas", lastName: "B. Olaussen", points: 40, avatar: require("@/assets/images/icon.png") },
+    { id: 3, firstName: "Sebastian", lastName: "W. Thomsen", points: 38, avatar: require("@/assets/images/icon.png") },
+    { id: 4, firstName: "Ida", lastName: "K. Tollaksen", points: 36, avatar: require("@/assets/images/icon.png") },
+    { id: 5, firstName: "Khalid", lastName: "O.", points: 35, avatar: require("@/assets/images/icon.png") },
+    { id: 6, firstName: "Emil", lastName: "Berglund", points: 34, avatar: require("@/assets/images/icon.png")},
+    { id: 7, firstName: "Bruker", lastName: "", points: 33, avatar: require("@/assets/images/icon.png") },
+    { id: 8, firstName: "Bruker", lastName: "", points: 32, avatar: require("@/assets/images/icon.png") },
+    { id: 9, firstName: "Bruker", lastName: "", points: 31, avatar: require("@/assets/images/icon.png") },
+    { id: 10, firstName: "Bruker", lastName: "", points: 30, avatar: require("@/assets/images/icon.png") },
   ];
 
   // Sort by points (descending) and calculate positions
@@ -103,7 +103,8 @@ export default function Dashboard() {
     .map((userData_item, index) => ({
       ...userData_item,
       position: index + 1,
-      isCurrentUser: userData_item.name === userData.name, // Check if this user is the logged-in user
+      fullName: `${userData_item.firstName} ${userData_item.lastName}`.trim(),
+      isCurrentUser: userData_item.firstName === userData.firstName && userData_item.lastName === userData.lastName, // Check if this user is the logged-in user
     }));
 
   // ------------------------------------------------------------------ //
@@ -208,7 +209,7 @@ export default function Dashboard() {
       >
         {/* HEADER */}
         <View style={[styles.header, commonStyles.headerTitle]}>
-          <WelcomeGreeting userName={userData.name} />
+          <WelcomeGreeting firstName={userData.firstName} lastName={userData.lastName} />
           <View style={styles.profileSection}>
             <View style={styles.profileContainer}>
               <Image
@@ -420,7 +421,7 @@ export default function Dashboard() {
                 </View>
               </View>
               <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[1].name}
+                {leaderboardData[1].fullName}
               </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
@@ -445,7 +446,7 @@ export default function Dashboard() {
                 </View>
               </View>
               <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[0].name}
+                {leaderboardData[0].fullName}
               </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
@@ -467,7 +468,7 @@ export default function Dashboard() {
                 </View>
               </View>
               <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[2].name}
+                {leaderboardData[2].fullName}
               </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
@@ -516,7 +517,7 @@ export default function Dashboard() {
                       },
                     ]}
                   >
-                    {user.name}
+                    {user.fullName}
                   </Text>
                 </View>
                 <Text
@@ -541,7 +542,7 @@ export default function Dashboard() {
         actionButtons={
           selectedTask &&
           !selectedTask.finished &&
-          selectedTask.assignedTo === userData.name
+          selectedTask.assignedTo === `${userData.firstName} ${userData.lastName}`.trim()
             ? [
                 {
                   label: "Marker som fullført",

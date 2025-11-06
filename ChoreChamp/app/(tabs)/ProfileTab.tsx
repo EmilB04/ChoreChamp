@@ -1,6 +1,10 @@
+import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
+import EditProfileModal from '@/components/profile/EditProfileModal';
+import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from "@expo/vector-icons";
+import { router } from 'expo-router';
 import React, { useState } from "react";
 import {
     Image,
@@ -12,12 +16,8 @@ import {
     View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import commonStyles from "../commonStyles";
-import EditProfileModal from '@/components/profile/EditProfileModal';
-import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
-import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
-import { router } from 'expo-router';
+import commonStyles from "../commonStyles";
 
 //TODO: Implement log out functionality
 
@@ -46,8 +46,13 @@ export default function Profile() {
 
     // Handler for saving profile changes
     const handleSaveProfile = (newName: string, newImageUri: string) => {
-        updateUserData({ name: newName, imageUri: newImageUri });
-        console.log('Profile updated:', { name: newName, image: newImageUri });
+        // Split the full name into firstName and lastName (everything after the first word becomes lastName)
+        const parts = newName.trim().split(/\s+/);
+        const firstName = parts.shift() || '';
+        const lastName = parts.join(' ');
+
+        updateUserData({ firstName, lastName, imageUri: newImageUri });
+        console.log('Profile updated:', { firstName, lastName, image: newImageUri });
     };
 
     // If showing My Account screen, render it instead
@@ -77,7 +82,7 @@ export default function Profile() {
                     source={{ uri: userData.imageUri }}
                     style={styles.avatar}
                 />
-                <Text style={[styles.name, { color: colors.darkText }]}>{userData.name}</Text>
+                <Text style={[styles.name, { color: colors.darkText }]}>{userData.firstName} {userData.lastName}</Text>
                 <View style={styles.separator} />
                 <TouchableOpacity 
                     style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
@@ -213,7 +218,7 @@ export default function Profile() {
             <EditProfileModal
                 visible={isEditModalVisible}
                 onClose={() => setIsEditModalVisible(false)}
-                currentName={userData.name}
+                currentName={userData.firstName + ' ' + userData.lastName}
                 currentImageUri={userData.imageUri}
                 onSave={handleSaveProfile}
             />

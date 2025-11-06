@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    TextInput,
-    Alert,
-    Switch,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import Header from './Header';
 
 interface MyAccountScreenProps {
@@ -108,7 +108,7 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
                     <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
                         <View style={styles.infoRow}>
                             <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>Navn</Text>
-                            <Text style={[styles.infoValue, { color: colors.text }]}>{userData.name}</Text>
+                            <Text style={[styles.infoValue, { color: colors.text }]}>{userData.firstName} {userData.lastName}</Text>
                         </View>
                         
                         <View style={styles.infoRow}>
