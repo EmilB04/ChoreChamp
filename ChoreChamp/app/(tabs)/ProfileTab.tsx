@@ -1,6 +1,11 @@
+import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
+import EditProfileModal from '@/components/profile/EditProfileModal';
+import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
+import UserLoadingState from '@/components/UserLoadingState';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from "@expo/vector-icons";
+import { router } from 'expo-router';
 import React, { useState } from "react";
 import {
     Image,
@@ -12,12 +17,8 @@ import {
     View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import commonStyles from "../commonStyles";
-import EditProfileModal from '@/components/profile/EditProfileModal';
-import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
-import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
-import { router } from 'expo-router';
+import commonStyles from "../commonStyles";
 
 //TODO: Implement log out functionality
 
@@ -32,6 +33,11 @@ export default function Profile() {
     const [showHelpSupport, setShowHelpSupport] = useState(false);
     const [showAboutApp, setShowAboutApp] = useState(false);
 
+    // Show loading state if userData is not available
+    if (!userData) {
+        return <UserLoadingState pageName="Profile" />;
+    }
+
     // Toggle About App section
 
     const toggleAboutApp = () => {
@@ -45,9 +51,25 @@ export default function Profile() {
     };
 
     // Handler for saving profile changes
-    const handleSaveProfile = (newName: string, newImageUri: string) => {
-        updateUserData({ name: newName, imageUri: newImageUri });
-        console.log('Profile updated:', { name: newName, image: newImageUri });
+    const handleSaveProfile = async (newUsername: string, newImageUri: string) => {
+        try {
+            console.log('💾 Saving profile to Firestore:', { 
+                username: newUsername,
+                imageUri: newImageUri 
+            });
+            
+            // Update in Firestore via UserContext
+            await updateUserData({ 
+                username: newUsername,
+                imageUri: newImageUri 
+            });
+            
+            console.log('✅ Profile saved successfully!');
+        } catch (error) {
+            console.error('❌ Error saving profile:', error);
+            // Show error to user
+            alert('Kunne ikke lagre profilen. Vennligst prøv igjen.');
+        }
     };
 
     // If showing My Account screen, render it instead
@@ -73,11 +95,17 @@ export default function Profile() {
                 <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
                     Profil & {"\n"}Innstillinger
                 </Text>
-                <Image
-                    source={{ uri: userData.imageUri }}
-                    style={styles.avatar}
-                />
-                <Text style={[styles.name, { color: colors.darkText }]}>{userData.name}</Text>
+                {userData.imageUri ? (
+                    <Image
+                        source={{ uri: userData.imageUri }}
+                        style={styles.avatar}
+                    />
+                ) : (
+                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                        <Ionicons name="person" size={40} color={colors.darkText} />
+                    </View>
+                )}
+                <Text style={[styles.name, { color: colors.darkText }]}>{userData.username}</Text>
                 <View style={styles.separator} />
                 <TouchableOpacity 
                     style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
@@ -213,8 +241,8 @@ export default function Profile() {
             <EditProfileModal
                 visible={isEditModalVisible}
                 onClose={() => setIsEditModalVisible(false)}
-                currentName={userData.name}
-                currentImageUri={userData.imageUri}
+                currentUsername={userData.username}
+                currentImageUri={userData.imageUri || ''}
                 onSave={handleSaveProfile}
             />
         </View>
@@ -286,6 +314,10 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255, 255, 255, 0.3)",
         marginBottom: 10,
     },
+    avatarPlaceholder: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     name: {
         fontSize: 24,
         fontWeight: "bold",
@@ -315,10 +347,7 @@ const styles = StyleSheet.create({
         alignItems: "stretch",
         paddingVertical: 12,
         borderRadius: 12,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         elevation: 1,
         justifyContent: "space-between",
     },

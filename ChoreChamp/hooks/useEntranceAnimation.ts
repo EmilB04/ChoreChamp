@@ -1,11 +1,14 @@
-import { useRef, useEffect } from "react";
-import { Animated } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, Platform } from "react-native";
 
 // Created with the assistance of AI Claude Sonnet 4.5
 /*
     Prompt: Help me create a custom hook for entrance animations in React Native, with fade-in and slide-up effects.
     Response: See below.
 */
+
+// Use native driver only on iOS and Android, not on web
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 /**
  * Hook for creating entrance animations with fade and slide effects
@@ -22,14 +25,14 @@ export function useEntranceAnimation(delay = 0) {
                 toValue: 1,
                 duration: 600,
                 delay,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
             }),
             Animated.spring(slideAnim, {
                 toValue: 0,
                 delay,
                 tension: 80,
                 friction: 8,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
             }),
         ]).start();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -53,7 +56,7 @@ export function useScaleAnimation(delay = 0, fromScale = 0.8) {
             delay,
             tension: 80,
             friction: 8,
-            useNativeDriver: true,
+            useNativeDriver: USE_NATIVE_DRIVER,
         }).start();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -84,7 +87,7 @@ export function useStaggeredAnimation(
                 delay: baseDelay + index * staggerDelay,
                 tension: 80,
                 friction: 8,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
             })
         );
 
@@ -105,7 +108,7 @@ export function useButtonPressAnimation() {
     const handlePressIn = () => {
         Animated.spring(scaleAnim, {
             toValue: 0.95,
-            useNativeDriver: true,
+            useNativeDriver: USE_NATIVE_DRIVER,
             tension: 100,
             friction: 3,
         }).start();
@@ -114,7 +117,7 @@ export function useButtonPressAnimation() {
     const handlePressOut = () => {
         Animated.spring(scaleAnim, {
             toValue: 1,
-            useNativeDriver: true,
+            useNativeDriver: USE_NATIVE_DRIVER,
             tension: 100,
             friction: 3,
         }).start();

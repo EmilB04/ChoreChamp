@@ -31,7 +31,11 @@ export default function DatePickerModal({ visible, date, minDate, maxDate, onClo
   if (!visible) return null;
 
   return (
-    <View style={styles.overlay}>
+    <View 
+      style={styles.overlay}
+      accessibilityViewIsModal={true}
+      importantForAccessibility="yes"
+    >
       <View style={[styles.card, { backgroundColor: colors.contextBackground }]}>
         {title ? (
           <Text style={[styles.title, { color: colors.text }]}>{title}</Text>

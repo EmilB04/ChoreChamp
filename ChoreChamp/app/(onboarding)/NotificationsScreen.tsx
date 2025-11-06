@@ -102,9 +102,12 @@ export default function NotificationsScreen() {
 
                     {/* Button Group */}
                     <View style={styles.buttonGroup}>
-                        <Animated.View style={{
-                            transform: [{ scale: button1SlideAnim }],
-                        }}>
+                        <Animated.View 
+                            style={{
+                                transform: [{ scale: button1SlideAnim }],
+                            }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
                                 onPress={handleAllow}
@@ -119,9 +122,12 @@ export default function NotificationsScreen() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{
-                            transform: [{ scale: button2SlideAnim }],
-                        }}>
+                        <Animated.View 
+                            style={{
+                                transform: [{ scale: button2SlideAnim }],
+                            }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[styles.secondaryBtn, { backgroundColor: colors.contextBackground }]}
                                 onPress={handleSkip}
@@ -191,10 +197,7 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
         elevation: 5,
     },
     iconInner: {
@@ -221,10 +224,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         borderRadius: 14,
         gap: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     descIcon: {
@@ -250,10 +250,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         borderRadius: 16,
         minWidth: 250,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2)',
         elevation: 4,
         gap: 8,
     },
@@ -270,10 +267,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         minWidth: 200,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     secondaryText: {

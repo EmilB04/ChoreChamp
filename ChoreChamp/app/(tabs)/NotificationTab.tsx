@@ -448,13 +448,7 @@ const styles = StyleSheet.create({
         padding: 4,
         marginBottom: 12,
         borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     readNotificationCard: {
