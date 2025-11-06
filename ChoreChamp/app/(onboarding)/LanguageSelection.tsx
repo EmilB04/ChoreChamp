@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 
 // TODO: Remove when language is incorporated throughout app
@@ -97,7 +98,11 @@ export default function LanguageSelection() {
                                 accessibilityLabel="English"
                                 activeOpacity={0.7}
                             >
-                                <Image source={require('../../assets/images/GB.png')} style={styles.flagImage} />
+                                <Image 
+                                    source={require('../../assets/images/GB.png')} 
+                                    style={styles.flagImage}
+                                    contentFit="cover"
+                                />
                                 <Text style={[styles.langText, { color: colors.text }]}>English</Text>
                                 {selected === 'en' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
                             </TouchableOpacity>
@@ -118,7 +123,11 @@ export default function LanguageSelection() {
                                 accessibilityLabel="Norsk"
                                 activeOpacity={0.7}
                             >
-                                <Image source={require('../../assets/images/NO.png')} style={styles.flagImage} />
+                                <Image 
+                                    source={require('../../assets/images/NO.png')} 
+                                    style={styles.flagImage}
+                                    contentFit="cover"
+                                />
                                 <Text style={[styles.langText, { color: colors.text }]}>Norsk</Text>
                                 {selected === 'no' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
                             </TouchableOpacity>
@@ -139,7 +148,11 @@ export default function LanguageSelection() {
                                 accessibilityLabel="Español"
                                 activeOpacity={0.7}
                             >
-                                <Image source={require('../../assets/images/ES.png')} style={styles.flagImage} />
+                                <Image 
+                                    source={require('../../assets/images/ES.png')} 
+                                    style={styles.flagImage}
+                                    contentFit="cover"
+                                />
                                 <Text style={[styles.langText, { color: colors.text }]}>Español</Text>
                                 {selected === 'es' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
                             </TouchableOpacity>
@@ -160,7 +173,11 @@ export default function LanguageSelection() {
                                 accessibilityLabel="Deutsch"
                                 activeOpacity={0.7}
                             >
-                                <Image source={require('../../assets/images/DE.png')} style={styles.flagImage} />
+                                <Image 
+                                    source={require('../../assets/images/DE.png')} 
+                                    style={styles.flagImage}
+                                    contentFit="cover"
+                                />
                                 <Text style={[styles.langText, { color: colors.text }]}>Deutsch</Text>
                                 {selected === 'de' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
                             </TouchableOpacity>
