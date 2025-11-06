@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useTheme } from '@/contexts/ThemeContext';
+import Header from '../profile/Header';
 
 interface Notification {
     id: number;
@@ -39,60 +40,138 @@ export default function Notification({ notification, onBack, rightElement }: Not
         return `${day}.${month}.${year}, ${hours}:${minutes}`;
     };
 
-    return (
-        <ScrollView>
-            {/* Header */}
-            <View style={[styles.header, { backgroundColor: colors.tint }]}>
-                <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.darkText} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, { color: colors.darkText }]}>
-                    {notification.title}
-                </Text>
-                <View>
-                    {rightElement}
-                </View>
-            </View>
+    const handleMarkAsRead = () => {
+        // Implement mark as read logic
+    };
 
-            {/* Content */}
-            <View style={styles.content}>
-                <View>
-                    {notification.avatar}
+    return (
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <Header 
+                title={notification.title} 
+                onBack={onBack}
+                rightElement={rightElement}
+            />
+
+            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+                {/* Notification Details Section */}
+                <View style={styles.section}>
+                    <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
+                        <View style={styles.avatarContainer}>
+                            {notification.avatar}
+                        </View>
+                        
+                        <View style={styles.messageContainer}>
+                            <Text style={[styles.messageText, { color: colors.text }]}>
+                                {notification.subtitle && `${notification.subtitle}, `}
+                                {notification.message.toLowerCase()}
+                            </Text>
+                        </View>
+
+                        <View style={styles.infoRow}>
+                            <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
+                                Tidspunkt
+                            </Text>
+                            <Text style={[styles.infoValue, { color: colors.text }]}>
+                                {formatTimestamp(notification.timestamp)}
+                            </Text>
+                        </View>
+
+                        {notification.points !== null && (
+                            <View style={styles.infoRow}>
+                                <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
+                                    Poeng
+                                </Text>
+                                <Text style={[styles.infoValue, { color: colors.text }]}>
+                                    {notification.points}
+                                </Text>
+                            </View>
+                        )}
+
+                        <View style={styles.infoRow}>
+                            <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
+                                Status
+                            </Text>
+                            <Text style={[styles.infoValue, { color: colors.text }]}>
+                                {notification.read ? "Lest ✅" : "Ulest ❌"}
+                            </Text>
+                        </View>
+                    </View>
                 </View>
-                <Text>{notification.subtitle}, {notification.message.toLocaleLowerCase()}</Text>
-                <Text style={styles.timestampText}>{formatTimestamp(notification.timestamp)}</Text>
-            </View>
-            <View>
-                
-            </View>
-        </ScrollView>
+
+                {/* Actions Section */}
+                {!notification.read && (
+                    <View style={styles.section}>
+                        <TouchableOpacity 
+                            style={[styles.actionButton, { backgroundColor: colors.tint }]}
+                            onPress={handleMarkAsRead}
+                        >
+                            <Ionicons name="checkmark-circle-outline" size={20} color={colors.darkText} />
+                            <Text style={[styles.actionButtonText, { color: colors.darkText }]}>
+                                Marker som lest
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+            </ScrollView>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingTop: 60,
-        marginBottom: 20,
-        paddingHorizontal: 15,
-        paddingBottom: 10,
-    },
-    backButton: {
-        padding: 5,
-    },
-    headerTitle: {
+    container: {
         flex: 1,
-        textAlign: 'center',
-        fontSize: 20,
-        fontWeight: 'bold',
     },
     content: {
-        alignItems: 'center',
+        flex: 1,
+        paddingHorizontal: 20,
     },
-    timestampText: {
-        fontSize: 12,
-        color: '#666',
-        marginTop: 8,
-    }
+    section: {
+        marginBottom: 32,
+    },
+    infoCard: {
+        borderRadius: 12,
+        padding: 16,
+    },
+    avatarContainer: {
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    messageContainer: {
+        marginBottom: 16,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    messageText: {
+        fontSize: 16,
+        lineHeight: 24,
+        textAlign: 'center',
+    },
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    infoLabel: {
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    infoValue: {
+        fontSize: 16,
+        flex: 1,
+        textAlign: 'right',
+    },
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 12,
+        gap: 8,
+    },
+    actionButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
 });
