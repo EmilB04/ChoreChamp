@@ -1,21 +1,18 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
-import i18n from '../i18n/i18n';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
 import BackButton from '@/components/onBoarding/BackButton';
 import OnboardingDots from '@/components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import i18n from '../i18n/i18n';
 
 export default function NotificationsScreen() {
     const router = useRouter();
@@ -28,22 +25,21 @@ export default function NotificationsScreen() {
     const langParam = typeof params.lang === 'string' ? params.lang : undefined;
 
     const { fadeAnim } = useEntranceAnimation();
-    const iconScaleAnim = useScaleAnimation(100);
     const titleSlideAnim = useScaleAnimation(200, 1);
     const [button1SlideAnim, button2SlideAnim] = useStaggeredAnimation(2, 300, 100);
 
     useEffect(() => {
-      async function applyLanguage() {
-        if (!langParam) return;
-        if (i18n.language === langParam) return; 
-        try {
-          await i18n.changeLanguage(langParam); 
-          await AsyncStorage.setItem('appLanguage', langParam); 
-        } catch (e) {
-          console.warn('Language change failed', e);
+        async function applyLanguage() {
+            if (!langParam) return;
+            if (i18n.language === langParam) return;
+            try {
+                await i18n.changeLanguage(langParam);
+                await AsyncStorage.setItem('appLanguage', langParam);
+            } catch (e) {
+                console.warn('Language change failed', e);
+            }
         }
-      }
-      applyLanguage();
+        applyLanguage();
     }, [langParam]);
 
 
@@ -95,7 +91,7 @@ export default function NotificationsScreen() {
                         <Text style={[styles.title, { color: colors.text }]}>
                             {t('notifications.title')}
                         </Text>
-                        
+
                         <View style={[styles.descriptionCard, { backgroundColor: colors.contextBackground }]}>
                             <Ionicons name="alarm" size={20} color={colors.tint} style={styles.descIcon} />
                             <Text style={[styles.subtitle, { color: colors.text }]}>
@@ -157,7 +153,7 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-    safe: { 
+    safe: {
         flex: 1,
     },
     headerBackground: {
@@ -182,9 +178,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         position: 'relative',
     },
-    container: { 
-        flex: 1, 
-        justifyContent: 'space-evenly', 
+    container: {
+        flex: 1,
+        justifyContent: 'space-evenly',
         alignItems: 'center',
         paddingHorizontal: 24,
         paddingVertical: 20,
@@ -213,8 +209,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 16,
     },
-    title: { 
-        fontSize: 28, 
+    title: {
+        fontSize: 28,
         fontWeight: '700',
         textAlign: 'center',
     },
@@ -234,7 +230,7 @@ const styles = StyleSheet.create({
     descIcon: {
         marginRight: 4,
     },
-    subtitle: { 
+    subtitle: {
         fontSize: 15,
         textAlign: 'center',
         fontWeight: '500',
@@ -246,7 +242,7 @@ const styles = StyleSheet.create({
         gap: 12,
         alignItems: 'center',
     },
-    primaryBtn: { 
+    primaryBtn: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -264,11 +260,11 @@ const styles = StyleSheet.create({
     btnIcon: {
         marginRight: 4,
     },
-    primaryText: { 
+    primaryText: {
         fontSize: 16,
         fontWeight: '700',
     },
-    secondaryBtn: { 
+    secondaryBtn: {
         paddingVertical: 14,
         paddingHorizontal: 32,
         borderRadius: 16,
@@ -280,7 +276,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 2,
     },
-    secondaryText: { 
+    secondaryText: {
         fontSize: 16,
         fontWeight: '600',
     },
@@ -292,7 +288,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         gap: 8,
     },
-    footer: { 
+    footer: {
         fontSize: 13,
         textAlign: 'center',
         fontWeight: '500',

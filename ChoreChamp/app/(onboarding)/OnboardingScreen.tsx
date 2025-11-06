@@ -1,7 +1,7 @@
-import { StyleSheet, View, Image, Text, Animated } from 'react-native';
-import React, { useEffect, useRef } from 'react';
-import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 /*
 Onboarding Screen
     - Displays the app logo when the user first opens the app.
