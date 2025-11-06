@@ -155,8 +155,6 @@ export async function getHouseholdMembers(householdId: string): Promise<{
     imageUri: string;
     points: number;
 }[]> {
-    console.log('👥 getHouseholdMembers called with householdId:', householdId);
-    
     try {
         // Query all users who have this household in their household array
         const usersRef = collection(db, 'users');
@@ -185,10 +183,8 @@ export async function getHouseholdMembers(householdId: string): Promise<{
                 imageUri: data.imageUri || '',
                 points: data.points || 0,
             });
-            console.log(`✅ Fetched member: ${data.firstName} ${data.lastName} (${data.points} pts)`);
         });
         
-        console.log(`✅ Total members fetched: ${members.length}`);
         return members;
     } catch (error) {
         console.error('💥 Error fetching household members:', error);

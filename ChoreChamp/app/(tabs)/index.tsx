@@ -58,7 +58,6 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       if (!userData?.id || !userData?.household || userData.household.length === 0) {
-        console.log('⚠️ No household data available for leaderboard');
         setLoadingLeaderboard(false);
         return;
       }
@@ -76,12 +75,10 @@ export default function Dashboard() {
         }
 
         if (!householdId) {
-          console.warn('⚠️ Could not extract household ID');
           setLoadingLeaderboard(false);
           return;
         }
 
-        console.log('🏆 Fetching leaderboard for household:', householdId);
         const members = await getHouseholdMembers(householdId);
 
         // Sort by points and add position
@@ -96,7 +93,6 @@ export default function Dashboard() {
           }));
 
         setLeaderboardData(sortedMembers);
-        console.log('✅ Leaderboard loaded:', sortedMembers.length, 'members');
       } catch (error) {
         console.error('❌ Error loading leaderboard:', error);
         setLeaderboardData([]);
@@ -112,14 +108,12 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchTasks = async () => {
       if (!userData?.id) {
-        console.log('⚠️ No user ID available for fetching tasks');
         setLoadingTasks(false);
         return;
       }
 
       setLoadingTasks(true);
       try {
-        console.log('📋 Fetching tasks for user:', userData.id);
         const tasks = await getTasksForUser(userData.id);
         
         // Transform TaskData to Task format for the UI
@@ -145,7 +139,6 @@ export default function Dashboard() {
         });
 
         setAllTasks(transformedTasks);
-        console.log('✅ Loaded tasks:', transformedTasks.length);
       } catch (error) {
         console.error('❌ Error loading tasks:', error);
         // Keep empty array on error
