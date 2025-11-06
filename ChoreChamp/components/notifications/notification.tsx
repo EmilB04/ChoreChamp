@@ -29,6 +29,16 @@ interface NotificationProps {
 export default function Notification({ notification, onBack, rightElement }: NotificationProps) {
     const { colors } = useTheme();
 
+    const formatTimestamp = (timestamp: string): string => {
+        const date = new Date(timestamp);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${day}.${month}.${year}, ${hours}:${minutes}`;
+    };
+
     return (
         <ScrollView>
             {/* Header */}
@@ -43,12 +53,17 @@ export default function Notification({ notification, onBack, rightElement }: Not
                     {rightElement}
                 </View>
             </View>
-            <View>
-                <Text>{notification.message}</Text>
-                <Text>{notification.timestamp}</Text>
+
+            {/* Content */}
+            <View style={styles.content}>
+                <View>
+                    {notification.avatar}
+                </View>
+                <Text>{notification.subtitle}, {notification.message.toLocaleLowerCase()}</Text>
+                <Text style={styles.timestampText}>{formatTimestamp(notification.timestamp)}</Text>
             </View>
             <View>
-
+                
             </View>
         </ScrollView>
     )
@@ -72,4 +87,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
     },
+    content: {
+        alignItems: 'center',
+    },
+    timestampText: {
+        fontSize: 12,
+        color: '#666',
+        marginTop: 8,
+    }
 });
