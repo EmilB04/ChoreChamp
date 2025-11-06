@@ -12,14 +12,14 @@ import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 // TODO: Remove when language is incorporated throughout app
 const CHOOSE_LANGUAGE_TEXTS: Record<string, string> = {
     en: 'Select your language',
-    no: 'Velg språk',
+    nb: 'Velg språk',
     es: 'Selecciona tu idioma',
     de: 'Wähle deine Sprache',
 };
 
 const CONTINUE_TEXTS: Record<string, string> = {
     en: 'Continue',
-    no: 'Fortsett',
+    nb: 'Fortsett',
     es: 'Continuar',
     de: 'Weiter',
 };
@@ -114,11 +114,11 @@ export default function LanguageSelection() {
                                     styles.langBtn,
                                     {
                                         backgroundColor: colors.contextBackground,
-                                        borderColor: selected === 'no' ? colors.tint : 'transparent',
+                                        borderColor: selected === 'nb' ? colors.tint : 'transparent',
                                         borderWidth: 2,
                                     }
                                 ]}
-                                onPress={() => setSelected('no')}
+                                onPress={() => setSelected('nb')}
                                 accessibilityRole="button"
                                 accessibilityLabel="Norsk"
                                 activeOpacity={0.7}
@@ -129,7 +129,7 @@ export default function LanguageSelection() {
                                     contentFit="cover"
                                 />
                                 <Text style={[styles.langText, { color: colors.text }]}>Norsk</Text>
-                                {selected === 'no' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
+                                {selected === 'nb' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
                             </TouchableOpacity>
                         </Animated.View>
 

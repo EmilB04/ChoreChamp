@@ -10,10 +10,10 @@ import React from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type LangKey = 'no' | 'en' | 'es' | 'de';
+type LangKey = 'nb' | 'en' | 'es' | 'de';
 
 const STRINGS: Record<LangKey, { title: string; subtitle: string; copy: string; next: string }> = {
-  no: {
+  nb: {
     title: 'Velkommen til ChoreChamp!',
     subtitle: 'Følg med på leaderboarden og se hvem som leder! Motivasjon og moro i én og samme app!',
     copy: 'Klar til å gjøre husarbeid litt mer gøy? La oss komme i gang!',
@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
   const rawLang =
     typeof params.lang === 'string' ? params.lang : Array.isArray(params.lang) ? params.lang[0] : undefined;
 
-  const lang = (rawLang && (rawLang === 'no' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'no';
+  const lang = (rawLang && (rawLang === 'nb' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'nb';
   const strings = STRINGS[lang];
 
   function goNext() {
