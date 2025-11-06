@@ -33,7 +33,6 @@ import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firest
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
-import { Platform } from "react-native";
 import * as AuthSession from "expo-auth-session";
 
 // Local imports
@@ -42,18 +41,35 @@ import type { AppUser } from "@/types/types";
 
 WebBrowser.maybeCompleteAuthSession();
 
-// Load client IDs from app config for google login
-const EXTRA = (Constants.expoConfig?.extra ?? {}) as {
+
+type Extra = {
     ANDROID_CLIENT_ID: string;
     IOS_CLIENT_ID: string;
     WEB_CLIENT_ID: string;
 }
 
-// 
-const redirectUri = AuthSession.makeRedirectUri({
-    scheme: "chorechamp",
-});
-console.log("Actual Redirect URI for Expo Go:", redirectUri);
+const EXTRA = (Constants.expoConfig?.extra ?? {}) as Extra;
+
+const isExpoGo = Constants.executionEnvironment === "storeClient";
+const owner = Constants.expoConfig?.owner;
+const slug = Constants.expoConfig?.slug;
+
+// When using Expo Go redirectUri is https://auth.expo.io...Else app scheme.
+const redirectUri = isExpoGo && owner && slug
+    ? `https://auth.expo.io/@${owner}/${slug}`
+    : AuthSession.makeRedirectUri({ scheme: "chorechamp"});
+
+const authRequestConfig = isExpoGo
+    ? {
+        webClientId: EXTRA.WEB_CLIENT_ID,
+        androidClientId: EXTRA.WEB_CLIENT_ID,
+        iosClientId: EXTRA.WEB_CLIENT_ID,
+      }
+    : {
+        webClientId: EXTRA.WEB_CLIENT_ID,
+         androidClientId: EXTRA.WEB_CLIENT_ID,
+          iosClientId: EXTRA.WEB_CLIENT_ID,
+      };
 
 export type AuthContextType = {
     user: FirebaseUser | null;
@@ -75,52 +91,56 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [loading, setLoading] = useState(true);
 
        const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-        androidClientId: EXTRA.ANDROID_CLIENT_ID,
-        iosClientId: EXTRA.IOS_CLIENT_ID,
-        webClientId: EXTRA.WEB_CLIENT_ID,
+        ...authRequestConfig,
         scopes: ['openid', 'profile', 'email'],
         responseType: 'id_token',
         redirectUri
-
     });
 
     useEffect(() => {
-        (async () => {
-            if (googleResponse?.type === 'success') {
-                const idToken = googleResponse.authentication?.idToken ?? googleResponse.params?.id_token;
-                if (idToken) {
-                    const credential = GoogleAuthProvider.credential(idToken);
-                    await signInWithCredential(auth, credential);
-                }
-            }
-        })();
-    }, [googleResponse]);
+        if (googleResponse?.type !== 'success') return;
+        const idToken = googleResponse.authentication?.idToken ?? googleResponse.params?.id_token;
+        if (!idToken) return;
 
+        (async () => {
+            try {
+                const credential = GoogleAuthProvider.credential(idToken);
+                await signInWithCredential(auth, credential);
+            } catch (error) {
+                console.log("signInWithCredentials failed", error);
+            }
+            })();
+        }, [googleResponse]);
 
     useEffect(() => {
-        const unsubscribeAuthListener = onAuthStateChanged(auth, async (firebaseUser) => {
+        const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
             setUser(firebaseUser);
             setLoading(false);
 
-            if (firebaseUser) {
-                const ref = doc(db, 'users', firebaseUser.uid);
-                const snapshot = await getDoc(ref);
+            if (!firebaseUser) return;
 
-                if (!snapshot.exists()) {
-                    const docData: AppUser = {
-                        name: firebaseUser.displayName ?? "",
-                        language: "nb",
-                        profilePicture: firebaseUser.photoURL ?? "",
-                        householdId: [],
-                        role: { admin: true },
-                        createdAt: serverTimestamp() as unknown as Timestamp,
-                    };
-                    await setDoc(ref, docData);
+            try {
+                const ref = doc(db, "users", firebaseUser.uid);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) {
+                const data: AppUser = {
+                    name: firebaseUser.displayName ?? "",
+                    language: "nb",
+                    profilePicture: firebaseUser.photoURL ?? "",
+                    householdId: [],
+                    role: { admin: true },
+                    createdAt: serverTimestamp() as unknown as Timestamp,
+                };
+                await setDoc(ref, data);
                 }
+            } catch (err) {
+                console.error("create/read user doc failed", err);
             }
-        });
-        return unsubscribeAuthListener;
-    }, []);
+            });
+
+            return unsub;
+        }, []);
+
 
     const value = useMemo<AuthContextType>(() => ({
         user,
@@ -139,10 +159,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await signOut(auth);
         },
         async signInWithGoogle() {
-            await googlePromptAsync({ showInRecents: true });
-        }
-    }),
-        [user, loading]
+            if (!googleRequest) return;
+            try {
+                await googlePromptAsync({ showInRecents: true });
+              } catch (error) {
+                console.log("googlePromptAsync error", error)
+              }
+            },
+        }),
+        [user, loading, googleRequest, googlePromptAsync]
     );
 
     return (
