@@ -1,5 +1,5 @@
-import OnboardingDots from '@/components/onBoarding/OnboardingDots';
 import BackButton from '@/components/onBoarding/BackButton';
+import OnboardingDots from '@/components/onBoarding/OnboardingDots';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,14 +7,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Animated } from 'react-native';
+import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type LangKey = 'no' | 'en' | 'es' | 'de';
+type LangKey = 'nb' | 'en' | 'es' | 'de';
 
 const STRINGS: Record<LangKey, { title: string; subtitle: string; copy: string; next: string }> = {
-  no: {
+  nb: {
     title: 'Velkommen til ChoreChamp!',
     subtitle: 'Følg med på leaderboarden og se hvem som leder! Motivasjon og moro i én og samme app!',
     copy: 'Klar til å gjøre husarbeid litt mer gøy? La oss komme i gang!',
@@ -52,7 +51,7 @@ export default function WelcomeScreen() {
   const rawLang =
     typeof params.lang === 'string' ? params.lang : Array.isArray(params.lang) ? params.lang[0] : undefined;
 
-  const lang = (rawLang && (rawLang === 'no' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'no';
+  const lang = (rawLang && (rawLang === 'nb' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'nb';
   const strings = STRINGS[lang];
 
   function goNext() {
