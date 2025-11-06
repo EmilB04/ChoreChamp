@@ -23,12 +23,28 @@ export interface UserData {
  * Fetch user data from Firestore by user ID
  */
 export async function getUserData(userId: string): Promise<UserData | null> {
+    console.log('🔍 getUserData called with userId:', userId);
+    
     try {
+        console.log('📡 Attempting to fetch from Firestore...');
+        console.log('📁 Database reference:', db ? 'Initialized' : 'NOT initialized');
+        
         const userDocRef = doc(db, 'users', userId);
+        console.log('📄 Document reference created:', userDocRef.path);
+        
         const userDoc = await getDoc(userDocRef);
+        console.log('📥 Document fetched, exists:', userDoc.exists());
         
         if (userDoc.exists()) {
             const data = userDoc.data();
+            console.log('✅ User document data:', {
+                id: userDoc.id,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                hasData: !!data,
+            });
+            
             return {
                 id: userDoc.id,
                 firstName: data.firstName || '',
@@ -46,11 +62,20 @@ export async function getUserData(userId: string): Promise<UserData | null> {
                     admin: data.role?.admin ?? false,
                 },
             };
+        } else {
+            console.error('❌ Document does not exist at path:', userDocRef.path);
+            console.error('💡 Check Firebase Console: https://console.firebase.google.com');
+            console.error('💡 Verify collection name is "users" and document ID is correct');
         }
         
         return null;
     } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('💥 Error fetching user data:', error);
+        console.error('Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            type: typeof error,
+            error,
+        });
         return null;
     }
 }

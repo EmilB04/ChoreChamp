@@ -13,6 +13,7 @@
 
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
+import { debugFirebaseConnection } from '@/utils/firebaseDebug';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -36,9 +37,15 @@ export default function UserLoadingState({ pageName = 'Page' }: UserLoadingState
 
     // 🧪 TEST FUNCTION: Load a specific user for testing
     const testLoadUser = async () => {
-        const testUserId = 'fDJg406VMlk09ulBHYbd';
+        const testUserId = 'fDJg4O6VMlk09ulBHYbd'; // Note: 4O6 with letter O, not zero
         console.log(`🧪 [${pageName}] Loading test user:`, testUserId);
         await loadSpecificUser(testUserId);
+    };
+
+    // 🔍 DEBUG FUNCTION: Test Firebase connection
+    const testFirebaseConnection = async () => {
+        console.log(`🔍 [${pageName}] Running Firebase diagnostics...`);
+        await debugFirebaseConnection();
     };
 
     // Only render if there's no user data
@@ -52,14 +59,25 @@ export default function UserLoadingState({ pageName = 'Page' }: UserLoadingState
                     {loading ? '🔄 Fetching user data...' : '❌ User not found or not logged in'}
                 </Text>
                 {!loading && (
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: colors.tint }]}
-                        onPress={testLoadUser}
-                    >
-                        <Text style={[styles.buttonText, { color: colors.darkText }]}>
-                            🧪 Load Test User
-                        </Text>
-                    </TouchableOpacity>
+                    <>
+                        <TouchableOpacity
+                            style={[styles.button, { backgroundColor: colors.tint }]}
+                            onPress={testLoadUser}
+                        >
+                            <Text style={[styles.buttonText, { color: colors.darkText }]}>
+                                🧪 Load Test User
+                            </Text>
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity
+                            style={[styles.button, { backgroundColor: '#ff9500', marginTop: 12 }]}
+                            onPress={testFirebaseConnection}
+                        >
+                            <Text style={[styles.buttonText, { color: '#fff' }]}>
+                                🔍 Debug Firebase
+                            </Text>
+                        </TouchableOpacity>
+                    </>
                 )}
             </View>
         );
