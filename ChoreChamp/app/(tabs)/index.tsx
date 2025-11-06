@@ -1,5 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
+import { getTodayTasksForUser } from "@/services/taskService";
 import type { Task } from "@/types/task";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
@@ -32,6 +33,57 @@ export default function Dashboard() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  // State for tasks from database
+  const [todayTasks, setTodayTasks] = useState<Task[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+
+  // Fetch tasks for the current user
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!userData?.id) {
+        console.log('⚠️ No user ID available for fetching tasks');
+        setLoadingTasks(false);
+        return;
+      }
+
+      setLoadingTasks(true);
+      try {
+        console.log('📋 Fetching tasks for user:', userData.id);
+        const tasks = await getTodayTasksForUser(userData.id);
+        
+        // Transform TaskData to Task format for the UI
+        const transformedTasks: Task[] = tasks.map((task, index) => {
+          const timeStart = new Date(task.timeStart);
+          const hours = timeStart.getHours().toString().padStart(2, '0');
+          const minutes = timeStart.getMinutes().toString().padStart(2, '0');
+          
+          return {
+            id: index + 1,
+            title: task.title,
+            description: task.description,
+            time: `${hours}:${minutes}`,
+            assignedTo: userData.username, // Using current user's name
+            avatar: userData.imageUri ? { uri: userData.imageUri } : require("@/assets/images/icon.png"),
+            duration: Math.round((task.timeEnd.getTime() - task.timeStart.getTime()) / 60000), // Duration in minutes
+            finished: task.done,
+          };
+        });
+
+        setTodayTasks(transformedTasks);
+        console.log('✅ Loaded tasks:', transformedTasks.length);
+      } catch (error) {
+        console.error('❌ Error loading tasks:', error);
+        // Keep empty array on error
+        setTodayTasks([]);
+      } finally {
+        setLoadingTasks(false);
+      }
+    };
+
+    fetchTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.id]);
+
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(new Date());
@@ -45,49 +97,6 @@ export default function Dashboard() {
   if (!userData) {
     return <UserLoadingState pageName="Dashboard" />;
   }
-
-  // TODO: Replace with database fetch
-  const todayTasks: Task[] = [
-    {
-      id: 1,
-      title: "Gå med søpla",
-      time: "10:00",
-      assignedTo: "Ida",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 60,
-      finished: true,
-    },
-    {
-      id: 2,
-      title: "Støvsuge huset",
-      time: "12:00",
-      assignedTo: "Andreas",
-      description:
-        "Husk godt under sofaen, hybelkaniner på størrelse med hodet ditt.",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 60,
-      finished: false,
-    },
-    {
-      id: 3,
-      title: "Lage middag",
-      time: "16:00",
-      assignedTo: "Emil Berglund",
-      description: "Prøv den nye oppskriften med kebabkjøtt og maiskaker.",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 90,
-      finished: false,
-    },
-    {
-      id: 4,
-      title: "Vanne planter",
-      time: "21:00",
-      assignedTo: "Emil",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 30,
-      finished: false,
-    },
-  ];
 
   // TODO: Replace with database fetch
   const rawLeaderboardData = [
@@ -275,8 +284,20 @@ export default function Dashboard() {
             Dagens oppgaver:
           </Text>
 
-          {/* Hourly Calendar */}
-          <View style={styles.calendarContainer}>
+          {loadingTasks ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, { color: colors.text }]}>
+                Laster oppgaver...
+              </Text>
+            </View>
+          ) : todayTasks.length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, { color: colors.lightDarkText }]}>
+                Ingen oppgaver for i dag 🎉
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.calendarContainer}>
             {timeSlots.map((timeSlot, index) => {
               // Find task for this time slot
               const taskForSlot = todayTasks.find(
@@ -404,7 +425,8 @@ export default function Dashboard() {
                 </View>
               );
             })}
-          </View>
+            </View>
+          )}
         </View>
 
         {/* Leaderboard */}

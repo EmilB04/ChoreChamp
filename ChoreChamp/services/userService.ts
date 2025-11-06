@@ -9,7 +9,7 @@ export interface UserData {
     imageUri: string;
     email?: string;
     phone?: string;
-    household?: DocumentReference;  // Firestore reference to household
+    household?: (DocumentReference | string)[];  // Array of Firestore references to households
     points?: number;
     language: 'nb' | 'en' | 'es' | 'de';
     notificationsEnabled?: boolean;

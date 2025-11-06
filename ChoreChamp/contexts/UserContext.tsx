@@ -7,6 +7,7 @@ Data is fetched from Firebase Firestore and synced in real-time.
 
 import { auth } from '@/lib/firebase';
 import { getUserData, updateUserData as updateUserDataService } from '@/services/userService';
+import { DocumentReference } from 'firebase/firestore';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 interface UserData {
@@ -17,9 +18,7 @@ interface UserData {
     imageUri?: string;
     email?: string;
     phone?: string;
-    household?: { 
-        id: string;
-    };  // references household ID
+    household?: (DocumentReference | string)[];  // Array of household references
     points?: number;
     language: 'nb' | 'en' | 'es' | 'de';
     notificationsEnabled?: boolean;
@@ -68,24 +67,19 @@ export function UserProvider({ children }: UserProviderProps) {
         try {
             const data = await getUserData(userId);
             if (data) {
-                // Convert Firestore household reference to simple object
-                const householdId = data.household?.id;
-                const userData = {
-                    ...data,
-                    household: householdId ? { id: householdId } : undefined,
-                };
-                setUserData(userData);
+                // Keep household array as-is (it's already an array of references)
+                setUserData(data);
                 
                 // Console log the found user
                 console.log('✅ User found and loaded:', {
-                    id: userData.id,
-                    name: `${userData.firstName} ${userData.lastName}`,
-                    email: userData.email || 'No email',
-                    phone: userData.phone || 'No phone',
-                    hasImage: !!userData.imageUri,
-                    household: householdId || 'No household',
-                    points: userData.points || 0,
-                    language: userData.language,
+                    id: data.id,
+                    name: `${data.firstName} ${data.lastName}`,
+                    email: data.email || 'No email',
+                    phone: data.phone || 'No phone',
+                    hasImage: !!data.imageUri,
+                    households: data.household?.length || 0,
+                    points: data.points || 0,
+                    language: data.language,
                 });
             } else {
                 console.warn('⚠️ No user found with ID:', userId);

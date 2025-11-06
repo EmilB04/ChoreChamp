@@ -15,7 +15,7 @@ export async function debugFirebaseConnection() {
     
     try {
         // Check if db is initialized
-        console.log('1️⃣ Database initialized:', !!db);
+        console.log('1: Database initialized:', !!db);
         console.log('   Database type:', db ? typeof db : 'undefined');
         
         if (!db) {
@@ -24,7 +24,7 @@ export async function debugFirebaseConnection() {
         }
         
         // Try to list users collection
-        console.log('\n2️⃣ Attempting to list users collection...');
+        console.log('\n2: Attempting to list users collection...');
         const usersRef = collection(db, 'users');
         console.log('   Collection reference created:', usersRef.path);
         
@@ -39,7 +39,7 @@ export async function debugFirebaseConnection() {
             console.warn('⚠️ Users collection is EMPTY!');
             console.warn('💡 Make sure you have documents in the "users" collection in Firebase Console');
         } else {
-            console.log('\n4️⃣ Available users in Firestore:');
+            console.log('\n4: Available users in Firestore:');
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 console.log(`   📄 ID: ${doc.id}`);
