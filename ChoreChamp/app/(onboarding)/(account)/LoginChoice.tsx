@@ -3,13 +3,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from '@/contexts/ThemeContext';
 import { useButtonPressAnimation, useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
 
 
@@ -109,7 +109,7 @@ export default function LoginChoice() {
         <View style={styles.socialStack}>
           <SocialButton
             label={t('loginchoice.google')}
-            icon={<Image source={require('@/assets/images/Google.png')} style={styles.socialIcon} />}
+            icon={<Image source={require('@/assets/images/Google.png')} style={styles.socialIcon} resizeMode="contain" />}
             onPress={signInWithGoogle}
             index={0}
           />
@@ -209,10 +209,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
     elevation: 3,
   },
   socialIconWrap: {
@@ -225,7 +222,6 @@ const styles = StyleSheet.create({
   socialIcon: { 
     width: 24, 
     height: 24, 
-    resizeMode: 'contain' 
   },
   socialText: { 
     fontSize: 16, 
@@ -255,10 +251,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.15)',
     elevation: 3,
   },
   registerButtonContent: {

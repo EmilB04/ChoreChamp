@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 
 // TODO: Remove when language is incorporated throughout app
@@ -82,7 +82,10 @@ export default function LanguageSelection() {
 
                     {/* Language Options */}
                     <View style={styles.buttons}>
-                        <Animated.View style={{ transform: [{ scale: button1ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button1ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
@@ -103,7 +106,10 @@ export default function LanguageSelection() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{ transform: [{ scale: button2ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button2ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
@@ -124,7 +130,10 @@ export default function LanguageSelection() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{ transform: [{ scale: button3ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button3ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
@@ -145,7 +154,10 @@ export default function LanguageSelection() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{ transform: [{ scale: button4ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button4ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
@@ -168,9 +180,12 @@ export default function LanguageSelection() {
                     </View>
 
                     {/* Next Button */}
-                    <Animated.View style={{
-                        transform: [{ scale: buttonSlideAnim }],
-                    }}>
+                    <Animated.View 
+                        style={{
+                            transform: [{ scale: buttonSlideAnim }],
+                        }}
+                        importantForAccessibility="no-hide-descendants"
+                    >
                         <TouchableOpacity
                             style={[
                                 styles.nextBtn,
@@ -239,10 +254,7 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
         elevation: 5,
     },
     iconInner: {
@@ -262,10 +274,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 16,
         gap: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     title: {
@@ -283,10 +292,7 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         paddingVertical: 16,
         paddingHorizontal: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
         gap: 16,
     },

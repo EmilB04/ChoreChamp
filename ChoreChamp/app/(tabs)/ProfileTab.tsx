@@ -1,6 +1,7 @@
 import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
+import UserLoadingState from '@/components/UserLoadingState';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from "@expo/vector-icons";
@@ -31,6 +32,11 @@ export default function Profile() {
     const [showAppSettings, setShowAppSettings] = useState(false);
     const [showHelpSupport, setShowHelpSupport] = useState(false);
     const [showAboutApp, setShowAboutApp] = useState(false);
+
+    // Show loading state if userData is not available
+    if (!userData) {
+        return <UserLoadingState pageName="Profile" />;
+    }
 
     // Toggle About App section
 
@@ -78,10 +84,16 @@ export default function Profile() {
                 <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
                     Profil & {"\n"}Innstillinger
                 </Text>
-                <Image
-                    source={{ uri: userData.imageUri }}
-                    style={styles.avatar}
-                />
+                {userData.imageUri ? (
+                    <Image
+                        source={{ uri: userData.imageUri }}
+                        style={styles.avatar}
+                    />
+                ) : (
+                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                        <Ionicons name="person" size={40} color={colors.darkText} />
+                    </View>
+                )}
                 <Text style={[styles.name, { color: colors.darkText }]}>{userData.firstName} {userData.lastName}</Text>
                 <View style={styles.separator} />
                 <TouchableOpacity 
@@ -219,7 +231,7 @@ export default function Profile() {
                 visible={isEditModalVisible}
                 onClose={() => setIsEditModalVisible(false)}
                 currentName={userData.firstName + ' ' + userData.lastName}
-                currentImageUri={userData.imageUri}
+                currentImageUri={userData.imageUri || ''}
                 onSave={handleSaveProfile}
             />
         </View>
@@ -291,6 +303,10 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255, 255, 255, 0.3)",
         marginBottom: 10,
     },
+    avatarPlaceholder: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     name: {
         fontSize: 24,
         fontWeight: "bold",
@@ -320,10 +336,7 @@ const styles = StyleSheet.create({
         alignItems: "stretch",
         paddingVertical: 12,
         borderRadius: 12,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         elevation: 1,
         justifyContent: "space-between",
     },

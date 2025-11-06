@@ -29,17 +29,17 @@ export default function NotificationsScreen() {
     const [button1SlideAnim, button2SlideAnim] = useStaggeredAnimation(2, 300, 100);
 
     useEffect(() => {
-      async function applyLanguage() {
-        if (!langParam) return;
-        if (i18n.language === langParam) return; 
-        try {
-          await i18n.changeLanguage(langParam); 
-          await AsyncStorage.setItem('appLanguage', langParam); 
-        } catch (e) {
-          console.warn('Language change failed', e);
+        async function applyLanguage() {
+            if (!langParam) return;
+            if (i18n.language === langParam) return;
+            try {
+                await i18n.changeLanguage(langParam);
+                await AsyncStorage.setItem('appLanguage', langParam);
+            } catch (e) {
+                console.warn('Language change failed', e);
+            }
         }
-      }
-      applyLanguage();
+        applyLanguage();
     }, [langParam]);
 
 
@@ -91,7 +91,7 @@ export default function NotificationsScreen() {
                         <Text style={[styles.title, { color: colors.text }]}>
                             {t('notifications.title')}
                         </Text>
-                        
+
                         <View style={[styles.descriptionCard, { backgroundColor: colors.contextBackground }]}>
                             <Ionicons name="alarm" size={20} color={colors.tint} style={styles.descIcon} />
                             <Text style={[styles.subtitle, { color: colors.text }]}>
@@ -102,9 +102,12 @@ export default function NotificationsScreen() {
 
                     {/* Button Group */}
                     <View style={styles.buttonGroup}>
-                        <Animated.View style={{
-                            transform: [{ scale: button1SlideAnim }],
-                        }}>
+                        <Animated.View 
+                            style={{
+                                transform: [{ scale: button1SlideAnim }],
+                            }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
                                 onPress={handleAllow}
@@ -119,9 +122,12 @@ export default function NotificationsScreen() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{
-                            transform: [{ scale: button2SlideAnim }],
-                        }}>
+                        <Animated.View 
+                            style={{
+                                transform: [{ scale: button2SlideAnim }],
+                            }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[styles.secondaryBtn, { backgroundColor: colors.contextBackground }]}
                                 onPress={handleSkip}
@@ -153,7 +159,7 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-    safe: { 
+    safe: {
         flex: 1,
     },
     headerBackground: {
@@ -178,9 +184,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         position: 'relative',
     },
-    container: { 
-        flex: 1, 
-        justifyContent: 'space-evenly', 
+    container: {
+        flex: 1,
+        justifyContent: 'space-evenly',
         alignItems: 'center',
         paddingHorizontal: 24,
         paddingVertical: 20,
@@ -191,10 +197,7 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
         elevation: 5,
     },
     iconInner: {
@@ -209,8 +212,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 16,
     },
-    title: { 
-        fontSize: 28, 
+    title: {
+        fontSize: 28,
         fontWeight: '700',
         textAlign: 'center',
     },
@@ -221,16 +224,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         borderRadius: 14,
         gap: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     descIcon: {
         marginRight: 4,
     },
-    subtitle: { 
+    subtitle: {
         fontSize: 15,
         textAlign: 'center',
         fontWeight: '500',
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
         gap: 12,
         alignItems: 'center',
     },
-    primaryBtn: { 
+    primaryBtn: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -250,33 +250,27 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         borderRadius: 16,
         minWidth: 250,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2)',
         elevation: 4,
         gap: 8,
     },
     btnIcon: {
         marginRight: 4,
     },
-    primaryText: { 
+    primaryText: {
         fontSize: 16,
         fontWeight: '700',
     },
-    secondaryBtn: { 
+    secondaryBtn: {
         paddingVertical: 14,
         paddingHorizontal: 32,
         borderRadius: 16,
         minWidth: 200,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
-    secondaryText: { 
+    secondaryText: {
         fontSize: 16,
         fontWeight: '600',
     },
@@ -288,7 +282,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         gap: 8,
     },
-    footer: { 
+    footer: {
         fontSize: 13,
         textAlign: 'center',
         fontWeight: '500',

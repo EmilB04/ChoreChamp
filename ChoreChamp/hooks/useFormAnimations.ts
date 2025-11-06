@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Animated } from 'react-native';
+import { Animated, Platform } from 'react-native';
+
+// Use native driver only on iOS and Android, not on web
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 interface UseFormAnimationsOptions {
     errorCount?: number;
@@ -26,7 +29,7 @@ export function useFormAnimations(options: UseFormAnimationsOptions = {}) {
         if (hasError) {
             Animated.spring(errorAnim, {
                 toValue: 1,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
                 tension: 100,
                 friction: 8,
             }).start();
@@ -34,7 +37,7 @@ export function useFormAnimations(options: UseFormAnimationsOptions = {}) {
             Animated.timing(errorAnim, {
                 toValue: 0,
                 duration: 200,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
             }).start();
         }
     }, [hasError, errorAnim]);
@@ -46,7 +49,7 @@ export function useFormAnimations(options: UseFormAnimationsOptions = {}) {
                 if (error) {
                     Animated.spring(fieldErrorAnims[index], {
                         toValue: 1,
-                        useNativeDriver: true,
+                        useNativeDriver: USE_NATIVE_DRIVER,
                         tension: 100,
                         friction: 8,
                     }).start();
@@ -54,7 +57,7 @@ export function useFormAnimations(options: UseFormAnimationsOptions = {}) {
                     Animated.timing(fieldErrorAnims[index], {
                         toValue: 0,
                         duration: 200,
-                        useNativeDriver: true,
+                        useNativeDriver: USE_NATIVE_DRIVER,
                     }).start();
                 }
             }
@@ -66,7 +69,7 @@ export function useFormAnimations(options: UseFormAnimationsOptions = {}) {
         Animated.timing(buttonOpacityAnim, {
             toValue: isValid ? 1 : 0.5,
             duration: 300,
-            useNativeDriver: true,
+            useNativeDriver: USE_NATIVE_DRIVER,
         }).start();
     };
 
@@ -120,14 +123,14 @@ export function usePickerAnimations(): UsePickerAnimationsResult {
         Animated.parallel([
             Animated.spring(pickerAnim, {
                 toValue: show ? 1 : 0,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
                 tension: 100,
                 friction: 8,
             }),
             Animated.timing(chevronAnim, {
                 toValue: show ? 1 : 0,
                 duration: 200,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
             }),
         ]).start();
     };

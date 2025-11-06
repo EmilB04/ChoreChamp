@@ -1,20 +1,20 @@
+import { useTheme } from '@/contexts/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
+    Alert,
+    Image,
+    KeyboardAvoidingView,
     Modal,
-    View,
+    Platform,
+    ScrollView,
+    StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    Image,
-    StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
+    View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@/contexts/ThemeContext';
-import * as ImagePicker from 'expo-image-picker';
 
 interface EditProfileModalProps {
     visible: boolean;
@@ -127,10 +127,12 @@ export default function EditProfileModal({
             animationType="slide"
             presentationStyle="pageSheet"
             onRequestClose={handleCancel}
+            accessibilityViewIsModal={true}
         >
             <KeyboardAvoidingView
                 style={[styles.container, { backgroundColor: colors.background }]}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                importantForAccessibility="yes"
             >
                 {/* Header */}
                 <View style={[styles.header, { borderBottomColor: colors.contextBackground }]}>

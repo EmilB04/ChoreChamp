@@ -1,16 +1,16 @@
-import React from "react";
-import {
-  Modal,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import type { Task } from "@/types/task";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import React from "react";
+import {
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 // TODO: Implement validation for action buttons based on user ID and task assignedToId
 
@@ -44,10 +44,15 @@ export default function TaskDetailModal({
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}
+      accessibilityViewIsModal={true}
     >
-      <View style={styles.modalOverlay}>
+      <View 
+        style={styles.modalOverlay}
+        importantForAccessibility="no-hide-descendants"
+      >
         <View
           style={[styles.modalContent, { backgroundColor: colors.background }]}
+          importantForAccessibility="yes"
         >
           {/* Header */}
           <View style={styles.modalHeader}>
@@ -297,13 +302,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     maxHeight: "90%",
     // Shadow for separation
-    shadowColor: "#FFBE00",
-    shadowOffset: {
-      width: 0,
-      height: -4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    boxShadow: '0 -4px 8px 0 rgba(255, 190, 0, 0.25)',
     elevation: 10,
   },
 

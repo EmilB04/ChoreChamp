@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import UserLoadingState from "../../components/UserLoadingState";
 import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
@@ -39,6 +40,11 @@ export default function Dashboard() {
     const interval = setInterval(updateTime, 10000); // Update every 10 seconds
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
+
+  // Show loading state while user data is being fetched
+  if (!userData) {
+    return <UserLoadingState pageName="Dashboard" />;
+  }
 
   // TODO: Replace with database fetch
   const todayTasks: Task[] = [
@@ -883,5 +889,14 @@ const styles = StyleSheet.create({
   leaderboardPoints: {
     fontSize: 16,
     fontWeight: "500",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '500',
   },
 });
