@@ -143,3 +143,55 @@ export async function getHouseholdById(householdId: string): Promise<Household |
         return null;
     }
 }
+
+/**
+ * Fetch all members of a household with their user data and points
+ */
+export async function getHouseholdMembers(householdId: string): Promise<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+    imageUri: string;
+    points: number;
+}[]> {
+    console.log('👥 getHouseholdMembers called with householdId:', householdId);
+    
+    try {
+        // Query all users who have this household in their household array
+        const usersRef = collection(db, 'users');
+        const householdRef = doc(db, 'households', householdId);
+        
+        // Query users where household array contains reference to this household
+        const q = query(usersRef, where('household', 'array-contains', householdRef));
+        const querySnapshot = await getDocs(q);
+        
+        const members: {
+            id: string;
+            firstName: string;
+            lastName: string;
+            username: string;
+            imageUri: string;
+            points: number;
+        }[] = [];
+        
+        querySnapshot.forEach((userDoc) => {
+            const data = userDoc.data();
+            members.push({
+                id: userDoc.id,
+                firstName: data.firstName || '',
+                lastName: data.lastName || '',
+                username: data.username || `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+                imageUri: data.imageUri || '',
+                points: data.points || 0,
+            });
+            console.log(`✅ Fetched member: ${data.firstName} ${data.lastName} (${data.points} pts)`);
+        });
+        
+        console.log(`✅ Total members fetched: ${members.length}`);
+        return members;
+    } catch (error) {
+        console.error('💥 Error fetching household members:', error);
+        return [];
+    }
+}
