@@ -51,14 +51,25 @@ export default function Profile() {
     };
 
     // Handler for saving profile changes
-    const handleSaveProfile = (newName: string, newImageUri: string) => {
-        // Split the full name into firstName and lastName (everything after the first word becomes lastName)
-        const parts = newName.trim().split(/\s+/);
-        const firstName = parts.shift() || '';
-        const lastName = parts.join(' ');
-
-        updateUserData({ firstName, lastName, imageUri: newImageUri });
-        console.log('Profile updated:', { firstName, lastName, image: newImageUri });
+    const handleSaveProfile = async (newUsername: string, newImageUri: string) => {
+        try {
+            console.log('💾 Saving profile to Firestore:', { 
+                username: newUsername,
+                imageUri: newImageUri 
+            });
+            
+            // Update in Firestore via UserContext
+            await updateUserData({ 
+                username: newUsername,
+                imageUri: newImageUri 
+            });
+            
+            console.log('✅ Profile saved successfully!');
+        } catch (error) {
+            console.error('❌ Error saving profile:', error);
+            // Show error to user
+            alert('Kunne ikke lagre profilen. Vennligst prøv igjen.');
+        }
     };
 
     // If showing My Account screen, render it instead
@@ -94,7 +105,7 @@ export default function Profile() {
                         <Ionicons name="person" size={40} color={colors.darkText} />
                     </View>
                 )}
-                <Text style={[styles.name, { color: colors.darkText }]}>{userData.firstName} {userData.lastName}</Text>
+                <Text style={[styles.name, { color: colors.darkText }]}>{userData.username}</Text>
                 <View style={styles.separator} />
                 <TouchableOpacity 
                     style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
@@ -230,7 +241,7 @@ export default function Profile() {
             <EditProfileModal
                 visible={isEditModalVisible}
                 onClose={() => setIsEditModalVisible(false)}
-                currentName={userData.firstName + ' ' + userData.lastName}
+                currentUsername={userData.username}
                 currentImageUri={userData.imageUri || ''}
                 onSave={handleSaveProfile}
             />

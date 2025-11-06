@@ -215,7 +215,7 @@ export default function Dashboard() {
       >
         {/* HEADER */}
         <View style={[styles.header, commonStyles.headerTitle]}>
-          <WelcomeGreeting firstName={userData.firstName} lastName={userData.lastName} />
+          <WelcomeGreeting username={userData.username} />
           <View style={styles.profileSection}>
             <View style={styles.profileContainer}>
               <Image

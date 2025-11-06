@@ -13,6 +13,7 @@ interface UserData {
     id: string;
     firstName: string;
     lastName: string;
+    username: string;  // Display name, defaults to firstName + lastName
     imageUri?: string;
     email?: string;
     phone?: string;

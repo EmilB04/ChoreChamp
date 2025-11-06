@@ -104,8 +104,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 const snapshot = await getDoc(ref);
 
                 if (!snapshot.exists()) {
+                    const displayName = firebaseUser.displayName ?? "";
                     const docData: AppUser = {
-                        name: firebaseUser.displayName ?? "",
+                        name: displayName,
+                        username: displayName,  // Default username to name
                         language: "nb",
                         profilePicture: firebaseUser.photoURL ?? "",
                         householdId: [],

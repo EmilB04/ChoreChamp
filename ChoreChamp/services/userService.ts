@@ -5,6 +5,7 @@ export interface UserData {
     id: string;
     firstName: string;
     lastName: string;
+    username: string;  // Display name, defaults to firstName + lastName
     imageUri: string;
     email?: string;
     phone?: string;
@@ -41,14 +42,19 @@ export async function getUserData(userId: string): Promise<UserData | null> {
                 id: userDoc.id,
                 firstName: data.firstName,
                 lastName: data.lastName,
+                username: data.username,
                 email: data.email,
                 hasData: !!data,
             });
+            
+            // Default username to firstName + lastName if not set
+            const defaultUsername = `${data.firstName || ''} ${data.lastName || ''}`.trim();
             
             return {
                 id: userDoc.id,
                 firstName: data.firstName || '',
                 lastName: data.lastName || '',
+                username: data.username || defaultUsername,
                 imageUri: data.imageUri || '',
                 email: data.email,
                 phone: data.phone,
@@ -84,12 +90,34 @@ export async function getUserData(userId: string): Promise<UserData | null> {
  * Update user data in Firestore
  */
 export async function updateUserData(userId: string, data: Partial<Omit<UserData, 'id'>>): Promise<boolean> {
+    console.log('💾 updateUserData called:', {
+        userId,
+        fieldsToUpdate: Object.keys(data),
+        data,
+    });
+    
     try {
         const userDocRef = doc(db, 'users', userId);
+        console.log('📄 Updating document at:', userDocRef.path);
+        
         await updateDoc(userDocRef, data as any);
+        
+        console.log('✅ User data updated successfully in Firestore!');
         return true;
     } catch (error) {
-        console.error('Error updating user data:', error);
+        console.error('💥 Error updating user data:', error);
+        console.error('Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            userId,
+            data,
+        });
+        
+        if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
+            console.error('🔒 WRITE PERMISSION ERROR:');
+            console.error('   Firebase security rules are blocking write access.');
+            console.error('   Make sure your rules allow writing to users/' + userId);
+        }
+        
         return false;
     }
 }

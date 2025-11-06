@@ -19,41 +19,52 @@ import {
 interface EditProfileModalProps {
     visible: boolean;
     onClose: () => void;
-    currentName: string;
+    currentUsername: string;
     currentImageUri: string;
-    onSave: (name: string, imageUri: string) => void;
+    onSave: (username: string, imageUri: string) => Promise<void>;
 }
 
 export default function EditProfileModal({
     visible,
     onClose,
-    currentName,
+    currentUsername,
     currentImageUri,
     onSave,
 }: EditProfileModalProps) {
     const { colors } = useTheme();
-    const [name, setName] = useState(currentName);
+    const [username, setUsername] = useState(currentUsername);
     const [imageUri, setImageUri] = useState(currentImageUri);
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSave = () => {
-        if (name.trim() === '') {
-            Alert.alert('Feil', 'Navnet kan ikke være tomt');
+    const handleSave = async () => {
+        if (username.trim() === '') {
+            Alert.alert('Feil', 'Brukernavnet kan ikke være tomt');
             return;
         }
         
-        setIsLoading(true);
-        // Simulate API call delay
-        setTimeout(() => {
-            onSave(name.trim(), imageUri);
-            setIsLoading(false);
+        try {
+            setIsLoading(true);
+            await onSave(username.trim(), imageUri);
+            
+            // Close modal first
             onClose();
-        }, 500);
+            
+            // Then show success message
+            Alert.alert(
+                'Suksess!',
+                'Profilen din er oppdatert'
+            );
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            Alert.alert('Feil', 'Kunne ikke lagre profilen. Vennligst prøv igjen.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleCancel = () => {
         // Reset to original values
-        setName(currentName);
+        setUsername(currentUsername);
         setImageUri(currentImageUri);
         onClose();
     };
@@ -170,9 +181,9 @@ export default function EditProfileModal({
                         </Text>
                     </View>
 
-                    {/* Name Section */}
+                    {/* Username Section */}
                     <View style={styles.nameSection}>
-                        <Text style={[styles.label, { color: colors.text }]}>Navn</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>Brukernavn</Text>
                         <TextInput
                             style={[
                                 styles.nameInput,
@@ -182,21 +193,21 @@ export default function EditProfileModal({
                                     borderColor: colors.lightDarkText,
                                 }
                             ]}
-                            value={name}
-                            onChangeText={setName}
-                            placeholder="Skriv inn navn"
+                            value={username}
+                            onChangeText={setUsername}
+                            placeholder="Skriv inn brukernavn"
                             placeholderTextColor={colors.lightDarkText}
-                            maxLength={50}
+                            maxLength={30}
                         />
                         <Text style={[styles.characterCount, { color: colors.lightDarkText }]}>
-                            {name.length}/50
+                            {username.length}/30
                         </Text>
                     </View>
 
                     {/* Additional Info */}
                     <View style={styles.infoSection}>
                         <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-                            Ditt navn vil være synlig for andre medlemmer i dine husstander.
+                            Ditt brukernavn vil være synlig for andre medlemmer i dine husstander.
                         </Text>
                     </View>
                 </ScrollView>

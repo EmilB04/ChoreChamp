@@ -9,7 +9,7 @@ This happens because Firebase security rules are blocking unauthenticated access
 
 ## Solution: Update Firestore Security Rules
 
-### Option 1: Allow Read for Testing (TEMPORARY - NOT FOR PRODUCTION)
+### Option 1: Allow Read/Write for Testing (TEMPORARY - NOT FOR PRODUCTION)
 
 1. Go to [Firebase Console](https://console.firebase.google.com)
 2. Select your project: **chorechamp-a000a**
@@ -22,10 +22,10 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow anyone to read users (for testing)
+    // Allow anyone to read/write users (for testing)
     match /users/{userId} {
       allow read: if true;  // ⚠️ TEMPORARY - allows unauthenticated reads
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow write: if true; // ⚠️ TEMPORARY - allows unauthenticated writes
     }
     
     // Other collections require authentication
