@@ -92,6 +92,7 @@ export default function EditProfileModal({
             }
         } catch (error) {
             Alert.alert('Feil', 'Kunne ikke velge bilde');
+            console.error('Error picking image:', error);
         }
     };
 
@@ -117,6 +118,7 @@ export default function EditProfileModal({
             }
         } catch (error) {
             Alert.alert('Feil', 'Kunne ikke ta bilde');
+            console.error('Error taking photo:', error);
         }
     };
 
