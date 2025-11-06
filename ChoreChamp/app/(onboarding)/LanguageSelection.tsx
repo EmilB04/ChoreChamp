@@ -12,14 +12,14 @@ import OnboardingDots from '../../components/onBoarding/OnboardingDots';
 // TODO: Remove when language is incorporated throughout app
 const CHOOSE_LANGUAGE_TEXTS: Record<string, string> = {
     en: 'Select your language',
-    no: 'Velg språk',
+    nb: 'Velg språk',
     es: 'Selecciona tu idioma',
     de: 'Wähle deine Sprache',
 };
 
 const CONTINUE_TEXTS: Record<string, string> = {
     en: 'Continue',
-    no: 'Fortsett',
+    nb: 'Fortsett',
     es: 'Continuar',
     de: 'Weiter',
 };
@@ -83,7 +83,10 @@ export default function LanguageSelection() {
 
                     {/* Language Options */}
                     <View style={styles.buttons}>
-                        <Animated.View style={{ transform: [{ scale: button1ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button1ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
@@ -108,17 +111,20 @@ export default function LanguageSelection() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{ transform: [{ scale: button2ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button2ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
                                     {
                                         backgroundColor: colors.contextBackground,
-                                        borderColor: selected === 'no' ? colors.tint : 'transparent',
+                                        borderColor: selected === 'nb' ? colors.tint : 'transparent',
                                         borderWidth: 2,
                                     }
                                 ]}
-                                onPress={() => setSelected('no')}
+                                onPress={() => setSelected('nb')}
                                 accessibilityRole="button"
                                 accessibilityLabel="Norsk"
                                 activeOpacity={0.7}
@@ -129,11 +135,14 @@ export default function LanguageSelection() {
                                     contentFit="cover"
                                 />
                                 <Text style={[styles.langText, { color: colors.text }]}>Norsk</Text>
-                                {selected === 'no' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
+                                {selected === 'nb' && <Ionicons name="checkmark-circle" size={24} color={colors.tint} />}
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{ transform: [{ scale: button3ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button3ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
@@ -158,7 +167,10 @@ export default function LanguageSelection() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{ transform: [{ scale: button4ScaleAnim }] }}>
+                        <Animated.View 
+                            style={{ transform: [{ scale: button4ScaleAnim }] }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[
                                     styles.langBtn,
@@ -185,9 +197,12 @@ export default function LanguageSelection() {
                     </View>
 
                     {/* Next Button */}
-                    <Animated.View style={{
-                        transform: [{ scale: buttonSlideAnim }],
-                    }}>
+                    <Animated.View 
+                        style={{
+                            transform: [{ scale: buttonSlideAnim }],
+                        }}
+                        importantForAccessibility="no-hide-descendants"
+                    >
                         <TouchableOpacity
                             style={[
                                 styles.nextBtn,
@@ -256,10 +271,7 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
         elevation: 5,
     },
     iconInner: {
@@ -279,10 +291,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 16,
         gap: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     title: {
@@ -300,10 +309,7 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         paddingVertical: 16,
         paddingHorizontal: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
         gap: 16,
     },

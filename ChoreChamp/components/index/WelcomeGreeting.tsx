@@ -21,10 +21,10 @@
 */
 
 
-import React from 'react';
-import { Text } from 'react-native';
 import commonStyles from '@/app/commonStyles';
 import { useTheme } from '@/contexts/ThemeContext';
+import React from 'react';
+import { Text } from 'react-native';
 
 // i18n greeting translations
 const GREETINGS = {
@@ -62,10 +62,10 @@ type Language = keyof typeof GREETINGS;
 type GreetingPeriod = keyof typeof GREETINGS.NO;
 
 export default function WelcomeGreeting({ 
-    userName,
+    username,
     language = 'NO'
 }: { 
-    userName: string;
+    username: string;
     language?: Language;
 }) {
     const { colors } = useTheme();
@@ -92,7 +92,7 @@ export default function WelcomeGreeting({
 
     return (
         <Text style={[commonStyles.headerTitle, { color: colors.text, marginTop: 0 }]}>
-            {greeting},{"\n"}{userName}!
+            {greeting},{"\n"}{username}!
         </Text>
     );
 }

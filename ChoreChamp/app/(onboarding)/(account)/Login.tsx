@@ -1,15 +1,15 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation } from '@/hooks/useEntranceAnimation';
 import { useBorderAnimations, useFormAnimations, usePickerAnimations } from '@/hooks/useFormAnimations';
+import { formatPhoneNumber, stripCountryCode, validatePhone } from '@/utils/formValidation';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
-import { formatPhoneNumber, stripCountryCode, validatePhone } from './FormValidation';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
 
 export default function Login() {
@@ -238,17 +238,20 @@ export default function Login() {
                                     <Ionicons name="call-outline" size={18} color={colors.tint} />
                                     <Text style={[styles.label, { color: colors.text }]}>{t('login.phoneLabel')}</Text>
                                 </View>
-                                <Animated.View style={[
-                                    styles.inputContainer,
-                                    {
-                                        backgroundColor: colors.contextBackground,
-                                        borderColor: phoneBorderAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: ['transparent', colors.tint],
-                                        }),
-                                        borderWidth: 2,
-                                    }
-                                ]}>
+                                <Animated.View 
+                                    style={[
+                                        styles.inputContainer,
+                                        {
+                                            backgroundColor: colors.contextBackground,
+                                            borderColor: phoneBorderAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: ['transparent', colors.tint],
+                                            }),
+                                            borderWidth: 2,
+                                        }
+                                    ]}
+                                    importantForAccessibility="no-hide-descendants"
+                                >
                                     <View style={styles.phoneInputRow}>
                                         <TouchableOpacity
                                             onPress={toggleCountryPicker}
@@ -309,11 +312,15 @@ export default function Login() {
                                                 }],
                                             }
                                         ]}
+                                        importantForAccessibility="no-hide-descendants"
+                                        accessibilityViewIsModal={true}
+                                        accessibilityElementsHidden={false}
                                     >
                                         <ScrollView
                                             style={styles.countryPickerScroll}
                                             showsVerticalScrollIndicator={false}
                                             nestedScrollEnabled={true}
+                                            importantForAccessibility="no-hide-descendants"
                                         >
                                             {countryCodes.map((item) => (
                                                 <TouchableOpacity
@@ -363,17 +370,20 @@ export default function Login() {
                                     <Ionicons name="lock-closed-outline" size={18} color={colors.tint} />
                                     <Text style={[styles.label, { color: colors.text }]}>{t('login.passwordLabel')}</Text>
                                 </View>
-                                <Animated.View style={[
-                                    styles.inputContainer,
-                                    {
-                                        backgroundColor: colors.contextBackground,
-                                        borderColor: passwordBorderAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: ['transparent', colors.tint],
-                                        }),
-                                        borderWidth: 2,
-                                    }
-                                ]}>
+                                <Animated.View 
+                                    style={[
+                                        styles.inputContainer,
+                                        {
+                                            backgroundColor: colors.contextBackground,
+                                            borderColor: passwordBorderAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: ['transparent', colors.tint],
+                                            }),
+                                            borderWidth: 2,
+                                        }
+                                    ]}
+                                    importantForAccessibility="no-hide-descendants"
+                                >
                                     <View style={styles.passwordInputRow}>
                                         <TextInput
                                             ref={passwordRef}
@@ -469,13 +479,16 @@ export default function Login() {
                             disabled={!isFormValid() || loading}
                             activeOpacity={0.7}
                         >
-                            <Animated.View style={[
-                                styles.loginBtn,
-                                {
-                                    backgroundColor: isFormValid() ? colors.tint : colors.lightNonInteractiveText,
-                                    opacity: buttonOpacityAnim,
-                                }
-                            ]}>
+                            <Animated.View 
+                                style={[
+                                    styles.loginBtn,
+                                    {
+                                        backgroundColor: isFormValid() ? colors.tint : colors.lightNonInteractiveText,
+                                        opacity: buttonOpacityAnim,
+                                    }
+                                ]}
+                                importantForAccessibility="no-hide-descendants"
+                            >
                                 {loading ? (
                                     <View style={styles.loadingContainer}>
                                         <Text style={[styles.loginText, { color: colors.darkText }]}>{t('login.loggingIn')}</Text>
@@ -506,7 +519,11 @@ export default function Login() {
                                 activeOpacity={0.7}
                                 style={[styles.socialIconButton, { backgroundColor: colors.contextBackground }]}
                             >
-                                <Image source={require('@/assets/images/Google.png')} style={styles.socialIconLarge} />
+                                <Image 
+                                    source={require('@/assets/images/Google.png')} 
+                                    style={styles.socialIconLarge}
+                                    resizeMode="contain"
+                                />
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -591,10 +608,7 @@ const styles = StyleSheet.create({
         borderRadius: 40,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
+        boxShadow: '0 3px 6px 0 rgba(0, 0, 0, 0.1)',
         elevation: 4,
     },
     form: {
@@ -662,10 +676,7 @@ const styles = StyleSheet.create({
         marginTop: 8,
         borderRadius: 16,
         maxHeight: 240,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
+        boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 0.1)',
         elevation: 4,
     },
     countryPickerScroll: {
@@ -732,10 +743,7 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2)',
         elevation: 5,
     },
     buttonContent: {
@@ -789,16 +797,12 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 3,
     },
     socialIconLarge: {
         width: 28,
         height: 28,
-        resizeMode: 'contain'
     },
     registerHintContainer: {
         marginTop: 24,

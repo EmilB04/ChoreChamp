@@ -1,5 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
+import { getHouseholdMembers } from "@/services/householdService";
+import { getTasksForUser, markTaskAsComplete, markTaskAsIncomplete } from "@/services/taskService";
 import type { Task } from "@/types/task";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
@@ -10,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import UserLoadingState from "../../components/UserLoadingState";
 import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
@@ -27,9 +30,175 @@ export default function Dashboard() {
   // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // State for selected date (for filtering tasks)
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
   // State for task detail modal
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  // State for tasks from database
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+
+  // State for leaderboard data
+  const [leaderboardData, setLeaderboardData] = useState<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    points: number;
+    avatar: any;
+    position: number;
+    isCurrentUser: boolean;
+  }[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+
+  // Fetch leaderboard data from household members
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      if (!userData?.id || !userData?.household || userData.household.length === 0) {
+        setLoadingLeaderboard(false);
+        return;
+      }
+
+      setLoadingLeaderboard(true);
+      try {
+        // Get the first household ID
+        let householdId = '';
+        const firstHousehold = userData.household[0];
+        
+        if (typeof firstHousehold === 'string') {
+          householdId = firstHousehold.split('/').pop() || '';
+        } else if (firstHousehold && typeof firstHousehold === 'object' && 'id' in firstHousehold) {
+          householdId = (firstHousehold as any).id;
+        }
+
+        if (!householdId) {
+          setLoadingLeaderboard(false);
+          return;
+        }
+
+        const members = await getHouseholdMembers(householdId);
+
+        // Sort by points and add position
+        const sortedMembers = members
+          .sort((a, b) => b.points - a.points)
+          .map((member, index) => ({
+            ...member,
+            fullName: `${member.firstName} ${member.lastName}`.trim(),
+            avatar: member.imageUri ? { uri: member.imageUri } : require("@/assets/images/icon.png"),
+            position: index + 1,
+            isCurrentUser: member.id === userData.id,
+          }));
+
+        setLeaderboardData(sortedMembers);
+      } catch (error) {
+        console.error('❌ Error loading leaderboard:', error);
+        setLeaderboardData([]);
+      } finally {
+        setLoadingLeaderboard(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [userData?.id, userData?.household]);
+
+  // Fetch tasks for the current user
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!userData?.id) {
+        setLoadingTasks(false);
+        return;
+      }
+
+      setLoadingTasks(true);
+      try {
+        const tasks = await getTasksForUser(userData.id);
+        
+        // Transform TaskData to Task format for the UI
+        const transformedTasks: Task[] = tasks.map((task, index) => {
+          const timeStart = new Date(task.timeStart);
+          const timeEnd = new Date(task.timeEnd);
+          const hours = timeStart.getHours().toString().padStart(2, '0');
+          const minutes = timeStart.getMinutes().toString().padStart(2, '0');
+          
+          return {
+            id: index + 1,
+            title: task.title,
+            description: task.description,
+            time: `${hours}:${minutes}`,
+            assignedTo: userData.username, // Using current user's name
+            avatar: userData.imageUri ? { uri: userData.imageUri } : require("@/assets/images/icon.png"),
+            duration: Math.round((timeEnd.getTime() - timeStart.getTime()) / 60000), // Duration in minutes
+            finished: task.done,
+            timeStart, // Keep the full Date object
+            timeEnd, // Keep the full Date object
+            firebaseId: task.id, // Store Firebase document ID
+          };
+        });
+
+        setAllTasks(transformedTasks);
+      } catch (error) {
+        console.error('❌ Error loading tasks:', error);
+        // Keep empty array on error
+        setAllTasks([]);
+      } finally {
+        setLoadingTasks(false);
+      }
+    };
+
+    fetchTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.id]);
+
+  // Filter tasks for the selected date
+  const tasksForSelectedDate = allTasks.filter((task) => {
+    if (!task.timeStart) return false;
+    
+    const taskDate = new Date(task.timeStart);
+    return (
+      taskDate.getDate() === selectedDate.getDate() &&
+      taskDate.getMonth() === selectedDate.getMonth() &&
+      taskDate.getFullYear() === selectedDate.getFullYear()
+    );
+  });
+
+  // Handle marking task as complete
+  const handleCompleteTask = async (taskId: number, firebaseTaskId: string) => {
+    try {
+      const success = await markTaskAsComplete(firebaseTaskId);
+      if (success) {
+        // Update the local state to reflect the change
+        setAllTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === taskId ? { ...task, finished: true } : task
+          )
+        );
+        console.log('✅ Task marked as complete locally');
+      }
+    } catch (error) {
+      console.error('❌ Error completing task:', error);
+    }
+  };
+
+  // Handle marking task as incomplete (undo)
+  const handleUndoTask = async (taskId: number, firebaseTaskId: string) => {
+    try {
+      const success = await markTaskAsIncomplete(firebaseTaskId);
+      if (success) {
+        // Update the local state to reflect the change
+        setAllTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === taskId ? { ...task, finished: false } : task
+          )
+        );
+        console.log('↩️ Task marked as incomplete locally');
+      }
+    } catch (error) {
+      console.error('❌ Error undoing task:', error);
+    }
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -40,71 +209,10 @@ export default function Dashboard() {
     return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
 
-  // TODO: Replace with database fetch
-  const todayTasks: Task[] = [
-    {
-      id: 1,
-      title: "Gå med søpla",
-      time: "10:00",
-      assignedTo: "Ida",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 60,
-      finished: true,
-    },
-    {
-      id: 2,
-      title: "Støvsuge huset",
-      time: "12:00",
-      assignedTo: "Andreas",
-      description:
-        "Husk godt under sofaen, hybelkaniner på størrelse med hodet ditt.",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 60,
-      finished: false,
-    },
-    {
-      id: 3,
-      title: "Lage middag",
-      time: "16:00",
-      assignedTo: "Emil Berglund",
-      description: "Prøv den nye oppskriften med kebabkjøtt og maiskaker.",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 90,
-      finished: false,
-    },
-    {
-      id: 4,
-      title: "Vanne planter",
-      time: "21:00",
-      assignedTo: "Emil",
-      avatar: require("@/assets/images/icon.png"),
-      duration: 30,
-      finished: false,
-    },
-  ];
-
-  // TODO: Replace with database fetch
-  const rawLeaderboardData = [
-    { id: 1, name: "Ola Nordmann", points: 43, avatar: require("@/assets/images/icon.png") },
-    { id: 2, name: "Andreas B. Olaussen", points: 40, avatar: require("@/assets/images/icon.png") },
-    { id: 3, name: "Sebastian W. Thomsen", points: 38, avatar: require("@/assets/images/icon.png") },
-    { id: 4, name: "Ida K. Tollaksen", points: 36, avatar: require("@/assets/images/icon.png") },
-    { id: 5, name: "Khalid O.", points: 35, avatar: require("@/assets/images/icon.png") },
-    { id: 6, name: "Emil Berglund", points: 34, avatar: require("@/assets/images/icon.png")},
-    { id: 7, name: "Bruker", points: 33, avatar: require("@/assets/images/icon.png") },
-    { id: 8, name: "Bruker", points: 32, avatar: require("@/assets/images/icon.png") },
-    { id: 9, name: "Bruker", points: 31, avatar: require("@/assets/images/icon.png") },
-    { id: 10, name: "Bruker", points: 30, avatar: require("@/assets/images/icon.png") },
-  ];
-
-  // Sort by points (descending) and calculate positions
-  const leaderboardData = rawLeaderboardData
-    .sort((a, b) => b.points - a.points)
-    .map((userData_item, index) => ({
-      ...userData_item,
-      position: index + 1,
-      isCurrentUser: userData_item.name === userData.name, // Check if this user is the logged-in user
-    }));
+  // Show loading state while user data is being fetched
+  if (!userData) {
+    return <UserLoadingState pageName="Dashboard" />;
+  }
 
   // ------------------------------------------------------------------ //
   /*                    Variables to be handled by Expo                 */
@@ -133,8 +241,13 @@ export default function Dashboard() {
     weekDates.push({
       day: weekDays[i],
       date: date.getDate(),
+      fullDate: date,
       isToday:
         date.getDate() === currentDate && date.getMonth() === today.getMonth(),
+      isSelected:
+        date.getDate() === selectedDate.getDate() &&
+        date.getMonth() === selectedDate.getMonth() &&
+        date.getFullYear() === selectedDate.getFullYear(),
     });
   }
 
@@ -143,15 +256,18 @@ export default function Dashboard() {
     const defaultStart = 8; // Default start hour (08:00)
     const defaultEnd = 20; // Default end hour (20:00)
 
-    // Extract hours from tasks
-    const taskHours = todayTasks.map((task) => {
-      const [hour] = task.time.split(":");
-      return parseInt(hour, 10);
+    // Extract hours from tasks (both start and end times)
+    const taskHours: number[] = [];
+    tasksForSelectedDate.forEach((task) => {
+      if (task.timeStart && task.timeEnd) {
+        taskHours.push(task.timeStart.getHours());
+        taskHours.push(task.timeEnd.getHours());
+      }
     });
 
     // Determine the range including task hours
-    const minHour = Math.min(defaultStart, ...taskHours);
-    const maxHour = Math.max(defaultEnd, ...taskHours);
+    const minHour = taskHours.length > 0 ? Math.min(defaultStart, ...taskHours) : defaultStart;
+    const maxHour = taskHours.length > 0 ? Math.max(defaultEnd, ...taskHours) : defaultEnd;
 
     // Generate time slots for the extended range
     const slots = [];
@@ -208,7 +324,7 @@ export default function Dashboard() {
       >
         {/* HEADER */}
         <View style={[styles.header, commonStyles.headerTitle]}>
-          <WelcomeGreeting userName={userData.name} />
+          <WelcomeGreeting username={userData.username} />
           <View style={styles.profileSection}>
             <View style={styles.profileContainer}>
               <Image
@@ -223,18 +339,20 @@ export default function Dashboard() {
         <View style={styles.calendarWrapper}>
           <View style={styles.calendarWeek}>
             {weekDates.map((dayData, index) => (
-              <View
+              <TouchableOpacity
                 key={index}
                 style={[
                   styles.calendarDay,
-                  dayData.isToday && styles.calendarDayActive,
+                  (dayData.isToday || dayData.isSelected) && styles.calendarDayActive,
                 ]}
+                onPress={() => setSelectedDate(dayData.fullDate)}
+                activeOpacity={0.7}
               >
                 <Text
                   style={[
                     styles.calendarDayNumber,
                     {
-                      color: dayData.isToday
+                      color: (dayData.isToday || dayData.isSelected)
                         ? colors.activeText
                         : colors.lightDarkText,
                     },
@@ -246,13 +364,13 @@ export default function Dashboard() {
                   style={[
                     styles.calendarDayLabel,
                     {
-                      color: dayData.isToday ? colors.activeText : colors.text,
+                      color: (dayData.isToday || dayData.isSelected) ? colors.activeText : colors.text,
                     },
                   ]}
                 >
                   {dayData.day}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -268,13 +386,44 @@ export default function Dashboard() {
             Dagens oppgaver:
           </Text>
 
-          {/* Hourly Calendar */}
-          <View style={styles.calendarContainer}>
+          {loadingTasks ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, { color: colors.text }]}>
+                Laster oppgaver...
+              </Text>
+            </View>
+          ) : tasksForSelectedDate.length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, { color: colors.lightDarkText }]}>
+                Ingen oppgaver for denne dagen 🎉
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.calendarContainer}>
             {timeSlots.map((timeSlot, index) => {
-              // Find task for this time slot
-              const taskForSlot = todayTasks.find(
-                (task) => task.time === timeSlot
-              );
+              // Parse the current time slot hour
+              const [slotHour] = timeSlot.split(':').map(Number);
+              const slotTime = new Date();
+              slotTime.setHours(slotHour, 0, 0, 0);
+              const nextSlotTime = new Date(slotTime);
+              nextSlotTime.setHours(slotHour + 1, 0, 0, 0);
+
+              // Find task that STARTS in this time slot
+              const taskStartingInSlot = tasksForSelectedDate.find((task) => {
+                if (!task.timeStart) return false;
+                
+                const taskStartHour = task.timeStart.getHours();
+                return taskStartHour === slotHour;
+              });
+
+              // Calculate task height if there's a task starting here
+              let taskHeight = 60; // Default height for one hour slot
+              if (taskStartingInSlot && taskStartingInSlot.timeStart && taskStartingInSlot.timeEnd) {
+                const durationMs = taskStartingInSlot.timeEnd.getTime() - taskStartingInSlot.timeStart.getTime();
+                const durationHours = durationMs / (1000 * 60 * 60);
+                // Each hour slot is approximately 60px (minHeight 50 + padding)
+                taskHeight = Math.max(60, durationHours * 60);
+              }
 
               // Check if we should show the now line after this time slot
               const showNowLineAfter =
@@ -300,18 +449,19 @@ export default function Dashboard() {
 
                     {/* Task Column */}
                     <View style={styles.taskColumn}>
-                      {taskForSlot && (
+                      {taskStartingInSlot && (
                         <TouchableOpacity
                           style={[
                             styles.taskCard,
                             {
-                              backgroundColor: taskForSlot.finished
+                              backgroundColor: taskStartingInSlot.finished
                                 ? colors.nonInteractiveBackground
                                 : colors.interactiveBackground,
+                              minHeight: taskHeight,
                             },
                           ]}
                           onPress={() => {
-                            setSelectedTask(taskForSlot);
+                            setSelectedTask(taskStartingInSlot);
                             setIsModalVisible(true);
                           }}
                           activeOpacity={0.7}
@@ -321,41 +471,42 @@ export default function Dashboard() {
                               style={[
                                 styles.taskTitle,
                                 {
-                                  color: taskForSlot.finished
+                                  color: taskStartingInSlot.finished
                                     ? colors.lightNonInteractiveText
                                     : colors.darkText,
-                                  textDecorationLine: taskForSlot.finished
+                                  textDecorationLine: taskStartingInSlot.finished
                                     ? "line-through"
                                     : "none",
                                 },
                               ]}
                             >
-                              {taskForSlot.title}
+                              {taskStartingInSlot.title}
                             </Text>
                             <Text
                               style={[
                                 styles.taskSubtitle,
                                 {
-                                  color: taskForSlot.finished
+                                  color: taskStartingInSlot.finished
                                     ? colors.lightNonInteractiveText
                                     : colors.lightText,
                                 },
                               ]}
                             >
-                              {taskForSlot.assignedTo}
+                              {taskStartingInSlot.assignedTo}
                             </Text>
                           </View>
+                          
                           <View
                             style={[
                               styles.taskAvatar,
-                              taskForSlot.finished && styles.taskAvatarFinished,
+                              taskStartingInSlot.finished && styles.taskAvatarFinished,
                             ]}
                           >
                             <Image
-                              source={taskForSlot.avatar}
+                              source={taskStartingInSlot.avatar}
                               style={[
                                 styles.avatarImage,
-                                taskForSlot.finished &&
+                                taskStartingInSlot.finished &&
                                   styles.avatarImageFinished,
                               ]}
                             />
@@ -397,7 +548,8 @@ export default function Dashboard() {
                 </View>
               );
             })}
-          </View>
+            </View>
+          )}
         </View>
 
         {/* Leaderboard */}
@@ -406,8 +558,28 @@ export default function Dashboard() {
             Ledertavle:
           </Text>
 
-          {/* Top 3 Podium */}
-          <View style={styles.podiumContainer}>
+          {loadingLeaderboard ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, { color: colors.text }]}>
+                Laster ledertavle...
+              </Text>
+            </View>
+          ) : leaderboardData.length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, { color: colors.text }]}>
+                Ingen medlemmer i husstanden
+              </Text>
+            </View>
+          ) : leaderboardData.length < 3 ? (
+            <View style={styles.loadingContainer}>
+              <Text style={[styles.loadingText, { color: colors.text }]}>
+                Trenger minst 3 medlemmer for ledertavle
+              </Text>
+            </View>
+          ) : (
+            <>
+              {/* Top 3 Podium */}
+              <View style={styles.podiumContainer}>
             {/* Second Place */}
             <View style={styles.podiumPosition}>
               <View style={[styles.podiumAvatar, styles.secondPlaceAvatar]}>
@@ -420,7 +592,7 @@ export default function Dashboard() {
                 </View>
               </View>
               <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[1].name}
+                {leaderboardData[1].fullName}
               </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
@@ -445,7 +617,7 @@ export default function Dashboard() {
                 </View>
               </View>
               <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[0].name}
+                {leaderboardData[0].fullName}
               </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
@@ -467,7 +639,7 @@ export default function Dashboard() {
                 </View>
               </View>
               <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[2].name}
+                {leaderboardData[2].fullName}
               </Text>
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
@@ -516,7 +688,7 @@ export default function Dashboard() {
                       },
                     ]}
                   >
-                    {user.name}
+                    {user.fullName}
                   </Text>
                 </View>
                 <Text
@@ -530,6 +702,8 @@ export default function Dashboard() {
               </View>
             ))}
           </View>
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -539,21 +713,34 @@ export default function Dashboard() {
         task={selectedTask}
         onClose={() => setIsModalVisible(false)}
         actionButtons={
-          selectedTask &&
-          !selectedTask.finished &&
-          selectedTask.assignedTo === userData.name
-            ? [
-                {
-                  label: "Marker som fullført",
-                  iconName: "checkmark-circle-outline",
-                  variant: "success",
-                  onPress: () => {
-                    // TODO: Implement mark as complete functionality
-                    console.log("Mark task as complete:", selectedTask?.id);
-                    setIsModalVisible(false);
+          selectedTask && selectedTask.firebaseId
+            ? selectedTask.finished
+              ? [
+                  {
+                    label: "Angre",
+                    iconName: "arrow-undo-outline",
+                    variant: "danger",
+                    onPress: async () => {
+                      if (selectedTask.firebaseId) {
+                        await handleUndoTask(selectedTask.id, selectedTask.firebaseId);
+                        setIsModalVisible(false);
+                      }
+                    },
                   },
-                },
-              ]
+                ]
+              : [
+                  {
+                    label: "Fullfør",
+                    iconName: "checkmark-circle-outline",
+                    variant: "success",
+                    onPress: async () => {
+                      if (selectedTask.firebaseId) {
+                        await handleCompleteTask(selectedTask.id, selectedTask.firebaseId);
+                        setIsModalVisible(false);
+                      }
+                    },
+                  },
+                ]
             : undefined
         }
       />
@@ -668,7 +855,7 @@ const styles = StyleSheet.create({
   },
   taskCard: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -882,5 +1069,14 @@ const styles = StyleSheet.create({
   leaderboardPoints: {
     fontSize: 16,
     fontWeight: "500",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: '500',
   },
 });

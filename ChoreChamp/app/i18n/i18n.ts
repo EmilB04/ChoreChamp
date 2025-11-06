@@ -4,13 +4,13 @@ import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import en from './locales/en/onboarding.json';
-import no from './locales/no/onboarding.json';
+import nb from './locales/nb/onboarding.json';
 import es from './locales/es/onboarding.json';
 import de from './locales/de/onboarding.json';
 
 const resources = {
   en: { onboarding: en },
-  no: { onboarding: no },
+  nb: { onboarding: nb },
   es: { onboarding: es },
   de: { onboarding: de },
 };
