@@ -2,6 +2,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
     Image,
     Linking,
@@ -31,6 +32,18 @@ export default function Profile() {
     const [showAppSettings, setShowAppSettings] = useState(false);
     const [showHelpSupport, setShowHelpSupport] = useState(false);
     const [showAboutApp, setShowAboutApp] = useState(false);
+
+    // Reset to main profile view when tab is focused
+    useFocusEffect(
+        React.useCallback(() => {
+            setIsEditModalVisible(false);
+            setShowMyAccount(false);
+            setShowMyHouseholds(false);
+            setShowAppSettings(false);
+            setShowHelpSupport(false);
+            setShowAboutApp(false);
+        }, [])
+    );
 
     // Toggle About App section
 

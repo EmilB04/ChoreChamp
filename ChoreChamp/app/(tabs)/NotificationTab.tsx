@@ -1,6 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import commonStyles from "../commonStyles";
 import Notification from "@/components/notifications/notification";
 
@@ -8,6 +9,13 @@ export default function Notifications() {
     const { colors } = useTheme();
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
     const [selectedNotification, setSelectedNotification] = useState<typeof notifications[0] | null>(null);
+
+    // Reset to main view when tab is focused
+    useFocusEffect(
+        React.useCallback(() => {
+            setSelectedNotification(null);
+        }, [])
+    );
 
     // Simulated notification data - Replace with real data from DB or API
     const [notifications, setNotifications] = useState([
