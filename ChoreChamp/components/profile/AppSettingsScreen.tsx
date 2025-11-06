@@ -1,6 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
-import React, { useState } from 'react';
+import React from 'react';
 import {
     ScrollView,
     StyleSheet,
@@ -17,22 +17,16 @@ interface AppSettingsScreenProps {
 export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
-    
-    // State for toggles - initialize from userData, with fallbacks for legacy data
-    const [notifications, setNotifications] = useState(userData.notificationsEnabled ?? false);
-    const [location, setLocation] = useState(userData.locationEnabled ?? false);
-    const [dataAnalysis, setDataAnalysis] = useState(false);
-    const [autoUpdates, setAutoUpdates] = useState(false);
 
-    // Update UserContext when notifications toggle changes
-    const handleNotificationsChange = (value: boolean) => {
-        setNotifications(value);
+    const handleNotificationToggle = (value: boolean) => {
         updateUserData({ notificationsEnabled: value });
     };
 
-    // Update UserContext when location toggle changes
-    const handleLocationChange = (value: boolean) => {
-        setLocation(value);
+    const handleDarkModeToggle = (value: boolean) => {
+        updateUserData({ darkModeEnabled: value });
+    };
+
+    const handleLocationToggle = (value: boolean) => {
         updateUserData({ locationEnabled: value });
     };
 
@@ -47,75 +41,60 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        Personvern og tillatelser
+                        App-innstillinger
                     </Text>
                     
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
-                        <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Varslinger
-                            </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Tillat at vi sender varslinger til deg
-                            </Text>
+                    <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
+                        <View style={styles.switchRow}>
+                            <View style={styles.switchInfo}>
+                                <Text style={[styles.switchLabel, { color: colors.text }]}>
+                                    Push-varsler
+                                </Text>
+                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
+                                    Motta varsler om nye oppgaver og meldinger
+                                </Text>
+                            </View>
+                            <Switch
+                                value={userData?.notificationsEnabled || false}
+                                onValueChange={handleNotificationToggle}
+                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
+                                thumbColor={colors.background}
+                            />
                         </View>
-                        <Switch
-                            value={notifications}
-                            onValueChange={handleNotificationsChange}
-                            trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                            thumbColor={colors.background}
-                        />
-                    </View>
-                    
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
-                        <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Lokasjon
-                            </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Tillat at vi bruker lokasjonen din
-                            </Text>
+                        
+                        <View style={styles.switchRow}>
+                            <View style={styles.switchInfo}>
+                                <Text style={[styles.switchLabel, { color: colors.text }]}>
+                                    Mørk modus
+                                </Text>
+                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
+                                    Endre fargetema mellom lys og mørk modus
+                                </Text>
+                            </View>
+                            <Switch
+                                value={userData?.darkModeEnabled}
+                                onValueChange={handleDarkModeToggle}
+                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
+                                thumbColor={colors.background}
+                            />
                         </View>
-                        <Switch
-                            value={location}
-                            onValueChange={handleLocationChange}
-                            trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                            thumbColor={colors.background}
-                        />
-                    </View>
-                    
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
-                        <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Data analysering
-                            </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Tillat at vi bruker dataene dine for å forbedre appen
-                            </Text>
+                        
+                        <View style={styles.switchRow}>
+                            <View style={styles.switchInfo}>
+                                <Text style={[styles.switchLabel, { color: colors.text }]}>
+                                    Lokasjonstjenester
+                                </Text>
+                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
+                                    Tillat appen å bruke din lokasjon for stedbaserte oppgaver
+                                </Text>
+                            </View>
+                            <Switch
+                                value={userData?.locationEnabled || false}
+                                onValueChange={handleLocationToggle}
+                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
+                                thumbColor={colors.background}
+                            />
                         </View>
-                        <Switch
-                            value={dataAnalysis}
-                            onValueChange={setDataAnalysis}
-                            trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                            thumbColor={colors.background}
-                        />
-                    </View>
-                    
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
-                        <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Automatiske oppdateringer
-                            </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Oppdaterer appen automatisk ved nye versjoner
-                            </Text>
-                        </View>
-                        <Switch
-                            value={autoUpdates}
-                            onValueChange={setAutoUpdates}
-                            trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                            thumbColor={colors.background}
-                        />
                     </View>
                 </View>
             </ScrollView>
@@ -143,7 +122,7 @@ const styles = StyleSheet.create({
     infoCard: {
         borderRadius: 12,
         padding: 16,
-        marginBottom: 16,
+        marginBottom: 0,
     },
     infoRow: {
         flexDirection: 'row',

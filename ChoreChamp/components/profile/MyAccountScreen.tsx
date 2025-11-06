@@ -6,7 +6,6 @@ import {
     Alert,
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -60,18 +59,6 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
         setTempEmail(userData?.email || '');
         setTempPhone(userData?.phone || '');
         setIsEditing(false);
-    };
-
-    const handleNotificationToggle = (value: boolean) => {
-        updateUserData({ notificationsEnabled: value });
-    };
-
-    const handleDarkModeToggle = (value: boolean) => {
-        updateUserData({ darkModeEnabled: value });
-    };
-
-    const handleLocationToggle = (value: boolean) => {
-        updateUserData({ locationEnabled: value });
     };
 
     const togglePersonvernInfo = () => {
@@ -225,66 +212,6 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
                             </Text>
                         </TouchableOpacity>
                     )}
-                </View>
-
-                {/* App Preferences Section */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        App-innstillinger
-                    </Text>
-                    
-                    <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
-                        <View style={styles.switchRow}>
-                            <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Push-varsler
-                                </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Motta varsler om nye oppgaver og meldinger
-                                </Text>
-                            </View>
-                            <Switch
-                                value={userData?.notificationsEnabled || false}
-                                onValueChange={handleNotificationToggle}
-                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                                thumbColor={colors.background}
-                            />
-                        </View>
-                        
-                        <View style={styles.switchRow}>
-                            <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Mørk modus
-                                </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Endre fargetema mellom lys og mørk modus
-                                </Text>
-                            </View>
-                            <Switch
-                                value={userData?.darkModeEnabled}
-                                onValueChange={handleDarkModeToggle}
-                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                                thumbColor={colors.background}
-                            />
-                        </View>
-                        <View style={styles.switchRow}>
-                            <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Lokasjonstjenester
-                                </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Tillat appen å bruke din lokasjon for stedbaserte oppgaver
-                                </Text>
-                            </View>
-                            <Switch
-                                value={userData?.locationEnabled || false}
-                                onValueChange={handleLocationToggle}
-                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                                thumbColor={colors.background}
-                            />
-                        </View>
-                        
-                    </View>
                 </View>
 
                 {/* Security Section */}
