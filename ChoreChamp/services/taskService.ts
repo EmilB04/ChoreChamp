@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDocs, Timestamp, updateDoc } from 'firebase/firestore';
 
 export interface TaskData {
     id: string;
@@ -12,6 +12,17 @@ export interface TaskData {
     householdId: string;
     points: number;
     done: boolean;
+}
+
+export interface CreateTaskInput {
+    title: string;
+    description?: string;
+    timeStart: Date;
+    timeEnd: Date;
+    assignedTo: string;  // User ID
+    createdBy: string;   // User ID
+    householdId: string;
+    points?: number;
 }
 
 /**
@@ -156,5 +167,37 @@ export async function markTaskAsIncomplete(taskId: string): Promise<boolean> {
     } catch (error) {
         console.error('💥 Error marking task as incomplete:', error);
         return false;
+    }
+}
+
+/**
+ * Create a new task
+ * @param taskInput - The task data to create
+ * @returns The ID of the created task, or null if failed
+ */
+export async function createTask(taskInput: CreateTaskInput): Promise<string | null> {
+    try {
+        const tasksRef = collection(db, 'tasks');
+        
+        // Convert Date objects to Firestore Timestamps
+        const taskData = {
+            title: taskInput.title,
+            description: taskInput.description || '',
+            timeStart: Timestamp.fromDate(taskInput.timeStart),
+            timeEnd: Timestamp.fromDate(taskInput.timeEnd),
+            assignedTo: `/users/${taskInput.assignedTo}`,
+            createdBy: `/users/${taskInput.createdBy}`,
+            householdId: taskInput.householdId,
+            points: taskInput.points || 0,
+            done: false,
+            status: 'not done' as const,
+        };
+        
+        const docRef = await addDoc(tasksRef, taskData);
+        
+        return docRef.id;
+    } catch (error) {
+        console.error('💥 Error creating task:', error);
+        return null;
     }
 }
