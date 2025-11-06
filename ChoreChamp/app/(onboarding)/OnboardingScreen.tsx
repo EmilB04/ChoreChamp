@@ -1,11 +1,15 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
+<<<<<<< HEAD
 import { Animated, Platform, StyleSheet, View } from 'react-native';
 
 // Use native driver only on iOS and Android, not on web
 const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
+=======
+import { Animated, StyleSheet, View } from 'react-native';
+>>>>>>> origin/main
 /*
 Onboarding Screen
     - Displays the app logo when the user first opens the app.
