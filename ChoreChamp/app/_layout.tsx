@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { UserProvider } from '@/contexts/UserContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { initI18n } from './i18n/i18n';
-import * as SplashScreen from 'expo-splash-screen';
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from 'react';
+import 'react-native-reanimated';
+import { initI18n } from './i18n/i18n';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -55,7 +55,6 @@ export default function RootLayout() {
         <ThemeProvider>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
             <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
@@ -63,4 +62,4 @@ export default function RootLayout() {
       </UserProvider>
     </AuthProvider>
   );
-} 
+}
