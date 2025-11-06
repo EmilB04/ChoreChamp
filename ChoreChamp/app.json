@@ -4,6 +4,7 @@
   "expo": {
     "name": "ChoreChamp",
     "slug": "ChoreChamp",
+    "owner": "andolaus",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

@@ -79,7 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         iosClientId: EXTRA.IOS_CLIENT_ID,
         webClientId: EXTRA.WEB_CLIENT_ID,
         scopes: ['openid', 'profile', 'email'],
-        
+        responseType: 'id_token',
         redirectUri
 
     });
