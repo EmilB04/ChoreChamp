@@ -10,7 +10,7 @@ export default function Notifications() {
     const [selectedNotification, setSelectedNotification] = useState<typeof notifications[0] | null>(null);
 
     // Simulated notification data - Replace with real data from DB or API
-    const [notifications] = useState([
+    const [notifications, setNotifications] = useState([
         {
             id: 1,
             title: "Mamma laget oppgaven",
@@ -88,6 +88,18 @@ export default function Notifications() {
     const groupedNotifications = groupNotificationsByTime();
     const unreadNotifications = notifications.filter(n => !n.read);
 
+    // Function to toggle notification read status
+    const toggleReadStatus = (notificationId: number, readStatus: boolean) => {
+        setNotifications(prevNotifications =>
+            prevNotifications.map(notification =>
+                notification.id === notificationId
+                    ? { ...notification, read: readStatus }
+                    : notification
+            )
+        );
+        setSelectedNotification(null);
+    };
+
     // Function to get relative time
     const getRelativeTime = (timestamp: string) => {
         const now = new Date();
@@ -111,6 +123,7 @@ export default function Notifications() {
             <Notification 
                 notification={selectedNotification}
                 onBack={() => setSelectedNotification(null)}
+                onToggleReadStatus={toggleReadStatus}
             />
         );
     }

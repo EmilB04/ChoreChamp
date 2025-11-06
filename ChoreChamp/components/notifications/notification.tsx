@@ -1,10 +1,11 @@
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Image,
 } from "react-native";
 import { useTheme } from '@/contexts/ThemeContext';
 import Header from '../profile/Header';
@@ -16,7 +17,7 @@ interface Notification {
     message: string;
     timestamp: string;
     read: boolean
-    type: "task_created" | "task_completed" | "task_assigned";
+    type: "task_completed" | "task_assigned";
     avatar: string;
     points: number | null;
 }
@@ -24,10 +25,11 @@ interface Notification {
 interface NotificationProps {
     notification: Notification;
     onBack: () => void;
+    onToggleReadStatus: (notificationId: number, readStatus: boolean) => void;
     rightElement?: React.ReactNode;
 }
 
-export default function Notification({ notification, onBack, rightElement }: NotificationProps) {
+export default function Notification({ notification, onBack, onToggleReadStatus, rightElement }: NotificationProps) {
     const { colors } = useTheme();
 
     const formatTimestamp = (timestamp: string): string => {
@@ -40,14 +42,14 @@ export default function Notification({ notification, onBack, rightElement }: Not
         return `${day}.${month}.${year}, ${hours}:${minutes}`;
     };
 
-    const handleMarkAsRead = () => {
-        // Implement mark as read logic
+    const handleToggleReadStatus = () => {
+        onToggleReadStatus(notification.id, !notification.read);
     };
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Header 
-                title={notification.title} 
+                title="Varsling"
                 onBack={onBack}
                 rightElement={rightElement}
             />
@@ -57,10 +59,11 @@ export default function Notification({ notification, onBack, rightElement }: Not
                 <View style={styles.section}>
                     <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
                         <View style={styles.avatarContainer}>
-                            {notification.avatar}
+                            <Text style={[styles.avatarText, { color: colors.text }]}>{notification.avatar}</Text>
                         </View>
                         
                         <View style={styles.messageContainer}>
+                            <Text style={[styles.messageTitle, { color: colors.text }]}>{notification.title}</Text>
                             <Text style={[styles.messageText, { color: colors.text }]}>
                                 {notification.subtitle && `${notification.subtitle}, `}
                                 {notification.message.toLowerCase()}
@@ -69,7 +72,7 @@ export default function Notification({ notification, onBack, rightElement }: Not
 
                         <View style={styles.infoRow}>
                             <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
-                                Tidspunkt
+                                Tid
                             </Text>
                             <Text style={[styles.infoValue, { color: colors.text }]}>
                                 {formatTimestamp(notification.timestamp)}
@@ -99,15 +102,27 @@ export default function Notification({ notification, onBack, rightElement }: Not
                 </View>
 
                 {/* Actions Section */}
-                {!notification.read && (
+                {!notification.read ? (
                     <View style={styles.section}>
                         <TouchableOpacity 
                             style={[styles.actionButton, { backgroundColor: colors.tint }]}
-                            onPress={handleMarkAsRead}
+                            onPress={handleToggleReadStatus}
                         >
                             <Ionicons name="checkmark-circle-outline" size={20} color={colors.darkText} />
                             <Text style={[styles.actionButtonText, { color: colors.darkText }]}>
                                 Marker som lest
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <View style={styles.section}>
+                        <TouchableOpacity 
+                            style={[styles.actionButton, { backgroundColor: colors.contextBackground, borderWidth: 2, borderColor: colors.tint }]}
+                            onPress={handleToggleReadStatus}
+                        >
+                            <Ionicons name="mail-unread-outline" size={20} color={colors.tint} />
+                            <Text style={[styles.actionButtonText, { color: colors.tint }]}>
+                                Marker som ulest
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -136,11 +151,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 16,
     },
+    avatarText: {
+        fontSize: 40,
+    },
     messageContainer: {
         marginBottom: 16,
         paddingBottom: 16,
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+    },
+    messageTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        marginBottom: 8,
+        textAlign: 'center',
     },
     messageText: {
         fontSize: 16,
