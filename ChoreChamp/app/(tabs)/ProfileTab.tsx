@@ -11,6 +11,12 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import {
+  isDicebearAvatar,
+  parseDicebearUri,
+  generateAvatarSvg,
+} from "@/lib/avatarUtils";
+import { SvgXml } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import commonStyles from "../commonStyles";
 import EditProfileModal from '@/components/profile/EditProfileModal';
@@ -65,28 +71,43 @@ export default function Profile() {
         return <AppSettingsScreen onBack={() => setShowAppSettings(false)} />;
     }
 
-    return (
-        <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
-            {/* Header - Outside Safe Area */}
-            <View style={[styles.header, { backgroundColor: colors.tint }]}>
-                {/* Adjust marginTop to keep title level with rest */}
-                <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
-                    Profil & {"\n"}Innstillinger
-                </Text>
-                <Image
-                    source={{ uri: userData.imageUri }}
-                    style={styles.avatar}
-                />
-                <Text style={[styles.name, { color: colors.darkText }]}>{userData.name}</Text>
-                <View style={styles.separator} />
-                <TouchableOpacity 
-                    style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
-                    onPress={() => setIsEditModalVisible(true)}
-                >
-                    <Text style={styles.editProfile}>Rediger profil</Text>
-                    <Ionicons name="create-outline" size={20} color={colors.darkText} />
-                </TouchableOpacity>
-            </View>
+  return (
+    <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
+      {/* Header - Outside Safe Area */}
+      <View style={[styles.header, { backgroundColor: colors.tint }]}>
+        {/* Adjust marginTop to keep title level with rest */}
+        <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
+          Profil & {"\n"}Innstillinger
+        </Text>
+        {isDicebearAvatar(userData.imageUri) ? (
+          <View style={[styles.avatar, { overflow: "hidden" }]}>
+            <SvgXml
+              xml={generateAvatarSvg(parseDicebearUri(userData.imageUri)!)}
+              width="100%"
+              height="100%"
+            />
+          </View>
+        ) : (
+          <Image source={{ uri: userData.imageUri }} style={styles.avatar} />
+        )}
+        <Text style={[styles.name, { color: colors.darkText }]}>
+          {userData.name}
+        </Text>
+        <View style={styles.separator} />
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-end",
+            alignContent: "center",
+            paddingVertical: 8,
+            gap: 4,
+          }}
+          onPress={() => setIsEditModalVisible(true)}
+        >
+          <Text style={styles.editProfile}>Rediger profil</Text>
+          <Ionicons name="create-outline" size={20} color={colors.darkText} />
+        </TouchableOpacity>
+      </View>
 
             {/* Settings */}
             <ScrollView style={[commonStyles.container, styles.menu, { flex: 1 }]}>
