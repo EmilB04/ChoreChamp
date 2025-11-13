@@ -17,7 +17,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
 import commonStyles from "../commonStyles";
 
@@ -26,7 +25,6 @@ import commonStyles from "../commonStyles";
 export default function Profile() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
-    const insets = useSafeAreaInsets();
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [showMyAccount, setShowMyAccount] = useState(false);
     const [showMyHouseholds, setShowMyHouseholds] = useState(false);
@@ -251,9 +249,10 @@ export default function Profile() {
                             Appen er utviklet for å gjøre vanlige husoppgaver til en morsom og engasjerende konkurranse for hele familien.{'\n\n'}
                             Appen er utviklet av:{'\n'}
                             - Emil Berglund{'\n'}
-                            - Andreas B. Olaussen{'\n'}
+                            - Andreas B. O. Skaarberg{'\n'}
                             - Sebastian W. Thomsen{'\n'}
-                            - Ida Tollaksen
+                            - Ida Tollaksen{'\n'}
+                            - Khalid H. Osman
                         </Text>
                     </View>
                 )}
