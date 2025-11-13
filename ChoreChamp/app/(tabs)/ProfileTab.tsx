@@ -7,17 +7,16 @@ import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from "@expo/vector-icons";
 import { router } from 'expo-router';
 import React, { useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import {
     Image,
     Linking,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
 import commonStyles from "../commonStyles";
 
@@ -26,13 +25,13 @@ import commonStyles from "../commonStyles";
 export default function Profile() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
-    const insets = useSafeAreaInsets();
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [showMyAccount, setShowMyAccount] = useState(false);
     const [showMyHouseholds, setShowMyHouseholds] = useState(false);
     const [showAppSettings, setShowAppSettings] = useState(false);
     const [showHelpSupport, setShowHelpSupport] = useState(false);
     const [showAboutApp, setShowAboutApp] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     // Show loading state if userData is not available
     if (!userData) {
@@ -71,6 +70,16 @@ export default function Profile() {
             // Show error to user
             alert('Kunne ikke lagre profilen. Vennligst prøv igjen.');
         }
+    };
+
+    // Handle pull-to-refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        // Profile data is managed by UserContext, so we just simulate a refresh
+        // In a real app, you might want to re-fetch user data from Firebase
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 500);
     };
 
     // If showing My Account screen, render it instead
@@ -118,7 +127,17 @@ export default function Profile() {
             </View>
 
             {/* Settings */}
-            <ScrollView style={[commonStyles.container, styles.menu, { flex: 1 }]}>
+            <ScrollView 
+                style={[commonStyles.container, styles.menu, { flex: 1 }]}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.tint}
+                        colors={[colors.tint]}
+                    />
+                }
+            >
                 <MenuItem
                     icon="person-circle"
                     title="Min konto"
@@ -230,9 +249,10 @@ export default function Profile() {
                             Appen er utviklet for å gjøre vanlige husoppgaver til en morsom og engasjerende konkurranse for hele familien.{'\n\n'}
                             Appen er utviklet av:{'\n'}
                             - Emil Berglund{'\n'}
-                            - Andreas B. Olaussen{'\n'}
+                            - Andreas B. O. Skaarberg{'\n'}
                             - Sebastian W. Thomsen{'\n'}
-                            - Ida Tollaksen
+                            - Ida Tollaksen{'\n'}
+                            - Khalid H. Osman
                         </Text>
                     </View>
                 )}

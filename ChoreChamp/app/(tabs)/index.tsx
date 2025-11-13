@@ -6,6 +6,7 @@ import type { Task } from "@/types/task";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -53,6 +54,9 @@ export default function Dashboard() {
     isCurrentUser: boolean;
   }[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+
+  // State for pull-to-refresh
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch leaderboard data from household members
   useEffect(() => {
@@ -130,6 +134,8 @@ export default function Dashboard() {
             time: `${hours}:${minutes}`,
             assignedTo: userData.username, // Using current user's name
             avatar: userData.imageUri ? { uri: userData.imageUri } : require("@/assets/images/icon.png"),
+            assignedFrom: task.createdByName || 'Unknown',
+            assignedFromAvatar: task.createdByAvatar ? { uri: task.createdByAvatar } : require("@/assets/images/icon.png"),
             duration: Math.round((timeEnd.getTime() - timeStart.getTime()) / 60000), // Duration in minutes
             finished: task.done,
             timeStart, // Keep the full Date object
@@ -200,6 +206,82 @@ export default function Dashboard() {
     }
   };
 
+  // Handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    
+    try {
+      // Fetch both leaderboard and tasks in parallel
+      const promises = [];
+
+      // Fetch leaderboard
+      if (userData?.id && userData?.household && userData.household.length > 0) {
+        const leaderboardPromise = (async () => {
+          let householdId = '';
+          const firstHousehold = userData.household![0];
+          
+          if (typeof firstHousehold === 'string') {
+            householdId = firstHousehold.split('/').pop() || '';
+          } else if (firstHousehold && typeof firstHousehold === 'object' && 'id' in firstHousehold) {
+            householdId = (firstHousehold as any).id;
+          }
+
+          if (householdId) {
+            const members = await getHouseholdMembers(householdId);
+            const sortedMembers = members
+              .sort((a, b) => b.points - a.points)
+              .map((member, index) => ({
+                ...member,
+                fullName: `${member.firstName} ${member.lastName}`.trim(),
+                avatar: member.imageUri ? { uri: member.imageUri } : require("@/assets/images/icon.png"),
+                position: index + 1,
+                isCurrentUser: member.id === userData.id,
+              }));
+            setLeaderboardData(sortedMembers);
+          }
+        })();
+        promises.push(leaderboardPromise);
+      }
+
+      // Fetch tasks
+      if (userData?.id) {
+        const tasksPromise = (async () => {
+          const tasks = await getTasksForUser(userData.id);
+          const transformedTasks: Task[] = tasks.map((task, index) => {
+            const timeStart = new Date(task.timeStart);
+            const timeEnd = new Date(task.timeEnd);
+            const hours = timeStart.getHours().toString().padStart(2, '0');
+            const minutes = timeStart.getMinutes().toString().padStart(2, '0');
+            
+            return {
+              id: index + 1,
+              title: task.title,
+              description: task.description,
+              time: `${hours}:${minutes}`,
+              assignedTo: userData.username,
+              avatar: userData.imageUri ? { uri: userData.imageUri } : require("@/assets/images/icon.png"),
+              assignedFrom: task.createdByName || 'Unknown',
+              assignedFromAvatar: task.createdByAvatar ? { uri: task.createdByAvatar } : require("@/assets/images/icon.png"),
+              duration: Math.round((timeEnd.getTime() - timeStart.getTime()) / 60000),
+              finished: task.done,
+              timeStart,
+              timeEnd,
+              firebaseId: task.id,
+            };
+          });
+          setAllTasks(transformedTasks);
+        })();
+        promises.push(tasksPromise);
+      }
+
+      await Promise.all(promises);
+    } catch (error) {
+      console.error('❌ Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     const updateTime = () => {
       setCurrentTime(new Date());
@@ -253,8 +335,7 @@ export default function Dashboard() {
 
   // Generate dynamic time slots based on tasks and default range
   function generateTimeSlots() {
-    const defaultStart = 8; // Default start hour (08:00)
-    const defaultEnd = 20; // Default end hour (20:00)
+    const bufferHours = 4; // Show 4 hours before and after tasks
 
     // Extract hours from tasks (both start and end times)
     const taskHours: number[] = [];
@@ -265,11 +346,24 @@ export default function Dashboard() {
       }
     });
 
-    // Determine the range including task hours
-    const minHour = taskHours.length > 0 ? Math.min(defaultStart, ...taskHours) : defaultStart;
-    const maxHour = taskHours.length > 0 ? Math.max(defaultEnd, ...taskHours) : defaultEnd;
+    let minHour: number;
+    let maxHour: number;
 
-    // Generate time slots for the extended range
+    if (taskHours.length > 0) {
+      // If there are tasks, show buffer hours around them
+      const earliestTask = Math.min(...taskHours);
+      const latestTask = Math.max(...taskHours);
+      
+      minHour = Math.max(0, earliestTask - bufferHours); // Don't go below 0
+      maxHour = Math.min(23, latestTask + bufferHours); // Don't go above 23
+    } else {
+      // If no tasks, show default range (current time ± 4 hours)
+      const currentHour = new Date().getHours();
+      minHour = Math.max(0, currentHour - bufferHours);
+      maxHour = Math.min(23, currentHour + bufferHours);
+    }
+
+    // Generate time slots for the range
     const slots = [];
     for (let hour = minHour; hour <= maxHour; hour++) {
       slots.push(`${hour.toString().padStart(2, "0")}:00`);
@@ -310,18 +404,29 @@ export default function Dashboard() {
     calculateNowLinePosition();
 
   return (
-    <ScrollView
-      style={[styles.outsideSafeArea, { backgroundColor: colors.background }]}
-    >
-      {/* HEADER SVG - Outside Safe Area */}
-      <SvgFigures.BackgroundShape tintColor={colors.tint} />
-      <SvgFigures.CircularShape tintColor={colors.tint} />
-      <SvgFigures.SmallDot tintColor={colors.tint} />
+    <View style={[styles.outsideSafeArea, { backgroundColor: colors.background }]}>
+      {/* Scrollable Content with Refresh Control */}
       <ScrollView
-        style={[commonStyles.container, { zIndex: 2, paddingTop: 0 }]}
-        contentContainerStyle={{ paddingBottom: 24 }} // Extra padding at the bottom for better scroll experience
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.tint}
+            colors={[colors.tint]}
+          />
+        }
       >
+        {/* SVG Decorations at top of scrollable content */}
+        <View pointerEvents="none">
+          <SvgFigures.BackgroundShape tintColor={colors.tint} />
+          <SvgFigures.CircularShape tintColor={colors.tint} />
+          <SvgFigures.SmallDot tintColor={colors.tint} />
+        </View>
+
+        <View style={commonStyles.container}>
         {/* HEADER */}
         <View style={[styles.header, commonStyles.headerTitle]}>
           <WelcomeGreeting username={userData.username} />
@@ -705,6 +810,7 @@ export default function Dashboard() {
             </>
           )}
         </View>
+        </View>
       </ScrollView>
 
       {/* Task Detail Modal */}
@@ -744,7 +850,7 @@ export default function Dashboard() {
             : undefined
         }
       />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -754,12 +860,27 @@ const styles = StyleSheet.create({
     margin: 0,
     padding: 0,
   },
+  fixedSvgLayer: {
+    position: 'relative',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+    zIndex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    zIndex: 1,
+    zIndex: 2,
     position: "relative",
+    marginTop: 8,
   },
   profileSection: {
     position: "relative",

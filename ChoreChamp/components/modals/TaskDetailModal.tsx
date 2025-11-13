@@ -220,6 +220,33 @@ export default function TaskDetailModal({
                 </View>
               </View>
 
+              {/* Assigned from */}
+              <View style={styles.detailRow}>
+                <View style={styles.iconContainer}>
+                  <Image source={task.assignedFromAvatar} style={styles.avatar} />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text
+                    style={[
+                      styles.labelBase,
+                      styles.detailLabel,
+                      { color: colors.lightDarkText },
+                    ]}
+                  >
+                    Tildelt av
+                  </Text>
+                  <Text
+                    style={[
+                      styles.semiboldText,
+                      styles.detailValue,
+                      { color: colors.text },
+                    ]}
+                  >
+                    {task.assignedFrom}
+                  </Text>
+                </View>
+              </View>
+
               {/* Assigned To */}
               <View style={styles.detailRow}>
                 <View style={styles.iconContainer}>

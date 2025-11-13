@@ -1,14 +1,15 @@
-import { useTheme } from "@/contexts/ThemeContext";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import commonStyles from "../commonStyles";
 import Notification from "@/components/notifications/notification";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useState } from "react";
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import commonStyles from "../commonStyles";
 
 export default function Notifications() {
     const { colors } = useTheme();
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
     const [selectedNotification, setSelectedNotification] = useState<typeof notifications[0] | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
 
     // Reset to main view when tab is focused
     useFocusEffect(
@@ -108,6 +109,16 @@ export default function Notifications() {
         setSelectedNotification(null);
     };
 
+    // Handle pull-to-refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        // In a real app, you would fetch notifications from Firebase here
+        // For now, just simulate a refresh
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 500);
+    };
+
     // Function to get relative time
     const getRelativeTime = (timestamp: string) => {
         const now = new Date();
@@ -155,6 +166,14 @@ export default function Notifications() {
                         <ScrollView
                             style={styles.notificationsList}
                             showsVerticalScrollIndicator={false}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    tintColor={colors.tint}
+                                    colors={[colors.tint]}
+                                />
+                            }
                         >
                             {/* Today's unread notifications */}
                             {groupedNotifications.today.filter(n => !n.read).length > 0 && (
@@ -289,6 +308,14 @@ export default function Notifications() {
                         <ScrollView
                             style={styles.notificationsList}
                             showsVerticalScrollIndicator={false}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    tintColor={colors.tint}
+                                    colors={[colors.tint]}
+                                />
+                            }
                         >
                             {/* This week's read notifications */}
                             {groupedNotifications.thisWeek.filter(n => n.read).length > 0 && (

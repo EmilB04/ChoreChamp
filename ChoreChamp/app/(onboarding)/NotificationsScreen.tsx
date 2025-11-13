@@ -6,11 +6,12 @@ import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Notifications from 'expo-notifications';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import i18n from '../i18n/i18n';
 
@@ -43,10 +44,44 @@ export default function NotificationsScreen() {
     }, [langParam]);
 
 
-    function handleAllow() {
-        updateUserData({ notificationsEnabled: true });
-        // --- CHANGED: after notifications step, go to AccountCheck
-        router.push('/(onboarding)/(account)/AccountCheck');
+    async function handleAllow() {
+        try {
+            // Request notification permissions from the system
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            
+            // If not already granted, ask for permission
+            if (existingStatus !== 'granted') {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+            
+            // Check if permission was granted
+            if (finalStatus === 'granted') {
+                updateUserData({ notificationsEnabled: true });
+                router.push('/(onboarding)/(account)/AccountCheck');
+            } else {
+                // Permission denied
+                Alert.alert(
+                    t('notifications.permissionDenied') || 'Permission Denied',
+                    t('notifications.permissionDeniedMessage') || 'You can enable notifications later in your device settings.',
+                    [
+                        {
+                            text: t('notifications.continueButton') || 'Continue',
+                            onPress: () => {
+                                updateUserData({ notificationsEnabled: false });
+                                router.push('/(onboarding)/(account)/AccountCheck');
+                            }
+                        }
+                    ]
+                );
+            }
+        } catch (error) {
+            console.error('Error requesting notification permissions:', error);
+            // Continue anyway if there's an error
+            updateUserData({ notificationsEnabled: false });
+            router.push('/(onboarding)/(account)/AccountCheck');
+        }
     }
 
     function handleSkip() {

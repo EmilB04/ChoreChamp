@@ -271,8 +271,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     calendarContainer: {
-        width: Platform.OS === 'web' ? 380 : '90%',
-        maxWidth: 400,
+        maxWidth: '95%',
         borderRadius: 20,
         padding: 20,
         ...Platform.select({

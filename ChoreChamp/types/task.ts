@@ -7,6 +7,8 @@ export interface Task {
   time: string;
   assignedTo: string;
   avatar: any;
+  assignedFrom: string;
+  assignedFromAvatar: any;
   duration: number; // in minutes
   finished: boolean;
   timeStart?: Date; // Full Date object for start time

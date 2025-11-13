@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackgroundShape, CircularShape, SmallDot } from './HeaderShapes';
 
@@ -46,7 +46,7 @@ const BackgroundShapeFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => {
     const styles = createResponsiveStyles(insets.top, width, height);
 
     return (
-        <View style={styles.backgroundShapePosition}>
+        <View style={styles.backgroundShapePosition} pointerEvents="none">
             <BackgroundShape fill={tintColor} style={styles.svgBackground} />
         </View>
     );
@@ -58,7 +58,7 @@ const CircularShapeFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => {
     const styles = createResponsiveStyles(insets.top, width, height);
 
     return (
-        <View style={styles.circularShapePosition}>
+        <View style={styles.circularShapePosition} pointerEvents="none">
             <CircularShape fill={tintColor} />
         </View>
     );
@@ -70,7 +70,7 @@ const SmallDotFigure: React.FC<SvgFiguresProps> = ({ tintColor }) => {
     const styles = createResponsiveStyles(insets.top, width, height);
 
     return (
-        <View style={styles.smallDotPosition}>
+        <View style={styles.smallDotPosition} pointerEvents="none">
             <SmallDot fill={tintColor} />
         </View>
     );

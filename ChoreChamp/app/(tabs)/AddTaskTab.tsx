@@ -4,11 +4,13 @@ import { useUser } from "@/contexts/UserContext";
 import { getHouseholdMembers } from "@/services/householdService";
 import { createTask } from "@/services/taskService";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import {
     Alert,
     KeyboardAvoidingView,
     Platform,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -63,7 +65,9 @@ export default function AddTask() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
+    const [points, setPoints] = useState('10');
     const [isSaving, setIsSaving] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     // Time picker state
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -107,6 +111,33 @@ export default function AddTask() {
 
         fetchHouseholdMembers();
     }, [userData?.id, userData?.household]);
+
+    // Handle pull-to-refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        
+        try {
+            if (userData?.id && userData?.household && userData.household.length > 0) {
+                let householdId = '';
+                const firstHousehold = userData.household[0];
+                
+                if (typeof firstHousehold === 'string') {
+                    householdId = firstHousehold.split('/').pop() || '';
+                } else if (firstHousehold && typeof firstHousehold === 'object' && 'id' in firstHousehold) {
+                    householdId = (firstHousehold as any).id;
+                }
+
+                if (householdId) {
+                    const members = await getHouseholdMembers(householdId);
+                    setHouseholdMembers(members);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error refreshing household members:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     // Get current date and calculate next two days (normalized to midnight)
     const now = new Date();
@@ -198,6 +229,14 @@ export default function AddTask() {
             <ScrollView
                 style={[commonStyles.container, { backgroundColor: colors.background }]}
                 keyboardShouldPersistTaps="handled"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.tint}
+                        colors={[colors.tint]}
+                    />
+                }
             >
                 <View>
                     <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
@@ -342,6 +381,30 @@ export default function AddTask() {
                             textAlignVertical="top"
                         />
                     </View>
+
+                    {/* Points Field */}
+                    <View style={styles.pointsContainer}>
+                        <Text style={[styles.pointsLabel, { color: colors.lightDarkText }]}>
+                            Poeng
+                        </Text>
+                        <TextInput
+                            style={[styles.pointsInput, { 
+                                backgroundColor: colors.darkNonInteractiveText,
+                                color: colors.text,
+                                borderColor: colors.nonInteractiveBackground
+                            }]}
+                            placeholder="10"
+                            placeholderTextColor={colors.lightDarkText}
+                            value={points}
+                            onChangeText={(text) => {
+                                // Only allow numbers
+                                const numericValue = text.replace(/[^0-9]/g, '');
+                                setPoints(numericValue);
+                            }}
+                            keyboardType="numeric"
+                            maxLength={3}
+                        />
+                    </View>
                 </View>
 
                 {/* Person Assignment Section */}
@@ -379,12 +442,20 @@ export default function AddTask() {
                                         { backgroundColor: selectedPerson === member.id ? colors.tint : colors.nonInteractiveBackground },
                                         selectedPerson === member.id && styles.personAvatarSelected
                                     ]}>
-                                        <Text style={[
-                                            styles.personInitial,
-                                            { color: selectedPerson === member.id ? colors.darkText : colors.text }
-                                        ]}>
-                                            {member.firstName.charAt(0)}
-                                        </Text>
+                                        {member.imageUri ? (
+                                            <Image
+                                                source={{ uri: member.imageUri }}
+                                                style={styles.personAvatarImage
+                                                }
+                                            />
+                                        ) : (
+                                            <Text style={[
+                                                styles.personInitial,
+                                                { color: selectedPerson === member.id ? colors.darkText : colors.text }
+                                            ]}>
+                                                {member.firstName.charAt(0)}
+                                            </Text>
+                                        )}
                                     </View>
                                     <Text style={[
                                         styles.personName,
@@ -466,8 +537,10 @@ export default function AddTask() {
                                     timeEnd: timeEndDate,
                                     assignedTo: selectedPerson,
                                     createdBy: userData.id,
+                                    createdByName: userData.username,
+                                    createdByAvatar: userData.imageUri || '',
                                     householdId: householdId,
-                                    points: 10, // Default points, you can make this configurable
+                                    points: parseInt(points) || 10, // Use input value or default to 10
                                 });
 
                                 if (taskId) {
@@ -481,6 +554,7 @@ export default function AddTask() {
                                                     // Reset form
                                                     setTitle('');
                                                     setDescription('');
+                                                    setPoints('10');
                                                     setSelectedPerson(null);
                                                     const { currentTime, futureTime } = calculateTimes();
                                                     setStartTime(currentTime);
@@ -693,6 +767,22 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
 
+    // Points Field Styles
+    pointsContainer: {
+        marginTop: 20,
+    },
+    pointsLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        marginBottom: 8,
+    },
+    pointsInput: {
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        borderWidth: 1,
+    },
+
     // Person Assignment Styles
     personSection: {
         marginTop: 25,
@@ -721,6 +811,11 @@ const styles = StyleSheet.create({
     personAvatarSelected: {
         borderWidth: 3,
         borderColor: '#fff',
+    },
+    personAvatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 30,
     },
     personInitial: {
         fontSize: 24,
