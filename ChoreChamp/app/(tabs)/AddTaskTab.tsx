@@ -9,6 +9,7 @@ import {
     Alert,
     KeyboardAvoidingView,
     Platform,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -65,6 +66,7 @@ export default function AddTask() {
     const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
     const [points, setPoints] = useState('10');
     const [isSaving, setIsSaving] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     // Time picker state
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -108,6 +110,33 @@ export default function AddTask() {
 
         fetchHouseholdMembers();
     }, [userData?.id, userData?.household]);
+
+    // Handle pull-to-refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        
+        try {
+            if (userData?.id && userData?.household && userData.household.length > 0) {
+                let householdId = '';
+                const firstHousehold = userData.household[0];
+                
+                if (typeof firstHousehold === 'string') {
+                    householdId = firstHousehold.split('/').pop() || '';
+                } else if (firstHousehold && typeof firstHousehold === 'object' && 'id' in firstHousehold) {
+                    householdId = (firstHousehold as any).id;
+                }
+
+                if (householdId) {
+                    const members = await getHouseholdMembers(householdId);
+                    setHouseholdMembers(members);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error refreshing household members:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     // Get current date and calculate next two days (normalized to midnight)
     const now = new Date();
@@ -199,6 +228,14 @@ export default function AddTask() {
             <ScrollView
                 style={[commonStyles.container, { backgroundColor: colors.background }]}
                 keyboardShouldPersistTaps="handled"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.tint}
+                        colors={[colors.tint]}
+                    />
+                }
             >
                 <View>
                     <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
@@ -491,6 +528,8 @@ export default function AddTask() {
                                     timeEnd: timeEndDate,
                                     assignedTo: selectedPerson,
                                     createdBy: userData.id,
+                                    createdByName: userData.username,
+                                    createdByAvatar: userData.imageUri || '',
                                     householdId: householdId,
                                     points: parseInt(points) || 10, // Use input value or default to 10
                                 });

@@ -1,6 +1,8 @@
 export type Task = {
     assignedTo: string; // Reference to /collection/users
     createdBy: string;
+    createdByName: string; // Display name of the creator
+    createdByAvatar: string; // Avatar URL of the creator
     description: string;
     householdId: string;
     points: number;

@@ -9,6 +9,8 @@ export interface TaskData {
     timeEnd: Date;
     assignedTo: string;  // User ID reference path like "/users/userId"
     createdBy: string;   // User ID reference path
+    createdByName?: string; // Display name of creator
+    createdByAvatar?: string; // Avatar URL of creator
     householdId: string;
     points: number;
     done: boolean;
@@ -21,6 +23,8 @@ export interface CreateTaskInput {
     timeEnd: Date;
     assignedTo: string;  // User ID
     createdBy: string;   // User ID
+    createdByName: string; // Display name
+    createdByAvatar: string; // Avatar URL
     householdId: string;
     points?: number;
 }
@@ -86,6 +90,8 @@ export async function getTasksForUser(userId: string): Promise<TaskData[]> {
                     timeEnd,
                     assignedTo: data.assignedTo || '',
                     createdBy: data.createdBy || '',
+                    createdByName: data.createdByName || '',
+                    createdByAvatar: data.createdByAvatar || '',
                     householdId: data.householdId || '',
                     points: data.points || 0,
                     done: data.done || false,
@@ -187,6 +193,8 @@ export async function createTask(taskInput: CreateTaskInput): Promise<string | n
             timeEnd: Timestamp.fromDate(taskInput.timeEnd),
             assignedTo: `/users/${taskInput.assignedTo}`,
             createdBy: `/users/${taskInput.createdBy}`,
+            createdByName: taskInput.createdByName,
+            createdByAvatar: taskInput.createdByAvatar,
             householdId: taskInput.householdId,
             points: taskInput.points || 0,
             done: false,
