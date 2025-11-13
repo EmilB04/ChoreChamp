@@ -4,14 +4,15 @@ import { getHouseholdsForUser, getUserHouseholds, Household } from "@/services/h
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-  FlatList,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import commonStyles from "../commonStyles";
 
@@ -25,6 +26,7 @@ export default function History() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
 
   // Fetch user's households
@@ -67,6 +69,34 @@ export default function History() {
     fetchHouseholds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData?.id]);
+
+  // Handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    
+    try {
+      if (!userData?.id) {
+        setRefreshing(false);
+        return;
+      }
+
+      let userHouseholds = await getHouseholdsForUser(userData.id);
+      
+      if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
+        userHouseholds = await getUserHouseholds(userData.household);
+      }
+      
+      setHouseholds(userHouseholds);
+      
+      if (userHouseholds.length > 0 && !household) {
+        setHousehold(userHouseholds[0].familyName);
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing households:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Available filter options
   const filterOptions = [
@@ -423,7 +453,17 @@ export default function History() {
       </Modal>
 
       {/* History list */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView 
+        contentContainerStyle={{ paddingBottom: 20 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.tint}
+            colors={[colors.tint]}
+          />
+        }
+      >
         {filteredHistoryData.map((item, index) => (
           <View
             key={index}
