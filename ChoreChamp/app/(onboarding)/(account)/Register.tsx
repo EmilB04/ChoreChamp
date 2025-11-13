@@ -8,6 +8,7 @@ import {
   validateBirthDate,
   validateFirstName,
   validateLastName,
+  validatePassword,
   validatePhone,
   validateRegistrationForm,
   type RegisterFormData
@@ -45,28 +46,34 @@ export default function Register() {
   const [countryCode, setCountryCode] = useState('+47');
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [birth, setBirth] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [firstNameError, setFirstNameError] = useState<string | null>(null);
   const [lastNameError, setLastNameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [birthError, setBirthError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeField, setActiveField] = useState<'firstName' | 'lastName' | 'phone' | 'birth' | null>(null);
+  const [activeField, setActiveField] = useState<'firstName' | 'lastName' | 'phone' | 'birth' | 'password' | 'confirmPassword' | null>(null);
 
   // Use entrance animation hook for initial page load
   const { fadeAnim, slideAnim } = useEntranceAnimation();
 
   // Use form animations hook
   const { buttonOpacityAnim, errorAnim, fieldErrorAnims, animateButtonOpacity } = useFormAnimations({
-    errorCount: 4,
+    errorCount: 6,
     hasError: !!error,
-    fieldErrors: [firstNameError, lastNameError, phoneError, birthError],
+    fieldErrors: [firstNameError, lastNameError, phoneError, birthError, passwordError, confirmPasswordError],
   });
-  const [firstNameErrorAnim, lastNameErrorAnim, phoneErrorAnim, birthErrorAnim] = fieldErrorAnims;
+  const [firstNameErrorAnim, lastNameErrorAnim, phoneErrorAnim, birthErrorAnim, passwordErrorAnim, confirmPasswordErrorAnim] = fieldErrorAnims;
 
   // Use border animations hook
-  const { borderAnims, animateBorder } = useBorderAnimations({ fieldCount: 4 });
-  const [firstNameBorderAnim, lastNameBorderAnim, phoneBorderAnim, birthBorderAnim] = borderAnims;
+  const { borderAnims, animateBorder } = useBorderAnimations({ fieldCount: 6 });
+  const [firstNameBorderAnim, lastNameBorderAnim, phoneBorderAnim, birthBorderAnim, passwordBorderAnim, confirmPasswordBorderAnim] = borderAnims;
 
   // Use picker animations hook for country picker
   const { pickerAnim: countryPickerAnim, chevronAnim: countryChevronAnim, animatePicker: animateCountryPicker } = usePickerAnimations();
@@ -91,9 +98,10 @@ export default function Register() {
       phone,
       countryCode,
       birth,
+      password,
     };
-    return isFormComplete(formData) && validateRegistrationForm(formData).isValid;
-  }, [firstName, lastName, phone, countryCode, birth]);
+    return isFormComplete(formData) && validateRegistrationForm(formData).isValid && password === confirmPassword && confirmPassword.length > 0;
+  }, [firstName, lastName, phone, countryCode, birth, password, confirmPassword]);
 
   // Animate button opacity when form validity changes
   useEffect(() => {
@@ -122,6 +130,7 @@ export default function Register() {
       phone,
       countryCode,
       birth,
+      password,
     };
 
     return isFormComplete(formData) && validateRegistrationForm(formData).isValid;
@@ -135,10 +144,20 @@ export default function Register() {
       phone,
       countryCode,
       birth,
+      password,
     };
 
     const validation = validateRegistrationForm(formData);
-    return validation.isValid ? null : validation.error || t('register.error');
+    if (!validation.isValid) {
+      return validation.error || t('register.error');
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      return t('register.errorPasswordMismatch') || 'Passwords do not match';
+    }
+
+    return null;
   }
 
   // TODO: Implement actual registration logic
@@ -265,6 +284,35 @@ export default function Register() {
     }, 100);
   };
 
+  const handlePasswordBlur = () => {
+    setTimeout(() => {
+      if (password) {
+        const validation = validatePassword(password);
+        if (!validation.isValid) {
+          setPasswordError(validation.error || t('register.error'));
+        } else {
+          setPasswordError(null);
+        }
+      } else {
+        setPasswordError(null);
+      }
+    }, 100);
+  };
+
+  const handleConfirmPasswordBlur = () => {
+    setTimeout(() => {
+      if (confirmPassword) {
+        if (confirmPassword !== password) {
+          setConfirmPasswordError(t('register.errorPasswordMismatch') || 'Passwords do not match');
+        } else {
+          setConfirmPasswordError(null);
+        }
+      } else {
+        setConfirmPasswordError(null);
+      }
+    }, 100);
+  };
+
   const toggleCountryPicker = () => {
     const newValue = !showCountryPicker;
     setShowCountryPicker(newValue);
@@ -277,12 +325,14 @@ export default function Register() {
     animateCountryPicker(false);
   };
 
-  const openField = (fieldName: 'firstName' | 'lastName' | 'phone' | 'birth') => {
+  const openField = (fieldName: 'firstName' | 'lastName' | 'phone' | 'birth' | 'password' | 'confirmPassword') => {
     // Animate all borders
     animateBorder(firstNameBorderAnim, fieldName === 'firstName' ? 1 : 0);
     animateBorder(lastNameBorderAnim, fieldName === 'lastName' ? 1 : 0);
     animateBorder(phoneBorderAnim, fieldName === 'phone' ? 1 : 0);
     animateBorder(birthBorderAnim, fieldName === 'birth' ? 1 : 0);
+    animateBorder(passwordBorderAnim, fieldName === 'password' ? 1 : 0);
+    animateBorder(confirmPasswordBorderAnim, fieldName === 'confirmPassword' ? 1 : 0);
 
     // Animate date picker appearance and chevron
     if (fieldName === 'birth') {
@@ -782,6 +832,160 @@ export default function Register() {
                 </View>
               </View>
 
+              {/* Password Input */}
+              <View style={styles.inputGroup}>
+                <View style={[styles.inputLabelRow]}>
+                  <Ionicons name="lock-closed-outline" size={18} color={colors.tint} />
+                  <Text style={[styles.label, { color: colors.text }]}>{t('register.password')}</Text>
+                </View>
+                <Animated.View
+                  style={[
+                    styles.inputContainer,
+                    {
+                      backgroundColor: colors.contextBackground,
+                      borderColor: passwordBorderAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['transparent', colors.tint],
+                      }),
+                      borderWidth: 2,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { color: colors.text, flex: 1 },
+                    ]}
+                    placeholder={t('register.passwordPlaceholder')}
+                    placeholderTextColor={colors.lightDarkText}
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (passwordError) setPasswordError(null);
+                    }}
+                    onFocus={() => {
+                      setActiveField('password');
+                      openField('password');
+                    }}
+                    onBlur={handlePasswordBlur}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="password-new"
+                    textContentType="newPassword"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={22}
+                      color={colors.lightDarkText}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+
+                {/* Password Error Message */}
+                {passwordError && (
+                  <Animated.View
+                    style={[
+                      styles.fieldErrorContainer,
+                      {
+                        backgroundColor: colors.statusFailedBackground,
+                        opacity: passwordErrorAnim,
+                        transform: [{
+                          translateY: passwordErrorAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [-10, 0],
+                          }),
+                        }],
+                      }
+                    ]}
+                  >
+                    <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                    <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{passwordError}</Text>
+                  </Animated.View>
+                )}
+              </View>
+
+              {/* Confirm Password Input */}
+              <View style={styles.inputGroup}>
+                <View style={[styles.inputLabelRow]}>
+                  <Ionicons name="lock-closed-outline" size={18} color={colors.tint} />
+                  <Text style={[styles.label, { color: colors.text }]}>{t('register.confirmPassword')}</Text>
+                </View>
+                <Animated.View
+                  style={[
+                    styles.inputContainer,
+                    {
+                      backgroundColor: colors.contextBackground,
+                      borderColor: confirmPasswordBorderAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['transparent', colors.tint],
+                      }),
+                      borderWidth: 2,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { color: colors.text, flex: 1 },
+                    ]}
+                    placeholder={t('register.confirmPasswordPlaceholder')}
+                    placeholderTextColor={colors.lightDarkText}
+                    value={confirmPassword}
+                    onChangeText={(text) => {
+                      setConfirmPassword(text);
+                      if (confirmPasswordError) setConfirmPasswordError(null);
+                    }}
+                    onFocus={() => {
+                      setActiveField('confirmPassword');
+                      openField('confirmPassword');
+                    }}
+                    onBlur={handleConfirmPasswordBlur}
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="password-new"
+                    textContentType="newPassword"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <Ionicons
+                      name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={22}
+                      color={colors.lightDarkText}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+
+                {/* Confirm Password Error Message */}
+                {confirmPasswordError && (
+                  <Animated.View
+                    style={[
+                      styles.fieldErrorContainer,
+                      {
+                        backgroundColor: colors.statusFailedBackground,
+                        opacity: confirmPasswordErrorAnim,
+                        transform: [{
+                          translateY: confirmPasswordErrorAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [-10, 0],
+                          }),
+                        }],
+                      }
+                    ]}
+                  >
+                    <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                    <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{confirmPasswordError}</Text>
+                  </Animated.View>
+                )}
+              </View>
+
               {error && (
                 <Animated.View
                   style={[
@@ -954,31 +1158,19 @@ const styles = StyleSheet.create({
     boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
     elevation: 5,
   },
-  editAvatarButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: '35%',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.2)',
-    elevation: 3,
-  },
   form: {
     width: '100%',
   },
   nameRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   nameInputGroup: {
     flex: 1,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   inputLabelRow: {
     flexDirection: 'row',
@@ -991,6 +1183,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 4,
@@ -998,6 +1192,9 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     paddingVertical: 12,
+  },
+  eyeIcon: {
+    padding: 8,
   },
   phoneInputRow: {
     flexDirection: 'row',
@@ -1140,20 +1337,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 16,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   socialIconButton: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
     elevation: 3,
   },
   socialIconLarge: {
-    width: 28,
-    height: 28,
+    width: 23,
+    height: 23,
   },
   loginHintContainer: {
     marginTop: 24,
