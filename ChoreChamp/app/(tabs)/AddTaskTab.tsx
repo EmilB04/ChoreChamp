@@ -4,6 +4,7 @@ import { useUser } from "@/contexts/UserContext";
 import { getHouseholdMembers } from "@/services/householdService";
 import { createTask } from "@/services/taskService";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import {
     Alert,
@@ -441,12 +442,20 @@ export default function AddTask() {
                                         { backgroundColor: selectedPerson === member.id ? colors.tint : colors.nonInteractiveBackground },
                                         selectedPerson === member.id && styles.personAvatarSelected
                                     ]}>
-                                        <Text style={[
-                                            styles.personInitial,
-                                            { color: selectedPerson === member.id ? colors.darkText : colors.text }
-                                        ]}>
-                                            {member.firstName.charAt(0)}
-                                        </Text>
+                                        {member.imageUri ? (
+                                            <Image
+                                                source={{ uri: member.imageUri }}
+                                                style={styles.personAvatarImage
+                                                }
+                                            />
+                                        ) : (
+                                            <Text style={[
+                                                styles.personInitial,
+                                                { color: selectedPerson === member.id ? colors.darkText : colors.text }
+                                            ]}>
+                                                {member.firstName.charAt(0)}
+                                            </Text>
+                                        )}
                                     </View>
                                     <Text style={[
                                         styles.personName,
@@ -802,6 +811,11 @@ const styles = StyleSheet.create({
     personAvatarSelected: {
         borderWidth: 3,
         borderColor: '#fff',
+    },
+    personAvatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 30,
     },
     personInitial: {
         fontSize: 24,
