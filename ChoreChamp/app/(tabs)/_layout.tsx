@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
@@ -134,13 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFBE00",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.25)',
     elevation: 8,
   },
   floatingButtonFocused: {

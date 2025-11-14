@@ -13,7 +13,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chorechamp.app"
+      "bundleIdentifier": "com.chorechamp.app",
+      "associatedDomains": [
+        "applinks:auth.expo.io"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +27,20 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.chorechamp.app"
+      "package": "com.chorechamp.app", 
+      "intentFilters": [ 
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "auth.expo.io",
+              "pathPrefix": "/@andolaus/ChoreChamp"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "output": "static",

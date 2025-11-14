@@ -1,13 +1,22 @@
 import Calendar from "@/components/ui/Calendar";
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from '@expo/vector-icons';
+import { useUser } from "@/contexts/UserContext";
+import { getHouseholdMembers } from "@/services/householdService";
+import { createTask } from "@/services/taskService";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import {
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import commonStyles from "../commonStyles";
 
@@ -16,6 +25,7 @@ import commonStyles from "../commonStyles";
 
 export default function AddTask() {
     const { colors } = useTheme();
+    const { userData } = useUser();
 
     // Initialize selectedDate normalized to midnight
     const [selectedDate, setSelectedDate] = useState<Date>(() => {
@@ -23,6 +33,17 @@ export default function AddTask() {
         return new Date(now.getFullYear(), now.getMonth(), now.getDate());
     });
     const [showCalendar, setShowCalendar] = useState(false);
+
+    // Household members state
+    const [householdMembers, setHouseholdMembers] = useState<{
+        id: string;
+        firstName: string;
+        lastName: string;
+        username: string;
+        imageUri: string;
+        points: number;
+    }[]>([]);
+    const [loadingMembers, setLoadingMembers] = useState(true);
 
     function calculateTimes() {
         const currentHour = new Date().getHours();
@@ -41,18 +62,82 @@ export default function AddTask() {
 
     const [startTime, setStartTime] = useState(calculateTimes().currentTime);
     const [endTime, setEndTime] = useState(calculateTimes().futureTime);
-    const [selectedTimePreset, setSelectedTimePreset] = useState<string | null>(null);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
+    const [points, setPoints] = useState('10');
+    const [isSaving, setIsSaving] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
-    // TODO: Mock person data - replace with actual data from your user context/database
-    const people = [
-        { id: '1', name: 'Emil B.' },
-        { id: '2', name: 'Ida K.' },
-        { id: '3', name: 'Andreas O.' },
-        { id: '4', name: 'Sebastian W.' },
-        { id: '5', name: 'Lina S.' },
-        { id: '6', name: 'Marius T.' },
-    ];
+    // Time picker state
+    const [showTimePicker, setShowTimePicker] = useState(false);
+    const [timePickerMode, setTimePickerMode] = useState<'start' | 'end'>('start');
+    const [tempDate, setTempDate] = useState(new Date());
+
+    // Fetch household members
+    useEffect(() => {
+        const fetchHouseholdMembers = async () => {
+            if (!userData?.id || !userData?.household || userData.household.length === 0) {
+                setLoadingMembers(false);
+                return;
+            }
+
+            setLoadingMembers(true);
+            try {
+                // Get the first household ID
+                let householdId = '';
+                const firstHousehold = userData.household[0];
+                
+                if (typeof firstHousehold === 'string') {
+                    householdId = firstHousehold.split('/').pop() || '';
+                } else if (firstHousehold && typeof firstHousehold === 'object' && 'id' in firstHousehold) {
+                    householdId = (firstHousehold as any).id;
+                }
+
+                if (!householdId) {
+                    setLoadingMembers(false);
+                    return;
+                }
+
+                const members = await getHouseholdMembers(householdId);
+                setHouseholdMembers(members);
+            } catch (error) {
+                console.error('❌ Error loading household members:', error);
+                setHouseholdMembers([]);
+            } finally {
+                setLoadingMembers(false);
+            }
+        };
+
+        fetchHouseholdMembers();
+    }, [userData?.id, userData?.household]);
+
+    // Handle pull-to-refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        
+        try {
+            if (userData?.id && userData?.household && userData.household.length > 0) {
+                let householdId = '';
+                const firstHousehold = userData.household[0];
+                
+                if (typeof firstHousehold === 'string') {
+                    householdId = firstHousehold.split('/').pop() || '';
+                } else if (firstHousehold && typeof firstHousehold === 'object' && 'id' in firstHousehold) {
+                    householdId = (firstHousehold as any).id;
+                }
+
+                if (householdId) {
+                    const members = await getHouseholdMembers(householdId);
+                    setHouseholdMembers(members);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error refreshing household members:', error);
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     // Get current date and calculate next two days (normalized to midnight)
     const now = new Date();
@@ -97,10 +182,61 @@ export default function AddTask() {
         setSelectedDate(date);
     };
 
+    const openTimePicker = (mode: 'start' | 'end') => {
+        const timeString = mode === 'start' ? startTime : endTime;
+        const [hours, minutes] = timeString.split(':').map(Number);
+        const date = new Date();
+        date.setHours(hours);
+        date.setMinutes(minutes);
+        setTempDate(date);
+        setTimePickerMode(mode);
+        setShowTimePicker(true);
+    };
+
+    const onTimeChange = (event: any, selectedDate?: Date) => {
+        if (Platform.OS === 'android') {
+            setShowTimePicker(false);
+        }
+        
+        if (selectedDate) {
+            const hours = selectedDate.getHours().toString().padStart(2, '0');
+            const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            
+            if (timePickerMode === 'start') {
+                setStartTime(timeString);
+            } else {
+                setEndTime(timeString);
+            }
+            
+            if (Platform.OS === 'ios') {
+                setTempDate(selectedDate);
+            }
+        }
+    };
+
+    const confirmIOSTime = () => {
+        setShowTimePicker(false);
+    };
+
     return (
-        <>
+        <KeyboardAvoidingView
+            style={{ flex: 1, backgroundColor: colors.background }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+
+        >
             <ScrollView
                 style={[commonStyles.container, { backgroundColor: colors.background }]}
+                keyboardShouldPersistTaps="handled"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.tint}
+                        colors={[colors.tint]}
+                    />
+                }
             >
                 <View>
                     <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
@@ -189,10 +325,7 @@ export default function AddTask() {
                         <View style={styles.timeRangeValues}>
                             <TouchableOpacity
                                 style={styles.timeInput}
-                                onPress={() => {
-                                    // TODO: Open time picker for start time
-                                    console.log("Open start time picker");
-                                }}
+                                onPress={() => openTimePicker('start')}
                             >
                                 <Text style={[styles.timeText, { color: colors.text }]}>{startTime}</Text>
                             </TouchableOpacity>
@@ -203,44 +336,74 @@ export default function AddTask() {
 
                             <TouchableOpacity
                                 style={styles.timeInput}
-                                onPress={() => {
-                                    // TODO: Open time picker for end time
-                                    console.log("Open end time picker");
-                                }}
+                                onPress={() => openTimePicker('end')}
                             >
                                 <Text style={[styles.timeText, { color: colors.text }]}>{endTime}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
 
-                    {/* Time Preset Buttons */}
-                    <View style={styles.timePresetsContainer}>
-                        <TouchableOpacity
-                            style={[
-                                styles.timePresetButton,
-                                { backgroundColor: selectedTimePreset === 'forvarsel' ? colors.tint : colors.interactiveBackground }
-                            ]}
-                            onPress={() => {
-                                setSelectedTimePreset('forvarsel');
-                                // You can set specific times here if needed
-                            }}
-                        >
-                            <Ionicons name="notifications-outline" size={20} color={colors.darkText} />
-                            <Text style={[styles.presetText, { color: colors.darkText }]}>Forvarsel</Text>
-                        </TouchableOpacity>
+                    {/* Title Field */}
+                    <View style={styles.titleContainer}>
+                        <Text style={[styles.titleLabel, { color: colors.lightDarkText }]}>
+                            Tittel
+                        </Text>
+                        <TextInput
+                            style={[styles.titleInput, { 
+                                backgroundColor: colors.darkNonInteractiveText,
+                                color: colors.text,
+                                borderColor: colors.nonInteractiveBackground
+                            }]}
+                            placeholder="Legg til en tittel..."
+                            placeholderTextColor={colors.lightDarkText}
+                            value={title}
+                            onChangeText={setTitle}
+                        />
+                    </View>
 
-                        <TouchableOpacity
-                            style={[
-                                styles.timePresetButton,
-                                { backgroundColor: selectedTimePreset === 'gjenta' ? colors.tint : colors.interactiveBackground }
-                            ]}
-                            onPress={() => {
-                                setSelectedTimePreset('gjenta');
+                    {/* Description Field */}
+                    <View style={styles.descriptionContainer}>
+                        <Text style={[styles.descriptionLabel, { color: colors.lightDarkText }]}>
+                            Beskrivelse (valgfritt)
+                        </Text>
+                        <TextInput
+                            style={[styles.descriptionInput, { 
+                                backgroundColor: colors.darkNonInteractiveText,
+                                color: colors.text,
+                                borderColor: colors.nonInteractiveBackground
+                            }]}
+                            placeholder="Legg til en beskrivelse..."
+                            placeholderTextColor={colors.lightDarkText}
+                            value={description}
+                            onChangeText={setDescription}
+                            multiline
+                            numberOfLines={3}
+                            textAlignVertical="top"
+                        />
+                    </View>
+
+                    {/* Points Field */}
+                    <View style={styles.pointsContainer}>
+                        <Text style={[styles.pointsLabel, { color: colors.lightDarkText }]}>
+                            Poeng
+                        </Text>
+                        <TextInput
+                            style={[styles.pointsInput, { 
+                                backgroundColor: colors.darkNonInteractiveText,
+                                color: colors.text,
+                                borderColor: colors.nonInteractiveBackground
+                            }]}
+                            placeholder="10"
+                            placeholderTextColor={colors.lightDarkText}
+                            value={points}
+                            onChangeText={(text) => {
+                                // Only allow numbers
+                                const numericValue = text.replace(/[^0-9]/g, '');
+                                setPoints(numericValue);
                             }}
-                        >
-                            <Ionicons name="repeat-outline" size={20} color={colors.darkText} />
-                            <Text style={[styles.presetText, { color: colors.darkText }]}>Gjenta</Text>
-                        </TouchableOpacity>
+                            keyboardType="numeric"
+                            maxLength={3}
+                        />
                     </View>
                 </View>
 
@@ -249,40 +412,62 @@ export default function AddTask() {
                     <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
                         Tilordne
                     </Text>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}
-                        contentContainerStyle={styles.personContainer}
-                    >
-                        {people.map((person) => (
-                            <TouchableOpacity
-                                key={person.id}
-                                style={styles.personItem}
-                                onPress={() => setSelectedPerson(person.id)}
-                            >
-                                <View style={[
-                                    styles.personAvatar,
-                                    { backgroundColor: selectedPerson === person.id ? colors.tint : colors.nonInteractiveBackground },
-                                    selectedPerson === person.id && styles.personAvatarSelected
-                                ]}>
-                                    <Text style={[
-                                        styles.personInitial,
-                                        { color: selectedPerson === person.id ? colors.darkText : colors.text }
+                    {loadingMembers ? (
+                        <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
+                            <Text style={[styles.loadingText, { color: colors.text }]}>
+                                Laster medlemmer...
+                            </Text>
+                        </View>
+                    ) : householdMembers.length === 0 ? (
+                        <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
+                            <Text style={[styles.loadingText, { color: colors.text }]}>
+                                Ingen medlemmer i husstanden
+                            </Text>
+                        </View>
+                    ) : (
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}
+                            contentContainerStyle={styles.personContainer}
+                        >
+                            {householdMembers.map((member) => (
+                                <TouchableOpacity
+                                    key={member.id}
+                                    style={styles.personItem}
+                                    onPress={() => setSelectedPerson(member.id)}
+                                >
+                                    <View style={[
+                                        styles.personAvatar,
+                                        { backgroundColor: selectedPerson === member.id ? colors.tint : colors.nonInteractiveBackground },
+                                        selectedPerson === member.id && styles.personAvatarSelected
                                     ]}>
-                                        {person.name.charAt(0)}
+                                        {member.imageUri ? (
+                                            <Image
+                                                source={{ uri: member.imageUri }}
+                                                style={styles.personAvatarImage
+                                                }
+                                            />
+                                        ) : (
+                                            <Text style={[
+                                                styles.personInitial,
+                                                { color: selectedPerson === member.id ? colors.darkText : colors.text }
+                                            ]}>
+                                                {member.firstName.charAt(0)}
+                                            </Text>
+                                        )}
+                                    </View>
+                                    <Text style={[
+                                        styles.personName,
+                                        { color: colors.text },
+                                        selectedPerson === member.id && { fontWeight: '600' }
+                                    ]}>
+                                        {member.firstName}
                                     </Text>
-                                </View>
-                                <Text style={[
-                                    styles.personName,
-                                    { color: colors.text },
-                                    selectedPerson === person.id && { fontWeight: '600' }
-                                ]}>
-                                    {person.name}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    )}
                 </View>
 
 
@@ -291,23 +476,162 @@ export default function AddTask() {
                     <TouchableOpacity
                         style={[
                             commonStyles.saveButton,
-                            { backgroundColor: colors.tint, marginTop: 30, marginBottom: 40 }
+                            { 
+                                backgroundColor: (title.trim() && !isSaving) ? colors.tint : colors.nonInteractiveBackground, 
+                                marginTop: 30, 
+                                marginBottom: 40 
+                            }
                         ]}
-                        onPress={() => {
-                            // Handle save action
-                            console.log('Saving task...', {
-                                date: selectedDate,
-                                startTime,
-                                endTime,
-                                assignedTo: selectedPerson,
-                                presets: selectedTimePreset
-                            });
+                        onPress={async () => {
+                            if (!title.trim() || isSaving) return;
+                            
+                            // Validate required fields
+                            if (!selectedPerson) {
+                                Alert.alert('Feil', 'Vennligst velg hvem som skal utføre oppgaven');
+                                return;
+                            }
+
+                            if (!userData?.id) {
+                                Alert.alert('Feil', 'Kunne ikke identifisere brukeren');
+                                return;
+                            }
+
+                            // Get household ID
+                            let householdId = '';
+                            if (userData.household && userData.household.length > 0) {
+                                const firstHousehold = userData.household[0];
+                                if (typeof firstHousehold === 'string') {
+                                    householdId = firstHousehold.split('/').pop() || '';
+                                } else if (firstHousehold && typeof firstHousehold === 'object' && 'id' in firstHousehold) {
+                                    householdId = (firstHousehold as any).id;
+                                }
+                            }
+
+                            if (!householdId) {
+                                Alert.alert('Feil', 'Kunne ikke finne husstand-ID');
+                                return;
+                            }
+
+                            setIsSaving(true);
+
+                            try {
+                                // Combine date with time strings to create full Date objects
+                                const [startHours, startMinutes] = startTime.split(':').map(Number);
+                                const [endHours, endMinutes] = endTime.split(':').map(Number);
+                                
+                                const timeStartDate = new Date(selectedDate);
+                                timeStartDate.setHours(startHours, startMinutes, 0, 0);
+                                
+                                const timeEndDate = new Date(selectedDate);
+                                timeEndDate.setHours(endHours, endMinutes, 0, 0);
+
+                                // If end time is before start time, assume it's the next day
+                                if (timeEndDate < timeStartDate) {
+                                    timeEndDate.setDate(timeEndDate.getDate() + 1);
+                                }
+
+                                const taskId = await createTask({
+                                    title: title.trim(),
+                                    description: description.trim(),
+                                    timeStart: timeStartDate,
+                                    timeEnd: timeEndDate,
+                                    assignedTo: selectedPerson,
+                                    createdBy: userData.id,
+                                    createdByName: userData.username,
+                                    createdByAvatar: userData.imageUri || '',
+                                    householdId: householdId,
+                                    points: parseInt(points) || 10, // Use input value or default to 10
+                                });
+
+                                if (taskId) {
+                                    Alert.alert(
+                                        'Suksess!',
+                                        'Oppgaven ble opprettet',
+                                        [
+                                            {
+                                                text: 'OK',
+                                                onPress: () => {
+                                                    // Reset form
+                                                    setTitle('');
+                                                    setDescription('');
+                                                    setPoints('10');
+                                                    setSelectedPerson(null);
+                                                    const { currentTime, futureTime } = calculateTimes();
+                                                    setStartTime(currentTime);
+                                                    setEndTime(futureTime);
+                                                    const now = new Date();
+                                                    setSelectedDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+                                                }
+                                            }
+                                        ]
+                                    );
+                                } else {
+                                    Alert.alert('Feil', 'Kunne ikke opprette oppgaven. Prøv igjen.');
+                                }
+                            } catch (error) {
+                                console.error('Error creating task:', error);
+                                Alert.alert('Feil', 'En feil oppstod ved oppretting av oppgaven');
+                            } finally {
+                                setIsSaving(false);
+                            }
                         }}
+                        disabled={!title.trim() || isSaving}
                     >
-                        <Text style={[commonStyles.saveButtonText, { color: colors.darkText }]}>Lagre</Text>
+                        <Text style={[
+                            commonStyles.saveButtonText, 
+                            { color: (title.trim() && !isSaving) ? colors.darkText : colors.lightDarkText }
+                        ]}>
+                            {isSaving ? 'Lagrer...' : 'Lagre'}
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Native Time Picker */}
+            {showTimePicker && (
+                <>
+                    {Platform.OS === 'ios' && (
+                        <View style={styles.iosPickerOverlay}>
+                            <TouchableOpacity 
+                                style={styles.iosPickerBackdrop}
+                                activeOpacity={1}
+                                onPress={() => setShowTimePicker(false)}
+                            />
+                            <View style={styles.iosPickerContainer}>
+                                <View style={[styles.iosPickerHeader, { backgroundColor: colors.contextBackground }]}>
+                                    <TouchableOpacity onPress={() => setShowTimePicker(false)}>
+                                        <Text style={[styles.iosPickerButton, { color: colors.text }]}>Avbryt</Text>
+                                    </TouchableOpacity>
+                                    <Text style={[styles.iosPickerTitle, { color: colors.text }]}>
+                                        Velg {timePickerMode === 'start' ? 'starttid' : 'sluttid'}
+                                    </Text>
+                                    <TouchableOpacity onPress={confirmIOSTime}>
+                                        <Text style={[styles.iosPickerButton, { color: colors.tint }]}>Ferdig</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={[styles.iosPickerContent, { backgroundColor: colors.contextBackground }]}>
+                                    <DateTimePicker
+                                        value={tempDate}
+                                        mode="time"
+                                        display="spinner"
+                                        onChange={onTimeChange}
+                                        textColor={colors.text}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+                    )}
+                    {Platform.OS === 'android' && (
+                        <DateTimePicker
+                            value={tempDate}
+                            mode="time"
+                            display="default"
+                            onChange={onTimeChange}
+                            is24Hour={true}
+                        />
+                    )}
+                </>
+            )}
 
             {/* Cross-platform Calendar */}
             <Calendar
@@ -317,7 +641,7 @@ export default function AddTask() {
                 onClose={() => setShowCalendar(false)}
                 minDate={new Date()}
             />
-        </>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -409,19 +733,54 @@ const styles = StyleSheet.create({
         marginTop: 20,
         gap: 12,
     },
-    timePresetButton: {
-        flex: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 25,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
+
+    // Title Field Styles
+    titleContainer: {
+        marginTop: 20,
     },
-    presetText: {
+    titleLabel: {
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '500',
+        marginBottom: 8,
+    },
+    titleInput: {
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        borderWidth: 1,
+    },
+
+    // Description Field Styles
+    descriptionContainer: {
+        marginTop: 20,
+    },
+    descriptionLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        marginBottom: 8,
+    },
+    descriptionInput: {
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        minHeight: 100,
+        borderWidth: 1,
+    },
+
+    // Points Field Styles
+    pointsContainer: {
+        marginTop: 20,
+    },
+    pointsLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        marginBottom: 8,
+    },
+    pointsInput: {
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        borderWidth: 1,
     },
 
     // Person Assignment Styles
@@ -453,6 +812,11 @@ const styles = StyleSheet.create({
         borderWidth: 3,
         borderColor: '#fff',
     },
+    personAvatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 30,
+    },
     personInitial: {
         fontSize: 24,
         fontWeight: 'bold',
@@ -460,5 +824,63 @@ const styles = StyleSheet.create({
     personName: {
         fontSize: 12,
         textAlign: 'center',
+    },
+    loadingText: {
+        fontSize: 14,
+        textAlign: 'center',
+        padding: 20,
+    },
+
+    // iOS Time Picker Styles
+    iosPickerOverlay: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+    iosPickerBackdrop: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    iosPickerContainer: {
+        width: '100%',
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    iosPickerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(0,0,0,0.1)',
+    },
+    iosPickerContent: {
+        borderBottomLeftRadius: 12,
+        borderBottomRightRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    iosPickerTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    iosPickerButton: {
+        fontSize: 16,
+        fontWeight: '600',
     },
 });

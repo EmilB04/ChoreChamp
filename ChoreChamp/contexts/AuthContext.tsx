@@ -12,28 +12,32 @@
 // https://docs.expo.dev/versions/latest/sdk/constants/
 
 // React imports
-import { createContext, useContext, useEffect, useState, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 // Firebase Auth imports
+import type { User as FirebaseUser } from "firebase/auth";
 import {
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    signInWithCredential,
+    signInWithEmailAndPassword,
     signOut,
     updateProfile,
-    GoogleAuthProvider,
-    signInWithCredential,
 } from "firebase/auth";
-import type { User as FirebaseUser } from "firebase/auth";
 
 // Firebase Firestore imports
 import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
 
 // Expo imports
-import * as WebBrowser from "expo-web-browser";
+import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
+<<<<<<< HEAD
 import * as AuthSession from "expo-auth-session";
+=======
+import * as WebBrowser from "expo-web-browser";
+>>>>>>> main
 
 // Local imports
 import { auth, db } from "@/lib/firebase";
@@ -90,8 +94,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
 
+<<<<<<< HEAD
        const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
         ...authRequestConfig,
+=======
+    const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
+        androidClientId: EXTRA.ANDROID_CLIENT_ID,
+        iosClientId: EXTRA.IOS_CLIENT_ID,
+        webClientId: EXTRA.WEB_CLIENT_ID,
+>>>>>>> main
         scopes: ['openid', 'profile', 'email'],
         responseType: 'id_token',
         redirectUri
@@ -119,6 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             if (!firebaseUser) return;
 
+<<<<<<< HEAD
             try {
                 const ref = doc(db, "users", firebaseUser.uid);
                 const snap = await getDoc(ref);
@@ -132,6 +144,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
                     createdAt: serverTimestamp() as unknown as Timestamp,
                 };
                 await setDoc(ref, data);
+=======
+                if (!snapshot.exists()) {
+                    const displayName = firebaseUser.displayName ?? "";
+                    const docData: AppUser = {
+                        name: displayName,
+                        username: displayName,  // Default username to name
+                        language: "nb",
+                        profilePicture: firebaseUser.photoURL ?? "",
+                        householdId: [],
+                        role: { admin: true },
+                        createdAt: serverTimestamp() as unknown as Timestamp,
+                    };
+                    await setDoc(ref, docData);
+>>>>>>> main
                 }
             } catch (err) {
                 console.error("create/read user doc failed", err);

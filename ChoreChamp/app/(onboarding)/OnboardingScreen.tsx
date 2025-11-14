@@ -1,7 +1,11 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Platform, StyleSheet, View } from 'react-native';
+
+// Use native driver only on iOS and Android, not on web
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
+
 /*
 Onboarding Screen
     - Displays the app logo when the user first opens the app.
@@ -27,13 +31,13 @@ const OnboardingScreen = () => {
             Animated.timing(translateY, {
                 toValue: -800, // How far the logo moves up
                 duration: ANIM_DURATION,
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
             }).start();
 
             Animated.timing(opacity, {
                 toValue: 0.95,
                 duration: 1500, // Fade duration
-                useNativeDriver: true,
+                useNativeDriver: USE_NATIVE_DRIVER,
             }).start();
 
                 // Navigate to the first onboarding step (language selection) after animation

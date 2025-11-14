@@ -1,29 +1,102 @@
 import { useTheme } from "@/contexts/ThemeContext";
+import { useUser } from "@/contexts/UserContext";
+import { getHouseholdsForUser, getUserHouseholds, Household } from "@/services/householdService";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  TextInput,
-  Modal,
-  FlatList,
+    FlatList,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import commonStyles from "../commonStyles";
 
 export default function History() {
-  const [household, setHousehold] = useState("Remmen");
+  const { userData } = useUser();
+  const [household, setHousehold] = useState<string>("");
+  const [households, setHouseholds] = useState<Household[]>([]);
+  const [loadingHouseholds, setLoadingHouseholds] = useState(true);
   const [showHouseholdDropdown, setShowHouseholdDropdown] = useState(false);
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
 
-  // Available households
-  const households = ["Remmen", "Hjemme", "Kollektiv", "Familie"];
+  // Fetch user's households
+  useEffect(() => {
+    const fetchHouseholds = async () => {
+      if (!userData?.id) {
+        console.log('⚠️ No user ID available');
+        setLoadingHouseholds(false);
+        return;
+      }
+
+      setLoadingHouseholds(true);
+      try {
+        console.log('🏠 Fetching households for user ID:', userData.id);
+        
+        // First, try to fetch households by querying familyMembers
+        let userHouseholds = await getHouseholdsForUser(userData.id);
+        
+        // If no households found via query and user has household array, fetch those
+        if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
+          console.log('🏠 No households found via query, trying user.household array:', userData.household);
+          userHouseholds = await getUserHouseholds(userData.household);
+        }
+        
+        setHouseholds(userHouseholds);
+        
+        // Set first household as default if available
+        if (userHouseholds.length > 0 && !household) {
+          setHousehold(userHouseholds[0].familyName);
+        }
+        
+        console.log('✅ Loaded households:', userHouseholds.map(h => h.familyName));
+      } catch (error) {
+        console.error('❌ Error loading households:', error);
+      } finally {
+        setLoadingHouseholds(false);
+      }
+    };
+
+    fetchHouseholds();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.id]);
+
+  // Handle pull-to-refresh
+  const onRefresh = async () => {
+    setRefreshing(true);
+    
+    try {
+      if (!userData?.id) {
+        setRefreshing(false);
+        return;
+      }
+
+      let userHouseholds = await getHouseholdsForUser(userData.id);
+      
+      if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
+        userHouseholds = await getUserHouseholds(userData.household);
+      }
+      
+      setHouseholds(userHouseholds);
+      
+      if (userHouseholds.length > 0 && !household) {
+        setHousehold(userHouseholds[0].familyName);
+      }
+    } catch (error) {
+      console.error('❌ Error refreshing households:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Available filter options
   const filterOptions = [
@@ -230,8 +303,22 @@ export default function History() {
         Historikk
       </Text>
 
-      {/* Filter bar */}
-      <View style={styles.filterRow}>
+      {loadingHouseholds ? (
+        <View style={styles.centerMessage}>
+          <Text style={[styles.messageText, { color: colors.text }]}>
+            Laster husstander...
+          </Text>
+        </View>
+      ) : households.length === 0 ? (
+        <View style={styles.centerMessage}>
+          <Text style={[styles.messageText, { color: colors.text }]}>
+            Du er ikke medlem av noen husstander ennå.
+          </Text>
+        </View>
+      ) : (
+        <>
+          {/* Filter bar */}
+          <View style={styles.filterRow}>
         {/* Household Dropdown */}
         <View style={styles.dropdownContainer}>
           <TouchableOpacity
@@ -253,21 +340,21 @@ export default function History() {
             <View style={[styles.dropdownMenu, { backgroundColor: colors.contextBackground }]}>
               {households.map((householdOption, index) => (
                 <TouchableOpacity
-                  key={index}
+                  key={householdOption.id}
                   style={[
                     styles.dropdownItem,
-                    household === householdOption && { backgroundColor: colors.tint }
+                    household === householdOption.familyName && { backgroundColor: colors.tint }
                   ]}
                   onPress={() => {
-                    setHousehold(householdOption);
+                    setHousehold(householdOption.familyName);
                     setShowHouseholdDropdown(false);
                   }}
                 >
                   <Text style={[
                     styles.dropdownItemText,
-                    { color: household === householdOption ? colors.darkText : colors.text }
+                    { color: household === householdOption.familyName ? colors.darkText : colors.text }
                   ]}>
-                    {householdOption}
+                    {householdOption.familyName}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -366,7 +453,17 @@ export default function History() {
       </Modal>
 
       {/* History list */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView 
+        contentContainerStyle={{ paddingBottom: 20 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.tint}
+            colors={[colors.tint]}
+          />
+        }
+      >
         {filteredHistoryData.map((item, index) => (
           <View
             key={index}
@@ -445,11 +542,23 @@ export default function History() {
           )}
         </TouchableOpacity>
       </View>
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  centerMessage: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  messageText: {
+    fontSize: 16,
+    textAlign: "center",
+  },
   filterRow: {
     flexDirection: "row",
     marginBottom: 15,
@@ -487,13 +596,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.25)',
     position: "relative",
   },
   dropdown: {
@@ -646,7 +749,6 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     borderWidth: 1,
-    shadowColor: "#000",
     borderColor: "rgba(224, 232, 242, 0.60)",
   },
   weekBadge: {

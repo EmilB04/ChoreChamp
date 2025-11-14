@@ -3,7 +3,7 @@
  * Centralized validation logic for form fields
  */
 
-import i18n from '../../i18n/i18n';
+import i18n from '../app/i18n/i18n';
 
 // Validation result interface
 export interface ValidationResult {
@@ -18,6 +18,7 @@ export interface RegisterFormData {
     phone: string;
     countryCode: string;
     birth: string;
+    password: string;
 }
 
 /**
@@ -165,6 +166,23 @@ export function validateBirthDate(birth: string): ValidationResult {
 }
 
 /**
+ * Validates password field
+ * @param password - The password to validate
+ * @returns ValidationResult with validation status and error message
+ */
+export function validatePassword(password: string): ValidationResult {
+    if (!password) {
+        return { isValid: false, error: i18n.t('register.errorPasswordRequired') };
+    }
+
+    if (password.length < 6) {
+        return { isValid: false, error: i18n.t('register.errorPasswordMin') };
+    }
+
+    return { isValid: true };
+}
+
+/**
  * Validates the entire registration form
  * @param formData - The form data to validate
  * @returns ValidationResult with validation status and first error message
@@ -194,6 +212,12 @@ export function validateRegistrationForm(formData: RegisterFormData): Validation
         return birthValidation;
     }
 
+    // Validate password
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+        return passwordValidation;
+    }
+
     return { isValid: true };
 }
 
@@ -207,7 +231,8 @@ export function isFormComplete(formData: RegisterFormData): boolean {
         formData.firstName.trim() &&
         formData.lastName.trim() &&
         formData.phone.trim() &&
-        formData.birth
+        formData.birth &&
+        formData.password.trim()
     );
 }
 

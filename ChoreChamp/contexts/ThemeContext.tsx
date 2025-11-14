@@ -5,9 +5,9 @@ throughout the component tree. The `useTheme` hook allows easy access to
 the theme data in any functional component.
 */
 
-import React, { createContext, useContext, ReactNode } from 'react';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import React, { createContext, ReactNode, useContext } from 'react';
 import { useUser } from './UserContext';
 
 interface ThemeContextType {
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const { userData } = useUser();
     
     // Use user preference if set, otherwise follow system
-    const colorScheme: 'light' | 'dark' = userData.darkModeEnabled !== undefined 
+    const colorScheme: 'light' | 'dark' = userData?.darkModeEnabled !== undefined 
         ? (userData.darkModeEnabled ? 'dark' : 'light')
         : systemColorScheme;
     
