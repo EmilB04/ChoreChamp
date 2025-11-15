@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    TextInput,
-    Alert,
-    Switch,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import Header from './Header';
 
 interface MyAccountScreenProps {
@@ -27,16 +26,26 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
     const [showPersonvernInfo, setShowPersonvernInfo] = useState(false);
     
     // Temporary state for editing
-    const [tempEmail, setTempEmail] = useState(userData.email || '');
-    const [tempPhone, setTempPhone] = useState(userData.phone || '');
+    const [tempFirstName, setTempFirstName] = useState(userData?.firstName || '');
+    const [tempLastName, setTempLastName] = useState(userData?.lastName || '');
+    const [tempEmail, setTempEmail] = useState(userData?.email || '');
+    const [tempPhone, setTempPhone] = useState(userData?.phone || '');
 
     const handleSaveChanges = () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(tempEmail)) {
+        if (tempEmail && !emailRegex.test(tempEmail)) {
             Alert.alert('Ugyldig e-post', 'Vennligst skriv inn en gyldig e-postadresse');
             return;
         }
+        
+        if (!tempFirstName.trim()) {
+            Alert.alert('Ugyldig navn', 'Fornavn kan ikke være tomt');
+            return;
+        }
+        
         updateUserData({ 
+            firstName: tempFirstName.trim(),
+            lastName: tempLastName.trim(),
             email: tempEmail, 
             phone: tempPhone 
         });
@@ -45,17 +54,11 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
     };
 
     const handleCancelEdit = () => {
-        setTempEmail(userData.email || '');
-        setTempPhone(userData.phone || '');
+        setTempFirstName(userData?.firstName || '');
+        setTempLastName(userData?.lastName || '');
+        setTempEmail(userData?.email || '');
+        setTempPhone(userData?.phone || '');
         setIsEditing(false);
-    };
-
-    const handleNotificationToggle = (value: boolean) => {
-        updateUserData({ notificationsEnabled: value });
-    };
-
-    const handleDarkModeToggle = (value: boolean) => {
-        updateUserData({ darkModeEnabled: value });
     };
 
     const togglePersonvernInfo = () => {
@@ -107,8 +110,39 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
                     
                     <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
                         <View style={styles.infoRow}>
-                            <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>Navn</Text>
-                            <Text style={[styles.infoValue, { color: colors.text }]}>{userData.name}</Text>
+                            <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>Fornavn</Text>
+                            {isEditing ? (
+                                <TextInput
+                                    style={[styles.editInput, { 
+                                        color: colors.text,
+                                        borderColor: colors.lightDarkText 
+                                    }]}
+                                    value={tempFirstName}
+                                    onChangeText={setTempFirstName}
+                                    placeholder="Fornavn"
+                                    placeholderTextColor={colors.lightDarkText}
+                                />
+                            ) : (
+                                <Text style={[styles.infoValue, { color: colors.text }]}>{userData?.firstName || 'Ikke angitt'}</Text>
+                            )}
+                        </View>
+                        
+                        <View style={styles.infoRow}>
+                            <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>Etternavn</Text>
+                            {isEditing ? (
+                                <TextInput
+                                    style={[styles.editInput, { 
+                                        color: colors.text,
+                                        borderColor: colors.lightDarkText 
+                                    }]}
+                                    value={tempLastName}
+                                    onChangeText={setTempLastName}
+                                    placeholder="Etternavn"
+                                    placeholderTextColor={colors.lightDarkText}
+                                />
+                            ) : (
+                                <Text style={[styles.infoValue, { color: colors.text }]}>{userData?.lastName || 'Ikke angitt'}</Text>
+                            )}
                         </View>
                         
                         <View style={styles.infoRow}>
@@ -125,7 +159,7 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
                                     autoCapitalize="none"
                                 />
                             ) : (
-                                <Text style={[styles.infoValue, { color: colors.text }]}>{userData.email || 'Ikke angitt'}</Text>
+                                <Text style={[styles.infoValue, { color: colors.text }]}>{userData?.email || 'Ikke angitt'}</Text>
                             )}
                         </View>
                         
@@ -142,7 +176,7 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
                                     keyboardType="phone-pad"
                                 />
                             ) : (
-                                <Text style={[styles.infoValue, { color: colors.text }]}>{userData.phone || 'Ikke angitt'}</Text>
+                                <Text style={[styles.infoValue, { color: colors.text }]}>{userData?.phone || 'Ikke angitt'}</Text>
                             )}
                         </View>
                     </View>
@@ -178,46 +212,6 @@ export default function MyAccountScreen({ onBack }: MyAccountScreenProps) {
                             </Text>
                         </TouchableOpacity>
                     )}
-                </View>
-
-                {/* App Preferences Section */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        App-innstillinger
-                    </Text>
-                    
-                    <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
-                        <View style={styles.switchRow}>
-                            <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Push-varsler
-                                </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Motta varsler om nye oppgaver og meldinger
-                                </Text>
-                            </View>
-                            <Switch
-                                value={userData.notificationsEnabled || false}
-                                onValueChange={handleNotificationToggle}
-                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                                thumbColor={colors.background}
-                            />
-                        </View>
-                        
-                        <View style={styles.switchRow}>
-                            <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Mørk modus
-                                </Text>
-                            </View>
-                            <Switch
-                                value={userData.darkModeEnabled}
-                                onValueChange={handleDarkModeToggle}
-                                trackColor={{ false: colors.lightDarkText, true: colors.tint }}
-                                thumbColor={colors.background}
-                            />
-                        </View>
-                    </View>
                 </View>
 
                 {/* Security Section */}

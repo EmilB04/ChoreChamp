@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Modal,
   View,
@@ -26,47 +26,58 @@ import {
 import { SvgXml } from "react-native-svg";
 
 interface EditProfileModalProps {
-  visible: boolean;
-  onClose: () => void;
-  currentName: string;
-  currentImageUri: string;
-  onSave: (name: string, imageUri: string) => void;
+    visible: boolean;
+    onClose: () => void;
+    currentUsername: string;
+    currentImageUri: string;
+    onSave: (username: string, imageUri: string) => Promise<void>;
 }
 
 export default function EditProfileModal({
-  visible,
-  onClose,
-  currentName,
-  currentImageUri,
-  onSave,
+    visible,
+    onClose,
+    currentUsername,
+    currentImageUri,
+    onSave,
 }: EditProfileModalProps) {
   const { colors } = useTheme();
-  const [name, setName] = useState(currentName);
+  const [username, setUsername] = useState(currentUsername);
   const [imageUri, setImageUri] = useState(currentImageUri);
   const [isLoading, setIsLoading] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
-  const handleSave = () => {
-    if (name.trim() === "") {
-      Alert.alert("Feil", "Navnet kan ikke være tomt");
-      return;
-    }
+    const handleSave = async () => {
+        if (username.trim() === '') {
+            Alert.alert('Feil', 'Brukernavnet kan ikke være tomt');
+            return;
+        }
+        
+        try {
+            setIsLoading(true);
+            await onSave(username.trim(), imageUri);
+            
+            // Close modal first
+            onClose();
+            
+            // Then show success message
+            Alert.alert(
+                'Suksess!',
+                'Profilen din er oppdatert'
+            );
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            Alert.alert('Feil', 'Kunne ikke lagre profilen. Vennligst prøv igjen.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    setIsLoading(true);
-    // Simulate API call delay
-    setTimeout(() => {
-      onSave(name.trim(), imageUri);
-      setIsLoading(false);
-      onClose();
-    }, 500);
-  };
-
-  const handleCancel = () => {
-    // Reset to original values
-    setName(currentName);
-    setImageUri(currentImageUri);
-    onClose();
-  };
+    const handleCancel = () => {
+        // Reset to original values
+        setUsername(currentUsername);
+        setImageUri(currentImageUri);
+        onClose();
+    };
 
   const pickImage = async () => {
     try {
@@ -90,13 +101,14 @@ export default function EditProfileModal({
         quality: 0.8,
       });
 
-      if (!result.canceled && result.assets[0]) {
-        setImageUri(result.assets[0].uri);
-      }
-    } catch (error) {
-      Alert.alert("Feil", "Kunne ikke velge bilde");
-    }
-  };
+            if (!result.canceled && result.assets[0]) {
+                setImageUri(result.assets[0].uri);
+            }
+        } catch (error) {
+            Alert.alert('Feil', 'Kunne ikke velge bilde');
+            console.error('Error picking image:', error);
+        }
+    };
 
   const takePhoto = async () => {
     try {
@@ -123,7 +135,8 @@ export default function EditProfileModal({
         setImageUri(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert("Feil", "Kunne ikke ta bilde");
+      Alert.alert('Feil', 'Kunne ikke ta bilde');
+            console.error('Error taking photo:', error);
     }
   };
 
@@ -142,49 +155,40 @@ export default function EditProfileModal({
     ]);
   };
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={handleCancel}
-    >
-      <KeyboardAvoidingView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        {/* Header */}
-        <View
-          style={[
-            styles.header,
-            { borderBottomColor: colors.contextBackground },
-          ]}
+    return (
+        <Modal
+            visible={visible}
+            animationType="slide"
+            presentationStyle="pageSheet"
+            onRequestClose={handleCancel}
+            accessibilityViewIsModal={true}
         >
-          <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-            <Text style={[styles.cancelText, { color: colors.text }]}>
-              Avbryt
-            </Text>
-          </TouchableOpacity>
-
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Rediger profil
-          </Text>
-
-          <TouchableOpacity
-            onPress={handleSave}
-            style={styles.headerButton}
-            disabled={isLoading}
-          >
-            <Text
-              style={[
-                styles.saveText,
-                { color: isLoading ? colors.lightDarkText : colors.tint },
-              ]}
+            <KeyboardAvoidingView
+                style={[styles.container, { backgroundColor: colors.background }]}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                importantForAccessibility="yes"
             >
-              {isLoading ? "Lagrer..." : "Lagre"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+                {/* Header */}
+                <View style={[styles.header, { borderBottomColor: colors.contextBackground }]}>
+                    <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
+                        <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
+                    </TouchableOpacity>
+                    
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Rediger profil</Text>
+                    
+                    <TouchableOpacity 
+                        onPress={handleSave} 
+                        style={styles.headerButton}
+                        disabled={isLoading}
+                    >
+                        <Text style={[
+                            styles.saveText, 
+                            { color: isLoading ? colors.lightDarkText : colors.tint }
+                        ]}>
+                            {isLoading ? 'Lagrer...' : 'Lagre'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {/* Profile Image Section */}
@@ -226,35 +230,33 @@ export default function EditProfileModal({
             </Text>
           </View>
 
-          {/* Name Section */}
-          <View style={styles.nameSection}>
-            <Text style={[styles.label, { color: colors.text }]}>Navn</Text>
-            <TextInput
-              style={[
-                styles.nameInput,
-                {
-                  backgroundColor: colors.contextBackground,
-                  color: colors.text,
-                  borderColor: colors.lightDarkText,
-                },
-              ]}
-              value={name}
-              onChangeText={setName}
-              placeholder="Skriv inn navn"
-              placeholderTextColor={colors.lightDarkText}
-              maxLength={50}
-            />
-            <Text
-              style={[styles.characterCount, { color: colors.lightDarkText }]}
-            >
-              {name.length}/50
-            </Text>
-          </View>
+                    {/* Username Section */}
+                    <View style={styles.nameSection}>
+                        <Text style={[styles.label, { color: colors.text }]}>Brukernavn</Text>
+                        <TextInput
+                            style={[
+                                styles.nameInput,
+                                {
+                                    backgroundColor: colors.contextBackground,
+                                    color: colors.text,
+                                    borderColor: colors.lightDarkText,
+                                }
+                            ]}
+                            value={username}
+                            onChangeText={setUsername}
+                            placeholder="Skriv inn brukernavn"
+                            placeholderTextColor={colors.lightDarkText}
+                            maxLength={30}
+                        />
+                        <Text style={[styles.characterCount, { color: colors.lightDarkText }]}>
+                            {username.length}/30
+                        </Text>
+                    </View>
 
           {/* Additional Info */}
           <View style={styles.infoSection}>
             <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-              Ditt navn vil være synlig for andre medlemmer i dine husstander.
+              Ditt brukernavn vil være synlig for andre medlemmer i dine husstander.
             </Text>
           </View>
         </ScrollView>

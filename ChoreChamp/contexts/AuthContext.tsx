@@ -12,29 +12,28 @@
 // https://docs.expo.dev/versions/latest/sdk/constants/
 
 // React imports
-import { createContext, useContext, useEffect, useState, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 // Firebase Auth imports
+import type { User as FirebaseUser } from "firebase/auth";
 import {
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    signInWithCredential,
+    signInWithEmailAndPassword,
     signOut,
     updateProfile,
-    GoogleAuthProvider,
-    signInWithCredential,
 } from "firebase/auth";
-import type { User as FirebaseUser } from "firebase/auth";
 
 // Firebase Firestore imports
 import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
 
 // Expo imports
-import * as WebBrowser from "expo-web-browser";
+import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
-import { Platform } from "react-native";
-import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
 
 // Local imports
 import { auth, db } from "@/lib/firebase";
@@ -53,6 +52,7 @@ const EXTRA = (Constants.expoConfig?.extra ?? {}) as {
 const redirectUri = AuthSession.makeRedirectUri({
     scheme: "chorechamp",
 });
+console.log("Actual Redirect URI for Expo Go:", redirectUri);
 
 export type AuthContextType = {
     user: FirebaseUser | null;
@@ -73,11 +73,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
 
-       const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
+    const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
         androidClientId: EXTRA.ANDROID_CLIENT_ID,
         iosClientId: EXTRA.IOS_CLIENT_ID,
         webClientId: EXTRA.WEB_CLIENT_ID,
         scopes: ['openid', 'profile', 'email'],
+        responseType: 'id_token',
         redirectUri
 
     });
@@ -105,8 +106,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 const snapshot = await getDoc(ref);
 
                 if (!snapshot.exists()) {
+                    const displayName = firebaseUser.displayName ?? "";
                     const docData: AppUser = {
-                        name: firebaseUser.displayName ?? "",
+                        name: displayName,
+                        username: displayName,  // Default username to name
                         language: "nb",
                         profilePicture: firebaseUser.photoURL ?? "",
                         householdId: [],

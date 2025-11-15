@@ -10,10 +10,10 @@ import React from 'react';
 import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type LangKey = 'no' | 'en' | 'es' | 'de';
+type LangKey = 'nb' | 'en' | 'es' | 'de';
 
 const STRINGS: Record<LangKey, { title: string; subtitle: string; copy: string; next: string }> = {
-  no: {
+  nb: {
     title: 'Velkommen til ChoreChamp!',
     subtitle: 'Følg med på leaderboarden og se hvem som leder! Motivasjon og moro i én og samme app!',
     copy: 'Klar til å gjøre husarbeid litt mer gøy? La oss komme i gang!',
@@ -51,7 +51,7 @@ export default function WelcomeScreen() {
   const rawLang =
     typeof params.lang === 'string' ? params.lang : Array.isArray(params.lang) ? params.lang[0] : undefined;
 
-  const lang = (rawLang && (rawLang === 'no' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'no';
+  const lang = (rawLang && (rawLang === 'nb' || rawLang === 'en' || rawLang === 'es' || rawLang === 'de')) ? (rawLang as LangKey) : 'nb';
   const strings = STRINGS[lang];
 
   function goNext() {
@@ -137,10 +137,13 @@ export default function WelcomeScreen() {
             </Animated.View>
 
             {/* Next Button */}
-            <Animated.View style={{
-              transform: [{ scale: buttonSlideAnim }],
-              width: '100%',
-            }}>
+            <Animated.View 
+              style={{
+                transform: [{ scale: buttonSlideAnim }],
+                width: '100%',
+              }}
+              importantForAccessibility="no-hide-descendants"
+            >
               <TouchableOpacity
                 style={[styles.nextBtn, { backgroundColor: colors.tint }]}
                 onPress={goNext}
@@ -205,10 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
     elevation: 5,
   },
   iconInner: {
@@ -236,10 +236,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 16,
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
     elevation: 2,
   },
   highlightIcon: {
@@ -261,10 +258,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
     elevation: 2,
   },
   copy: {
@@ -280,10 +274,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2)',
     elevation: 4,
     gap: 8,
   },

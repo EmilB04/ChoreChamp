@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    TextInput,
-    Alert,
-    Modal,
-    Image,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUser } from '@/contexts/UserContext';
+import { getHouseholdsForUser, getUserHouseholds } from '@/services/householdService';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import {
+    Alert,
+    Image,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import Header from './Header';
 
 interface MyHouseholdsScreenProps {
@@ -34,58 +36,53 @@ interface Household {
 
 export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) {
     const { colors } = useTheme();
+    const { userData } = useUser();
     
-    // Sample household data generated with ai
-    const [households, setHouseholds] = useState<Household[]>([
-        {
-            id: '1',
-            name: 'Remmen',
-            role: 'admin',
-            members: [
-                { id: '1', name: 'Emil Berglund', role: 'admin', avatar: 'https://i.pravatar.cc/150?u=1' },
-                { id: '2', name: 'Ida Tollaksen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=2' },
-                { id: '3', name: 'Andreas B. Olaussen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=3' },
-                { id: '4', name: 'Sebastian W. Thomsen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=4' }
-            ]
-        },
-        {
-            id: '2',
-            name: 'Hjemme',
-            role: 'admin',
-            members: [
-                { id: '1', name: 'Emil Berglund', role: 'admin', avatar: 'https://i.pravatar.cc/150?u=1' },
-                { id: '5', name: 'Ola Normann', role: 'member', avatar: 'https://i.pravatar.cc/150?u=5' }
-            ]
-        },
-        {
-            id: '3',
-            name: 'Kollektiv',
-            role: 'member',
-            members: [
-                { id: '1', name: 'Emil Berglund', role: 'member', avatar: 'https://i.pravatar.cc/150?u=1' },
-                { id: '6', name: 'Ola Nordmann', role: 'admin', avatar: 'https://i.pravatar.cc/150?u=6' },
-                { id: '7', name: 'Ingrid Svendsen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=7' },
-                { id: '8', name: 'Martin Johansen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=8' },
-                { id: '9', name: 'Lise Kristiansen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=9' },
-                { id: '10', name: 'Erik Andersen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=10' }
-            ]
-        },
-        {
-            id: '4',
-            name: 'Hytta',
-            role: 'member',
-            members: [
-                { id: '1', name: 'Emil Berglund', role: 'member', avatar: 'https://i.pravatar.cc/150?u=1' },
-                { id: '11', name: 'Per Hansen', role: 'admin', avatar: 'https://i.pravatar.cc/150?u=11' },
-                { id: '12', name: 'Berit Hansen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=12' },
-                { id: '13', name: 'Ole Hansen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=13' },
-                { id: '14', name: 'Astrid Hansen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=14' },
-                { id: '15', name: 'Nils Johansen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=15' },
-                { id: '16', name: 'Tone Andersen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=16' },
-                { id: '17', name: 'Geir Olsen', role: 'member', avatar: 'https://i.pravatar.cc/150?u=17' }
-            ]
-        }
-    ]);
+    // Fetch households from database
+    const [households, setHouseholds] = useState<Household[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch user's households on mount
+    useEffect(() => {
+        const fetchHouseholds = async () => {
+            if (!userData?.id) {
+                console.log('⚠️ No user ID available');
+                setLoading(false);
+                return;
+            }
+
+            setLoading(true);
+            try {
+                console.log('🏠 Fetching households for user:', userData.id);
+                
+                // First, try to fetch households by querying familyMembers
+                let userHouseholds = await getHouseholdsForUser(userData.id);
+                
+                // If no households found via query and user has household array, fetch those
+                if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
+                    console.log('🏠 No households found via query, trying user.household array');
+                    userHouseholds = await getUserHouseholds(userData.household);
+                }
+
+                // Transform to match the component's Household interface
+                const transformedHouseholds: Household[] = userHouseholds.map(h => ({
+                    id: h.id,
+                    name: h.familyName,
+                    role: 'member', // Default to member, you can enhance this later
+                    members: [] // Empty for now, can be populated if needed
+                }));
+
+                setHouseholds(transformedHouseholds);
+                console.log('✅ Loaded households:', transformedHouseholds.map(h => h.name));
+            } catch (error) {
+                console.error('❌ Error loading households:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHouseholds();
+    }, [userData?.id, userData?.household]);
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newHouseholdName, setNewHouseholdName] = useState('');
@@ -149,20 +146,38 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
             />
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-                {/* Info Section */}
-                <View style={styles.section}>
-                    <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-                        Du er medlem av {households.length} husstand{households.length !== 1 ? 'er' : ''}
-                    </Text>
-                </View>
+                {loading ? (
+                    <View style={styles.loadingContainer}>
+                        <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
+                            Laster husstander...
+                        </Text>
+                    </View>
+                ) : households.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="home-outline" size={64} color={colors.lightDarkText} />
+                        <Text style={[styles.emptyText, { color: colors.text }]}>
+                            Du er ikke medlem av noen husstander ennå
+                        </Text>
+                        <Text style={[styles.emptySubtext, { color: colors.lightDarkText }]}>
+                            Opprett en ny husstand eller bli med i en eksisterende
+                        </Text>
+                    </View>
+                ) : (
+                    <>
+                        {/* Info Section */}
+                        <View style={styles.section}>
+                            <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
+                                Du er medlem av {households.length} husstand{households.length !== 1 ? 'er' : ''}
+                            </Text>
+                        </View>
 
-                {/* Households List */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        Dine husstander
-                    </Text>
-                    
-                    {households.map((household) => (
+                        {/* Households List */}
+                        <View style={styles.section}>
+                            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                                Dine husstander
+                            </Text>
+                            
+                            {households.map((household) => (
                         <View key={household.id} style={[styles.householdCard, { backgroundColor: colors.contextBackground }]}>
                             <View style={styles.householdContent}>
                                 <View style={styles.householdHeader}>
@@ -186,28 +201,32 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                     </View>
                                 </View>
                                 
-                                <View style={styles.householdStats}>
-                                    <View style={styles.statItem}>
-                                        <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
-                                        <Text style={[styles.statText, { color: colors.lightDarkText }]}>
-                                            {household.members.length} medlemmer
-                                        </Text>
+                                {household.members && household.members.length > 0 && (
+                                    <View style={styles.householdStats}>
+                                        <View style={styles.statItem}>
+                                            <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
+                                            <Text style={[styles.statText, { color: colors.lightDarkText }]}>
+                                                {household.members.length} medlemmer
+                                            </Text>
+                                        </View>
                                     </View>
-                                </View>
+                                )}
                             </View>
                             
                             {/* Actions */}
                             <View style={styles.householdActions}>
-                                {/* Se medlemmer button for all */}
-                                <TouchableOpacity 
-                                    style={[styles.actionButton, { borderColor: colors.lightDarkText }]}
-                                    onPress={() => handleShowMembers(household)}
-                                >
-                                    <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
-                                    <Text style={[styles.actionButtonText, { color: colors.lightDarkText }]}>
-                                        Se medlemmer
-                                    </Text>
-                                </TouchableOpacity>
+                                {/* Se medlemmer button - only show if we have member data */}
+                                {household.members && household.members.length > 0 && (
+                                    <TouchableOpacity 
+                                        style={[styles.actionButton, { borderColor: colors.lightDarkText }]}
+                                        onPress={() => handleShowMembers(household)}
+                                    >
+                                        <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
+                                        <Text style={[styles.actionButtonText, { color: colors.lightDarkText }]}>
+                                            Se medlemmer
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
                                 
                                 {household.role === 'admin' ? (
                                     <TouchableOpacity 
@@ -219,35 +238,46 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         </Text>
                                     </TouchableOpacity>
                                 ) : (
-                                    <TouchableOpacity 
-                                        style={[styles.actionButton, styles.leaveButton]}
-                                        onPress={() => handleLeaveHousehold(household)}
-                                    >
-                                        <Ionicons name="exit-outline" size={16} color="#ef4444" />
-                                        <Text style={[styles.actionButtonText, { color: '#ef4444' }]}>
-                                            Forlat
-                                        </Text>
-                                    </TouchableOpacity>
+                                    <>
+                                        <TouchableOpacity 
+                                            style={[styles.actionButton, { borderColor: colors.tint }]}
+                                            onPress={() => Alert.alert('Del husstand', 'Invitasjonskode eller link kan genereres her')}
+                                        >
+                                            <Ionicons name="share-outline" size={16} color={colors.tint} />
+                                            <Text style={[styles.actionButtonText, { color: colors.tint }]}>
+                                                Del
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity 
+                                            style={[styles.actionButton, styles.leaveButton]}
+                                            onPress={() => handleLeaveHousehold(household)}
+                                        >
+                                            <Ionicons name="exit-outline" size={16} color="#ef4444" />
+                                            <Text style={[styles.actionButtonText, { color: '#ef4444' }]}>
+                                                Forlat
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </>
                                 )}
                             </View>
                         </View>
-                    ))}
-                </View>
+                        ))}
+                    </View>
 
-                {/* Join Household Section */}
-                <View style={styles.section}>
-                    <TouchableOpacity 
-                        style={[styles.joinButton, { backgroundColor: colors.contextBackground, borderColor: colors.tint }]}
-                    >
-                        <Ionicons name="add-circle-outline" size={24} color={colors.tint} />
-                        <Text style={[styles.joinButtonText, { color: colors.tint }]}>
-                            Bli med i eksisterende husstand
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-
-            {/* Create Household Modal */}
+                    {/* Join Household Section */}
+                    <View style={styles.section}>
+                        <TouchableOpacity 
+                            style={[styles.joinButton, { backgroundColor: colors.contextBackground, borderColor: colors.tint }]}
+                        >
+                            <Ionicons name="add-circle-outline" size={24} color={colors.tint} />
+                            <Text style={[styles.joinButtonText, { color: colors.tint }]}>
+                                Bli med i eksisterende husstand
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    </>
+                )}
+            </ScrollView>            {/* Create Household Modal */}
             <Modal
                 visible={showCreateModal}
                 animationType="slide"
@@ -374,6 +404,30 @@ const styles = StyleSheet.create({
         fontSize: 14,
         textAlign: 'center',
         marginTop: 8,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 60,
+        paddingHorizontal: 40,
+    },
+    emptyText: {
+        fontSize: 18,
+        fontWeight: '600',
+        textAlign: 'center',
+        marginTop: 16,
+        marginBottom: 8,
+    },
+    emptySubtext: {
+        fontSize: 14,
+        textAlign: 'center',
     },
     householdCard: {
         borderRadius: 12,

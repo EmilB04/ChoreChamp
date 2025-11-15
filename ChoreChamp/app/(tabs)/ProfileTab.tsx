@@ -1,10 +1,16 @@
+import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
+import EditProfileModal from '@/components/profile/EditProfileModal';
+import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
+import UserLoadingState from '@/components/UserLoadingState';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from "@expo/vector-icons";
+import { router } from 'expo-router';
 import React, { useState } from "react";
 import {
     Image,
     Linking,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     Text,
@@ -17,26 +23,26 @@ import {
   generateAvatarSvg,
 } from "@/lib/avatarUtils";
 import { SvgXml } from "react-native-svg";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import commonStyles from "../commonStyles";
-import EditProfileModal from '@/components/profile/EditProfileModal';
-import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
-import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
-import { router } from 'expo-router';
+import commonStyles from "../commonStyles";
 
 //TODO: Implement log out functionality
 
 export default function Profile() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
-    const insets = useSafeAreaInsets();
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [showMyAccount, setShowMyAccount] = useState(false);
     const [showMyHouseholds, setShowMyHouseholds] = useState(false);
     const [showAppSettings, setShowAppSettings] = useState(false);
     const [showHelpSupport, setShowHelpSupport] = useState(false);
     const [showAboutApp, setShowAboutApp] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Show loading state if userData is not available
+    if (!userData) {
+        return <UserLoadingState pageName="Profile" />;
+    }
 
     // Toggle About App section
 
@@ -51,9 +57,35 @@ export default function Profile() {
     };
 
     // Handler for saving profile changes
-    const handleSaveProfile = (newName: string, newImageUri: string) => {
-        updateUserData({ name: newName, imageUri: newImageUri });
-        console.log('Profile updated:', { name: newName, image: newImageUri });
+    const handleSaveProfile = async (newUsername: string, newImageUri: string) => {
+        try {
+            console.log('💾 Saving profile to Firestore:', { 
+                username: newUsername,
+                imageUri: newImageUri 
+            });
+            
+            // Update in Firestore via UserContext
+            await updateUserData({ 
+                username: newUsername,
+                imageUri: newImageUri 
+            });
+            
+            console.log('✅ Profile saved successfully!');
+        } catch (error) {
+            console.error('❌ Error saving profile:', error);
+            // Show error to user
+            alert('Kunne ikke lagre profilen. Vennligst prøv igjen.');
+        }
+    };
+
+    // Handle pull-to-refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        // Profile data is managed by UserContext, so we just simulate a refresh
+        // In a real app, you might want to re-fetch user data from Firebase
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 500);
     };
 
     // If showing My Account screen, render it instead
@@ -71,46 +103,52 @@ export default function Profile() {
         return <AppSettingsScreen onBack={() => setShowAppSettings(false)} />;
     }
 
-  return (
-    <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
-      {/* Header - Outside Safe Area */}
-      <View style={[styles.header, { backgroundColor: colors.tint }]}>
-        {/* Adjust marginTop to keep title level with rest */}
-        <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
-          Profil & {"\n"}Innstillinger
-        </Text>
-        {isDicebearAvatar(userData.imageUri) ? (
-          <View style={[styles.avatar, { overflow: "hidden" }]}>
-            <SvgXml
-              xml={generateAvatarSvg(parseDicebearUri(userData.imageUri)!)}
-              width="100%"
-              height="100%"
-            />
-          </View>
-        ) : (
-          <Image source={{ uri: userData.imageUri }} style={styles.avatar} />
-        )}
-        <Text style={[styles.name, { color: colors.darkText }]}>
-          {userData.name}
-        </Text>
-        <View style={styles.separator} />
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-end",
-            alignContent: "center",
-            paddingVertical: 8,
-            gap: 4,
-          }}
-          onPress={() => setIsEditModalVisible(true)}
-        >
-          <Text style={styles.editProfile}>Rediger profil</Text>
-          <Ionicons name="create-outline" size={20} color={colors.darkText} />
-        </TouchableOpacity>
-      </View>
+    return (
+        <View style={[{ backgroundColor: colors.background, flex: 1 }]}>
+            {/* Header - Outside Safe Area */}
+            <View style={[styles.header, { backgroundColor: colors.tint }]}>
+                {/* Adjust marginTop to keep title level with rest */}
+                <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
+                    Profil & {"\n"}Innstillinger
+                </Text>
+                {!userData.imageUri ? (
+                <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                    <Ionicons name="person" size={40} color={colors.darkText} />
+                </View>
+                ) : isDicebearAvatar(userData.imageUri) ? (
+                <View style={[styles.avatar, { overflow: "hidden" }]}>
+                    <SvgXml
+                    xml={generateAvatarSvg(parseDicebearUri(userData.imageUri)!)}
+                    width="100%"
+                    height="100%"
+                    />
+                </View>
+                ) : (
+                <Image source={{ uri: userData.imageUri }} style={styles.avatar} />
+                )}
+                <Text style={[styles.name, { color: colors.darkText }]}>{userData.username}</Text>
+                <View style={styles.separator} />
+                <TouchableOpacity 
+                    style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
+                    onPress={() => setIsEditModalVisible(true)}
+                >
+                    <Text style={styles.editProfile}>Rediger profil</Text>
+                    <Ionicons name="create-outline" size={20} color={colors.darkText} />
+                </TouchableOpacity>
+            </View>
 
             {/* Settings */}
-            <ScrollView style={[commonStyles.container, styles.menu, { flex: 1 }]}>
+            <ScrollView 
+                style={[commonStyles.container, styles.menu, { flex: 1 }]}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.tint}
+                        colors={[colors.tint]}
+                    />
+                }
+            >
                 <MenuItem
                     icon="person-circle"
                     title="Min konto"
@@ -222,9 +260,10 @@ export default function Profile() {
                             Appen er utviklet for å gjøre vanlige husoppgaver til en morsom og engasjerende konkurranse for hele familien.{'\n\n'}
                             Appen er utviklet av:{'\n'}
                             - Emil Berglund{'\n'}
-                            - Andreas B. Olaussen{'\n'}
+                            - Andreas B. O. Skaarberg{'\n'}
                             - Sebastian W. Thomsen{'\n'}
-                            - Ida Tollaksen
+                            - Ida Tollaksen{'\n'}
+                            - Khalid H. Osman
                         </Text>
                     </View>
                 )}
@@ -234,8 +273,8 @@ export default function Profile() {
             <EditProfileModal
                 visible={isEditModalVisible}
                 onClose={() => setIsEditModalVisible(false)}
-                currentName={userData.name}
-                currentImageUri={userData.imageUri}
+                currentUsername={userData.username}
+                currentImageUri={userData.imageUri || ''}
                 onSave={handleSaveProfile}
             />
         </View>
@@ -307,6 +346,10 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(255, 255, 255, 0.3)",
         marginBottom: 10,
     },
+    avatarPlaceholder: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     name: {
         fontSize: 24,
         fontWeight: "bold",
@@ -336,10 +379,7 @@ const styles = StyleSheet.create({
         alignItems: "stretch",
         paddingVertical: 12,
         borderRadius: 12,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         elevation: 1,
         justifyContent: "space-between",
     },

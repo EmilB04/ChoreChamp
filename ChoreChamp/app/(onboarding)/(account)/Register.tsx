@@ -1,17 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation } from '@/hooks/useEntranceAnimation';
 import { useBorderAnimations, useFormAnimations, usePickerAnimations } from '@/hooks/useFormAnimations';
-import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
-import i18n from '../../i18n/i18n';
-import { useLocalSearchParams } from 'expo-router';
 import {
   formatPhoneNumber,
   isFormComplete,
@@ -19,10 +8,24 @@ import {
   validateBirthDate,
   validateFirstName,
   validateLastName,
+  validatePassword,
   validatePhone,
   validateRegistrationForm,
   type RegisterFormData
-} from './FormValidation';
+} from '@/utils/formValidation';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Animated, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
+import i18n from '../../i18n/i18n';
+
+// Use native driver only on iOS and Android, not on web
+const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 export default function Register() {
   const router = useRouter();
@@ -43,28 +46,34 @@ export default function Register() {
   const [countryCode, setCountryCode] = useState('+47');
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [birth, setBirth] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [firstNameError, setFirstNameError] = useState<string | null>(null);
   const [lastNameError, setLastNameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [birthError, setBirthError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeField, setActiveField] = useState<'firstName' | 'lastName' | 'phone' | 'birth' | null>(null);
+  const [activeField, setActiveField] = useState<'firstName' | 'lastName' | 'phone' | 'birth' | 'password' | 'confirmPassword' | null>(null);
 
   // Use entrance animation hook for initial page load
   const { fadeAnim, slideAnim } = useEntranceAnimation();
 
   // Use form animations hook
   const { buttonOpacityAnim, errorAnim, fieldErrorAnims, animateButtonOpacity } = useFormAnimations({
-    errorCount: 4,
+    errorCount: 6,
     hasError: !!error,
-    fieldErrors: [firstNameError, lastNameError, phoneError, birthError],
+    fieldErrors: [firstNameError, lastNameError, phoneError, birthError, passwordError, confirmPasswordError],
   });
-  const [firstNameErrorAnim, lastNameErrorAnim, phoneErrorAnim, birthErrorAnim] = fieldErrorAnims;
+  const [firstNameErrorAnim, lastNameErrorAnim, phoneErrorAnim, birthErrorAnim, passwordErrorAnim, confirmPasswordErrorAnim] = fieldErrorAnims;
 
   // Use border animations hook
-  const { borderAnims, animateBorder } = useBorderAnimations({ fieldCount: 4 });
-  const [firstNameBorderAnim, lastNameBorderAnim, phoneBorderAnim, birthBorderAnim] = borderAnims;
+  const { borderAnims, animateBorder } = useBorderAnimations({ fieldCount: 6 });
+  const [firstNameBorderAnim, lastNameBorderAnim, phoneBorderAnim, birthBorderAnim, passwordBorderAnim, confirmPasswordBorderAnim] = borderAnims;
 
   // Use picker animations hook for country picker
   const { pickerAnim: countryPickerAnim, chevronAnim: countryChevronAnim, animatePicker: animateCountryPicker } = usePickerAnimations();
@@ -81,19 +90,23 @@ export default function Register() {
     { code: '+49', country: 'Tyskland', flag: '🇩🇪' },
   ];
 
-  // Animate button opacity when form validity changes
-  useEffect(() => {
+  // Memoize form validity to avoid expensive validation on every render
+  const isFormValidMemoized = useMemo(() => {
     const formData: RegisterFormData = {
       firstName,
       lastName,
       phone,
       countryCode,
       birth,
+      password,
     };
+    return isFormComplete(formData) && validateRegistrationForm(formData).isValid && password === confirmPassword && confirmPassword.length > 0;
+  }, [firstName, lastName, phone, countryCode, birth, password, confirmPassword]);
 
-    const isValid = isFormComplete(formData) && validateRegistrationForm(formData).isValid;
-    animateButtonOpacity(isValid);
-  }, [firstName, lastName, phone, countryCode, birth, animateButtonOpacity]);
+  // Animate button opacity when form validity changes
+  useEffect(() => {
+    animateButtonOpacity(isFormValidMemoized);
+  }, [isFormValidMemoized, animateButtonOpacity]);
 
   useEffect(() => {
     async function applyLanguage() {
@@ -117,6 +130,7 @@ export default function Register() {
       phone,
       countryCode,
       birth,
+      password,
     };
 
     return isFormComplete(formData) && validateRegistrationForm(formData).isValid;
@@ -130,10 +144,20 @@ export default function Register() {
       phone,
       countryCode,
       birth,
+      password,
     };
 
     const validation = validateRegistrationForm(formData);
-    return validation.isValid ? null : validation.error || t('register.error');
+    if (!validation.isValid) {
+      return validation.error || t('register.error');
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      return t('register.errorPasswordMismatch') || 'Passwords do not match';
+    }
+
+    return null;
   }
 
   // TODO: Implement actual registration logic
@@ -260,6 +284,35 @@ export default function Register() {
     }, 100);
   };
 
+  const handlePasswordBlur = () => {
+    setTimeout(() => {
+      if (password) {
+        const validation = validatePassword(password);
+        if (!validation.isValid) {
+          setPasswordError(validation.error || t('register.error'));
+        } else {
+          setPasswordError(null);
+        }
+      } else {
+        setPasswordError(null);
+      }
+    }, 100);
+  };
+
+  const handleConfirmPasswordBlur = () => {
+    setTimeout(() => {
+      if (confirmPassword) {
+        if (confirmPassword !== password) {
+          setConfirmPasswordError(t('register.errorPasswordMismatch') || 'Passwords do not match');
+        } else {
+          setConfirmPasswordError(null);
+        }
+      } else {
+        setConfirmPasswordError(null);
+      }
+    }, 100);
+  };
+
   const toggleCountryPicker = () => {
     const newValue = !showCountryPicker;
     setShowCountryPicker(newValue);
@@ -272,36 +325,38 @@ export default function Register() {
     animateCountryPicker(false);
   };
 
-  const openField = (fieldName: 'firstName' | 'lastName' | 'phone' | 'birth') => {
+  const openField = (fieldName: 'firstName' | 'lastName' | 'phone' | 'birth' | 'password' | 'confirmPassword') => {
     // Animate all borders
     animateBorder(firstNameBorderAnim, fieldName === 'firstName' ? 1 : 0);
     animateBorder(lastNameBorderAnim, fieldName === 'lastName' ? 1 : 0);
     animateBorder(phoneBorderAnim, fieldName === 'phone' ? 1 : 0);
     animateBorder(birthBorderAnim, fieldName === 'birth' ? 1 : 0);
+    animateBorder(passwordBorderAnim, fieldName === 'password' ? 1 : 0);
+    animateBorder(confirmPasswordBorderAnim, fieldName === 'confirmPassword' ? 1 : 0);
 
     // Animate date picker appearance and chevron
     if (fieldName === 'birth') {
       Animated.spring(datePickerAnim, {
         toValue: 1,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
         tension: 100,
         friction: 8,
       }).start();
       Animated.timing(chevronRotateAnim, {
         toValue: 1,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start();
     } else {
       Animated.timing(datePickerAnim, {
         toValue: 0,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start();
       Animated.timing(chevronRotateAnim, {
         toValue: 0,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: USE_NATIVE_DRIVER,
       }).start();
     }
 
@@ -377,17 +432,20 @@ export default function Register() {
                       <Ionicons name="person-outline" size={18} color={colors.tint} />
                       <Text style={[styles.label, { color: colors.text }]}>{t('register.firstNameLabel')}</Text>
                     </View>
-                    <Animated.View style={[
-                      styles.inputContainer,
-                      {
-                        backgroundColor: colors.contextBackground,
-                        borderColor: firstNameBorderAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['transparent', colors.tint],
-                        }),
-                        borderWidth: 2,
-                      }
-                    ]}>
+                    <Animated.View 
+                      style={[
+                        styles.inputContainer,
+                        {
+                          backgroundColor: colors.contextBackground,
+                          borderColor: firstNameBorderAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['transparent', colors.tint],
+                          }),
+                          borderWidth: 2,
+                        }
+                      ]}
+                      importantForAccessibility="no-hide-descendants"
+                    >
                       <TextInput
                         ref={firstNameRef}
                         value={firstName}
@@ -443,17 +501,20 @@ export default function Register() {
                       <Ionicons name="person-outline" size={18} color={colors.tint} />
                       <Text style={[styles.label, { color: colors.text }]}>{t('register.lastNameLabel')}</Text>
                     </View>
-                    <Animated.View style={[
-                      styles.inputContainer,
-                      {
-                        backgroundColor: colors.contextBackground,
-                        borderColor: lastNameBorderAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['transparent', colors.tint],
-                        }),
-                        borderWidth: 2,
-                      }
-                    ]}>
+                    <Animated.View 
+                      style={[
+                        styles.inputContainer,
+                        {
+                          backgroundColor: colors.contextBackground,
+                          borderColor: lastNameBorderAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['transparent', colors.tint],
+                          }),
+                          borderWidth: 2,
+                        }
+                      ]}
+                      importantForAccessibility="no-hide-descendants"
+                    >
                       <TextInput
                         ref={lastNameRef}
                         value={lastName}
@@ -510,17 +571,20 @@ export default function Register() {
                     <Ionicons name="call-outline" size={18} color={colors.tint} />
                     <Text style={[styles.label, { color: colors.text }]}>{t('register.phoneLabel')}</Text>
                   </View>
-                  <Animated.View style={[
-                    styles.inputContainer,
-                    {
-                      backgroundColor: colors.contextBackground,
-                      borderColor: phoneBorderAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['transparent', colors.tint],
-                      }),
-                      borderWidth: 2,
-                    }
-                  ]}>
+                  <Animated.View 
+                    style={[
+                      styles.inputContainer,
+                      {
+                        backgroundColor: colors.contextBackground,
+                        borderColor: phoneBorderAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['transparent', colors.tint],
+                        }),
+                        borderWidth: 2,
+                      }
+                    ]}
+                    importantForAccessibility="no-hide-descendants"
+                  >
                     <View style={styles.phoneInputRow}>
                       <TouchableOpacity
                         onPress={toggleCountryPicker}
@@ -584,11 +648,15 @@ export default function Register() {
                           }],
                         }
                       ]}
+                      importantForAccessibility="no-hide-descendants"
+                      accessibilityViewIsModal={true}
+                      accessibilityElementsHidden={false}
                     >
                       <ScrollView
                         style={styles.countryPickerScroll}
                         showsVerticalScrollIndicator={false}
                         nestedScrollEnabled={true}
+                        importantForAccessibility="no-hide-descendants"
                       >
                         {countryCodes.map((item) => (
                           <TouchableOpacity
@@ -639,17 +707,20 @@ export default function Register() {
                     <Text style={[styles.label, { color: colors.text }]}>{t('register.birthLabel')}</Text>
                   </View>
                   {Platform.OS === 'web' ? (
-                    <Animated.View style={[
-                      styles.inputContainer,
-                      {
-                        backgroundColor: colors.contextBackground,
-                        borderColor: birthBorderAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['transparent', colors.tint],
-                        }),
-                        borderWidth: 2,
-                      }
-                    ]}>
+                    <Animated.View 
+                      style={[
+                        styles.inputContainer,
+                        {
+                          backgroundColor: colors.contextBackground,
+                          borderColor: birthBorderAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['transparent', colors.tint],
+                          }),
+                          borderWidth: 2,
+                        }
+                      ]}
+                      importantForAccessibility="no-hide-descendants"
+                    >
                         <TextInput
                         value={birth}
                         onChangeText={(text) => {
@@ -672,17 +743,20 @@ export default function Register() {
                         onPress={() => openField('birth')}
                         activeOpacity={0.7}
                       >
-                        <Animated.View style={[
-                          styles.inputContainer,
-                          {
-                            backgroundColor: colors.contextBackground,
-                            borderColor: birthBorderAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: ['transparent', colors.tint],
-                            }),
-                            borderWidth: 2,
-                          }
-                        ]}>
+                        <Animated.View 
+                          style={[
+                            styles.inputContainer,
+                            {
+                              backgroundColor: colors.contextBackground,
+                              borderColor: birthBorderAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ['transparent', colors.tint],
+                              }),
+                              borderWidth: 2,
+                            }
+                          ]}
+                          importantForAccessibility="no-hide-descendants"
+                        >
                           <View style={styles.datePickerTouchable}>
                             <Text style={[
                               styles.dateText,
@@ -758,6 +832,160 @@ export default function Register() {
                 </View>
               </View>
 
+              {/* Password Input */}
+              <View style={styles.inputGroup}>
+                <View style={[styles.inputLabelRow]}>
+                  <Ionicons name="lock-closed-outline" size={18} color={colors.tint} />
+                  <Text style={[styles.label, { color: colors.text }]}>{t('register.password')}</Text>
+                </View>
+                <Animated.View
+                  style={[
+                    styles.inputContainer,
+                    {
+                      backgroundColor: colors.contextBackground,
+                      borderColor: passwordBorderAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['transparent', colors.tint],
+                      }),
+                      borderWidth: 2,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { color: colors.text, flex: 1 },
+                    ]}
+                    placeholder={t('register.passwordPlaceholder')}
+                    placeholderTextColor={colors.lightDarkText}
+                    value={password}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      if (passwordError) setPasswordError(null);
+                    }}
+                    onFocus={() => {
+                      setActiveField('password');
+                      openField('password');
+                    }}
+                    onBlur={handlePasswordBlur}
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="password-new"
+                    textContentType="newPassword"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={22}
+                      color={colors.lightDarkText}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+
+                {/* Password Error Message */}
+                {passwordError && (
+                  <Animated.View
+                    style={[
+                      styles.fieldErrorContainer,
+                      {
+                        backgroundColor: colors.statusFailedBackground,
+                        opacity: passwordErrorAnim,
+                        transform: [{
+                          translateY: passwordErrorAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [-10, 0],
+                          }),
+                        }],
+                      }
+                    ]}
+                  >
+                    <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                    <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{passwordError}</Text>
+                  </Animated.View>
+                )}
+              </View>
+
+              {/* Confirm Password Input */}
+              <View style={styles.inputGroup}>
+                <View style={[styles.inputLabelRow]}>
+                  <Ionicons name="lock-closed-outline" size={18} color={colors.tint} />
+                  <Text style={[styles.label, { color: colors.text }]}>{t('register.confirmPassword')}</Text>
+                </View>
+                <Animated.View
+                  style={[
+                    styles.inputContainer,
+                    {
+                      backgroundColor: colors.contextBackground,
+                      borderColor: confirmPasswordBorderAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['transparent', colors.tint],
+                      }),
+                      borderWidth: 2,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { color: colors.text, flex: 1 },
+                    ]}
+                    placeholder={t('register.confirmPasswordPlaceholder')}
+                    placeholderTextColor={colors.lightDarkText}
+                    value={confirmPassword}
+                    onChangeText={(text) => {
+                      setConfirmPassword(text);
+                      if (confirmPasswordError) setConfirmPasswordError(null);
+                    }}
+                    onFocus={() => {
+                      setActiveField('confirmPassword');
+                      openField('confirmPassword');
+                    }}
+                    onBlur={handleConfirmPasswordBlur}
+                    secureTextEntry={!showConfirmPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    autoComplete="password-new"
+                    textContentType="newPassword"
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <Ionicons
+                      name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={22}
+                      color={colors.lightDarkText}
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+
+                {/* Confirm Password Error Message */}
+                {confirmPasswordError && (
+                  <Animated.View
+                    style={[
+                      styles.fieldErrorContainer,
+                      {
+                        backgroundColor: colors.statusFailedBackground,
+                        opacity: confirmPasswordErrorAnim,
+                        transform: [{
+                          translateY: confirmPasswordErrorAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [-10, 0],
+                          }),
+                        }],
+                      }
+                    ]}
+                  >
+                    <Ionicons name="alert-circle" size={16} color={colors.statusFailedText} />
+                    <Text style={[styles.fieldError, { color: colors.statusFailedText }]}>{confirmPasswordError}</Text>
+                  </Animated.View>
+                )}
+              </View>
+
               {error && (
                 <Animated.View
                   style={[
@@ -791,7 +1019,11 @@ export default function Register() {
                   activeOpacity={0.7}
                   style={[styles.socialIconButton, { backgroundColor: colors.contextBackground }]}
                 >
-                  <Image source={require('@/assets/images/Google.png')} style={styles.socialIconLarge} />
+                  <Image 
+                    source={require('@/assets/images/Google.png')} 
+                    style={styles.socialIconLarge}
+                    resizeMode="contain"
+                  />
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -816,13 +1048,16 @@ export default function Register() {
                 disabled={!isFormValid() || loading}
                 activeOpacity={0.7}
               >
-                <Animated.View style={[
-                  styles.nextBtn,
-                  {
-                    backgroundColor: isFormValid() ? colors.tint : colors.lightNonInteractiveText,
-                    opacity: buttonOpacityAnim,
-                  }
-                ]}>
+                <Animated.View 
+                  style={[
+                    styles.nextBtn,
+                    {
+                      backgroundColor: isFormValid() ? colors.tint : colors.lightNonInteractiveText,
+                      opacity: buttonOpacityAnim,
+                    }
+                  ]}
+                  importantForAccessibility="no-hide-descendants"
+                >
                   {loading ? (
                     <View style={styles.loadingContainer}>
                       <Text style={[styles.nextText, { color: colors.darkText }]}>Oppretter profil</Text>
@@ -906,10 +1141,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    boxShadow: '0 3px 6px 0 rgba(0, 0, 0, 0.1)',
     elevation: 4,
   },
   avatarWrap: {
@@ -923,26 +1155,8 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
     elevation: 5,
-  },
-  editAvatarButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: '35%',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
   },
   form: {
     width: '100%',
@@ -950,13 +1164,13 @@ const styles = StyleSheet.create({
   nameRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   nameInputGroup: {
     flex: 1,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   inputLabelRow: {
     flexDirection: 'row',
@@ -969,6 +1183,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 4,
@@ -976,6 +1192,9 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 16,
     paddingVertical: 12,
+  },
+  eyeIcon: {
+    padding: 8,
   },
   phoneInputRow: {
     flexDirection: 'row',
@@ -1007,10 +1226,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     borderRadius: 16,
     maxHeight: 240,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    boxShadow: '0 2px 8px 0 rgba(0, 0, 0, 0.1)',
     elevation: 4,
   },
   countryPickerScroll: {
@@ -1075,10 +1291,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2)',
     elevation: 5,
   },
   buttonContent: {
@@ -1124,24 +1337,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 16,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   socialIconButton: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
     elevation: 3,
   },
   socialIconLarge: {
-    width: 28,
-    height: 28,
-    resizeMode: 'contain'
+    width: 23,
+    height: 23,
   },
   loginHintContainer: {
     marginTop: 24,

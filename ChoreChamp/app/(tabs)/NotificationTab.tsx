@@ -1,14 +1,25 @@
+import Notification from "@/components/notifications/notification";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useFocusEffect } from "@react-navigation/native";
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import commonStyles from "../commonStyles";
 
 export default function Notifications() {
     const { colors } = useTheme();
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
+    const [selectedNotification, setSelectedNotification] = useState<typeof notifications[0] | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Reset to main view when tab is focused
+    useFocusEffect(
+        React.useCallback(() => {
+            setSelectedNotification(null);
+        }, [])
+    );
 
     // Simulated notification data - Replace with real data from DB or API
-    const [notifications] = useState([
+    const [notifications, setNotifications] = useState([
         {
             id: 1,
             title: "Mamma laget oppgaven",
@@ -86,6 +97,28 @@ export default function Notifications() {
     const groupedNotifications = groupNotificationsByTime();
     const unreadNotifications = notifications.filter(n => !n.read);
 
+    // Function to toggle notification read status
+    const toggleReadStatus = (notificationId: number, readStatus: boolean) => {
+        setNotifications(prevNotifications =>
+            prevNotifications.map(notification =>
+                notification.id === notificationId
+                    ? { ...notification, read: readStatus }
+                    : notification
+            )
+        );
+        setSelectedNotification(null);
+    };
+
+    // Handle pull-to-refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        // In a real app, you would fetch notifications from Firebase here
+        // For now, just simulate a refresh
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 500);
+    };
+
     // Function to get relative time
     const getRelativeTime = (timestamp: string) => {
         const now = new Date();
@@ -103,6 +136,16 @@ export default function Notifications() {
         return `${diffInDays} dager siden`;
     };
 
+    // If a notification is selected, show the detail view
+    if (selectedNotification) {
+        return (
+            <Notification 
+                notification={selectedNotification}
+                onBack={() => setSelectedNotification(null)}
+                onToggleReadStatus={toggleReadStatus}
+            />
+        );
+    }
 
     return (
         <View style={[commonStyles.container, { backgroundColor: colors.background }]}>
@@ -123,6 +166,14 @@ export default function Notifications() {
                         <ScrollView
                             style={styles.notificationsList}
                             showsVerticalScrollIndicator={false}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    tintColor={colors.tint}
+                                    colors={[colors.tint]}
+                                />
+                            }
                         >
                             {/* Today's unread notifications */}
                             {groupedNotifications.today.filter(n => !n.read).length > 0 && (
@@ -132,9 +183,10 @@ export default function Notifications() {
                                         <Text style={[styles.sectionDivider, {borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.today.filter(n => !n.read).map((notification) => (
-                                        <View
+                                        <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground }]}
+                                            onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
@@ -158,7 +210,7 @@ export default function Notifications() {
                                                 </View>
                                                 {!notification.read && <View style={[styles.unreadDot, { backgroundColor: colors.tint }]} />}
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                     ))}
                                 </>
                             )}
@@ -171,9 +223,10 @@ export default function Notifications() {
                                         <Text style={[styles.sectionDivider, { borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.thisWeek.filter(n => !n.read).map((notification) => (
-                                        <View
+                                        <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground }]}
+                                            onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
@@ -197,7 +250,7 @@ export default function Notifications() {
                                                 </View>
                                                 {!notification.read && <View style={[styles.unreadDot, { backgroundColor: colors.tint }]} />}
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                     ))}
                                 </>
                             )}
@@ -210,9 +263,10 @@ export default function Notifications() {
                                         <Text style={[styles.sectionDivider, { borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.earlier.filter(n => !n.read).map((notification) => (
-                                        <View
+                                        <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground }]}
+                                            onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
@@ -236,7 +290,7 @@ export default function Notifications() {
                                                 </View>
                                                 {!notification.read && <View style={[styles.unreadDot, { backgroundColor: colors.tint }]} />}
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                     ))}
                                 </>
                             )}
@@ -254,6 +308,14 @@ export default function Notifications() {
                         <ScrollView
                             style={styles.notificationsList}
                             showsVerticalScrollIndicator={false}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={onRefresh}
+                                    tintColor={colors.tint}
+                                    colors={[colors.tint]}
+                                />
+                            }
                         >
                             {/* This week's read notifications */}
                             {groupedNotifications.thisWeek.filter(n => n.read).length > 0 && (
@@ -262,9 +324,10 @@ export default function Notifications() {
                                         <Text style={[styles.sectionTitle, { color: colors.text }]}>Denne uken</Text>
                                     </View>
                                     {groupedNotifications.thisWeek.filter(n => n.read).map((notification) => (
-                                        <View
+                                        <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground, opacity: 0.7 }]}
+                                            onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}>
@@ -291,7 +354,7 @@ export default function Notifications() {
                                                     </Text>
                                                 </View>
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                     ))}
                                 </>
                             )}
@@ -303,9 +366,10 @@ export default function Notifications() {
                                         <Text style={[styles.sectionTitle, { color: colors.text }]}>Tidligere</Text>
                                     </View>
                                     {groupedNotifications.earlier.filter(n => n.read).map((notification) => (
-                                        <View
+                                        <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground, opacity: 0.7 }]}
+                                            onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
                                                 <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}>
@@ -332,7 +396,7 @@ export default function Notifications() {
                                                     </Text>
                                                 </View>
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                     ))}
                                 </>
                             )}
@@ -448,13 +512,7 @@ const styles = StyleSheet.create({
         padding: 4,
         marginBottom: 12,
         borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     readNotificationCard: {

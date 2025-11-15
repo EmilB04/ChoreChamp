@@ -2,15 +2,14 @@ import BackButton from '@/components/onBoarding/BackButton';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n/i18n';
-import { useLocalSearchParams } from 'expo-router';
 
 /**
  * LoginCheckScreen
@@ -216,10 +215,7 @@ const styles = StyleSheet.create({
         padding: 24,
         borderRadius: 16,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 3,
     },
     optionTitle: {

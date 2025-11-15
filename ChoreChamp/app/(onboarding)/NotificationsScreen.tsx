@@ -6,11 +6,12 @@ import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Notifications from 'expo-notifications';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import i18n from '../i18n/i18n';
 
@@ -43,10 +44,44 @@ export default function NotificationsScreen() {
     }, [langParam]);
 
 
-    function handleAllow() {
-        updateUserData({ notificationsEnabled: true });
-        // --- CHANGED: after notifications step, go to AccountCheck
-        router.push('/(onboarding)/(account)/AccountCheck');
+    async function handleAllow() {
+        try {
+            // Request notification permissions from the system
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            
+            // If not already granted, ask for permission
+            if (existingStatus !== 'granted') {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+            }
+            
+            // Check if permission was granted
+            if (finalStatus === 'granted') {
+                updateUserData({ notificationsEnabled: true });
+                router.push('/(onboarding)/(account)/AccountCheck');
+            } else {
+                // Permission denied
+                Alert.alert(
+                    t('notifications.permissionDenied') || 'Permission Denied',
+                    t('notifications.permissionDeniedMessage') || 'You can enable notifications later in your device settings.',
+                    [
+                        {
+                            text: t('notifications.continueButton') || 'Continue',
+                            onPress: () => {
+                                updateUserData({ notificationsEnabled: false });
+                                router.push('/(onboarding)/(account)/AccountCheck');
+                            }
+                        }
+                    ]
+                );
+            }
+        } catch (error) {
+            console.error('Error requesting notification permissions:', error);
+            // Continue anyway if there's an error
+            updateUserData({ notificationsEnabled: false });
+            router.push('/(onboarding)/(account)/AccountCheck');
+        }
     }
 
     function handleSkip() {
@@ -102,9 +137,12 @@ export default function NotificationsScreen() {
 
                     {/* Button Group */}
                     <View style={styles.buttonGroup}>
-                        <Animated.View style={{
-                            transform: [{ scale: button1SlideAnim }],
-                        }}>
+                        <Animated.View 
+                            style={{
+                                transform: [{ scale: button1SlideAnim }],
+                            }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[styles.primaryBtn, { backgroundColor: colors.tint }]}
                                 onPress={handleAllow}
@@ -119,9 +157,12 @@ export default function NotificationsScreen() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        <Animated.View style={{
-                            transform: [{ scale: button2SlideAnim }],
-                        }}>
+                        <Animated.View 
+                            style={{
+                                transform: [{ scale: button2SlideAnim }],
+                            }}
+                            importantForAccessibility="no-hide-descendants"
+                        >
                             <TouchableOpacity
                                 style={[styles.secondaryBtn, { backgroundColor: colors.contextBackground }]}
                                 onPress={handleSkip}
@@ -191,10 +232,7 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.15)',
         elevation: 5,
     },
     iconInner: {
@@ -221,10 +259,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 18,
         borderRadius: 14,
         gap: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     descIcon: {
@@ -250,10 +285,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         borderRadius: 16,
         minWidth: 250,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
+        boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2)',
         elevation: 4,
         gap: 8,
     },
@@ -270,10 +302,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         minWidth: 200,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
         elevation: 2,
     },
     secondaryText: {

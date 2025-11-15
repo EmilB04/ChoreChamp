@@ -1,16 +1,16 @@
+import { useTheme } from "@/contexts/ThemeContext";
+import type { Task } from "@/types/task";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import React from "react";
 import {
   Modal,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Image } from "expo-image";
-import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@/contexts/ThemeContext";
-import type { Task } from "@/types/task";
 
 // TODO: Implement validation for action buttons based on user ID and task assignedToId
 
@@ -44,10 +44,15 @@ export default function TaskDetailModal({
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}
+      accessibilityViewIsModal={true}
     >
-      <View style={styles.modalOverlay}>
+      <View 
+        style={styles.modalOverlay}
+        importantForAccessibility="no-hide-descendants"
+      >
         <View
           style={[styles.modalContent, { backgroundColor: colors.background }]}
+          importantForAccessibility="yes"
         >
           {/* Header */}
           <View style={styles.modalHeader}>
@@ -124,10 +129,10 @@ export default function TaskDetailModal({
                 { borderBottomColor: colors.lightNonInteractiveText },
               ]}
             >
-              {/* Time */}
+              {/* Start Time */}
               <View style={styles.detailRow}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="time-outline" size={24} color={colors.tint} />
+                  <Ionicons name="play-outline" size={24} color={colors.tint} />
                 </View>
                 <View style={styles.detailContent}>
                   <Text
@@ -137,7 +142,7 @@ export default function TaskDetailModal({
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Tid
+                    Starttid
                   </Text>
                   <Text
                     style={[
@@ -146,7 +151,38 @@ export default function TaskDetailModal({
                       { color: colors.text },
                     ]}
                   >
-                    {task.time}
+                    {task.timeStart 
+                      ? `${task.timeStart.getHours().toString().padStart(2, '0')}:${task.timeStart.getMinutes().toString().padStart(2, '0')}`
+                      : task.time}
+                  </Text>
+                </View>
+              </View>
+
+              {/* End Time */}
+              <View style={styles.detailRow}>
+                <View style={styles.iconContainer}>
+                  <Ionicons name="stop-outline" size={24} color={colors.tint} />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text
+                    style={[
+                      styles.labelBase,
+                      styles.detailLabel,
+                      { color: colors.lightDarkText },
+                    ]}
+                  >
+                    Sluttid
+                  </Text>
+                  <Text
+                    style={[
+                      styles.semiboldText,
+                      styles.detailValue,
+                      { color: colors.text },
+                    ]}
+                  >
+                    {task.timeEnd 
+                      ? `${task.timeEnd.getHours().toString().padStart(2, '0')}:${task.timeEnd.getMinutes().toString().padStart(2, '0')}`
+                      : '-'}
                   </Text>
                 </View>
               </View>
@@ -177,7 +213,36 @@ export default function TaskDetailModal({
                       { color: colors.text },
                     ]}
                   >
-                    {task.duration} minutter
+                    {task.duration >= 60 
+                      ? `${Math.floor(task.duration / 60)} t ${task.duration % 60} min`
+                      : `${task.duration} min`}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Assigned from */}
+              <View style={styles.detailRow}>
+                <View style={styles.iconContainer}>
+                  <Image source={task.assignedFromAvatar} style={styles.avatar} />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text
+                    style={[
+                      styles.labelBase,
+                      styles.detailLabel,
+                      { color: colors.lightDarkText },
+                    ]}
+                  >
+                    Tildelt av
+                  </Text>
+                  <Text
+                    style={[
+                      styles.semiboldText,
+                      styles.detailValue,
+                      { color: colors.text },
+                    ]}
+                  >
+                    {task.assignedFrom}
                   </Text>
                 </View>
               </View>
@@ -297,13 +362,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     maxHeight: "90%",
     // Shadow for separation
-    shadowColor: "#FFBE00",
-    shadowOffset: {
-      width: 0,
-      height: -4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    boxShadow: '0 -4px 8px 0 rgba(255, 190, 0, 0.25)',
     elevation: 10,
   },
 
