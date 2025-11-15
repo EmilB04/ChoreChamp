@@ -11,6 +11,7 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import type { Task } from "@/types/task";
+import { useTranslation } from "react-i18next";
 
 // TODO: Implement validation for action buttons based on user ID and task assignedToId
 
@@ -35,6 +36,7 @@ export default function TaskDetailModal({
   actionButtons,
 }: TaskDetailModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation("onboarding");
 
   if (!task) return null;
 
@@ -51,8 +53,8 @@ export default function TaskDetailModal({
         >
           {/* Header */}
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Oppgavedetaljer
+            <Text style={[styles.modalTitle, { color: colors.text }]}> 
+              {t("taskDetails.title")}
             </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={28} color={colors.text} />
@@ -89,7 +91,7 @@ export default function TaskDetailModal({
                       { color: colors.statusSuccessText },
                     ]}
                   >
-                    Fullført
+                    {t("taskDetails.status.completed")}
                   </Text>
                 </View>
               ) : (
@@ -111,7 +113,7 @@ export default function TaskDetailModal({
                       { color: colors.statusFailedText },
                     ]}
                   >
-                    Ikke fullført
+                    {t("taskDetails.status.notCompleted")}
                   </Text>
                 </View>
               )}
@@ -137,7 +139,7 @@ export default function TaskDetailModal({
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Tid
+                    {t("taskDetails.time")}
                   </Text>
                   <Text
                     style={[
@@ -168,7 +170,7 @@ export default function TaskDetailModal({
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Varighet
+                    {t("taskDetails.duration")}
                   </Text>
                   <Text
                     style={[
@@ -195,7 +197,7 @@ export default function TaskDetailModal({
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Tildelt til
+                    {t("taskDetails.assignedTo")}
                   </Text>
                   <Text
                     style={[
@@ -219,10 +221,10 @@ export default function TaskDetailModal({
                   { color: colors.lightDarkText },
                 ]}
               >
-                Beskrivelse
+                {t("taskDetails.description")}
               </Text>
-              <Text style={[styles.description, { color: colors.text }]}>
-                {task.description || "Ingen beskrivelse."}
+              <Text style={[styles.description, { color: colors.text }]}> 
+                {task.description || t("taskDetails.noDescription")}
               </Text>
             </View>
           </ScrollView>

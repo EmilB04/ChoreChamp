@@ -25,49 +25,11 @@ import React from 'react';
 import { Text } from 'react-native';
 import commonStyles from '@/app/commonStyles';
 import { useTheme } from '@/contexts/ThemeContext';
+import i18n from '@/app/i18n/i18n';
 
-// i18n greeting translations
-const GREETINGS = {
-    NO: {
-        morning: "God morgen",
-        forenoon: "God formiddag",
-        afternoon: "God dag",
-        evening: "God kveld",
-        night: "God natt",
-    },
-    EN: {
-        morning: "Good morning",
-        forenoon: "Good morning",
-        afternoon: "Good afternoon",
-        evening: "Good evening",
-        night: "Good night",
-    },
-    DE: {
-        morning: "Guten Morgen",
-        forenoon: "Guten Morgen",
-        afternoon: "Guten Tag",
-        evening: "Guten Abend",
-        night: "Gute Nacht",
-    },
-    ES: {
-        morning: "Buenos días",
-        forenoon: "Buenos días",
-        afternoon: "Buenas tardes",
-        evening: "Buenas noches",
-        night: "Buenas noches",
-    },
-} as const;
+type GreetingPeriod = 'morning' | 'forenoon' | 'afternoon' | 'evening' | 'night';
 
-type Language = keyof typeof GREETINGS;
-type GreetingPeriod = keyof typeof GREETINGS.NO;
-
-export default function WelcomeGreeting({ 
-    userName,
-    language = 'NO'
-}: { 
-    userName: string;
-    language?: Language;
-}) {
+export default function WelcomeGreeting({ userName }: { userName: string }) {
     const { colors } = useTheme();
 
     // Get greeting period based on time of day
@@ -88,7 +50,19 @@ export default function WelcomeGreeting({
     };
 
     const period = getGreetingPeriod();
-    const greeting = GREETINGS[language][period];
+    // Prefer i18n translations in the 'onboarding' namespace. Provide Norwegian
+    // defaults as a fallback via defaultValue so tests and non-initialized i18n
+    // still render readable greetings.
+    const key = `greeting.${period}`;
+    const defaultMap: Record<GreetingPeriod, string> = {
+        morning: 'God morgen',
+        forenoon: 'God formiddag',
+        afternoon: 'God dag',
+        evening: 'God kveld',
+        night: 'God natt',
+    };
+
+    const greeting = i18n.t(key, { defaultValue: defaultMap[period], ns: 'onboarding' });
 
     return (
         <Text style={[commonStyles.headerTitle, { color: colors.text, marginTop: 0 }]}>

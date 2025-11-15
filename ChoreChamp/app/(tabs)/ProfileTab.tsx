@@ -18,11 +18,13 @@ import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
 import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 //TODO: Implement log out functionality
 
 export default function Profile() {
     const { colors } = useTheme();
+    const { t } = useTranslation('onboarding');
     const { userData, updateUserData } = useUser();
     const insets = useSafeAreaInsets();
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -71,7 +73,7 @@ export default function Profile() {
             <View style={[styles.header, { backgroundColor: colors.tint }]}>
                 {/* Adjust marginTop to keep title level with rest */}
                 <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
-                    Profil & {"\n"}Innstillinger
+                    {t('profileTab.heading')}
                 </Text>
                 <Image
                     source={{ uri: userData.imageUri }}
@@ -83,7 +85,7 @@ export default function Profile() {
                     style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
                     onPress={() => setIsEditModalVisible(true)}
                 >
-                    <Text style={styles.editProfile}>Rediger profil</Text>
+                    <Text style={styles.editProfile}>{t('profileTab.editProfile')}</Text>
                     <Ionicons name="create-outline" size={20} color={colors.darkText} />
                 </TouchableOpacity>
             </View>
@@ -92,36 +94,36 @@ export default function Profile() {
             <ScrollView style={[commonStyles.container, styles.menu, { flex: 1 }]}>
                 <MenuItem
                     icon="person-circle"
-                    title="Min konto"
-                    description="Administrer konto informasjon og personlige innstillinger"
+                    title={t('profileTab.myAccount')}
+                    description={t('profileTab.myAccountDesc')}
                     onPress={() => setShowMyAccount(true)}
                 />
 
                 <MenuItem
                     icon="people"
-                    title="Mine husstander"
-                    description="Se og administrer dine tilknyttede husstander"
+                    title={t('profileTab.myHouseholds')}
+                    description={t('profileTab.myHouseholdsDesc')}
                     onPress={() => setShowMyHouseholds(true)}
                 />
 
                 <MenuItem
                     icon="cog"
-                    title="App innstillinger"
-                    description="Tilpass appens funksjonalitet og utseende"
+                    title={t('profileTab.appSettings')}
+                    description={t('profileTab.appSettingsDesc')}
                     onPress={() => setShowAppSettings(true)}
                 />
 
                 <MenuItem
                     icon="log-out"
-                    title="Logg ut"
-                    description="Logg ut av din konto"
+                    title={t('profileTab.logout')}
+                    description={t('profileTab.logoutDesc')}
                     onPress={() => {
                         // Navigate to WelcomeScreen
                         router.push('/WelcomeScreen');
                     }}
                 />
 
-                <Text style={[styles.more, { color: colors.lightDarkText }]}>Mer</Text>
+                <Text style={[styles.more, { color: colors.lightDarkText }]}>{t('profileTab.more')}</Text>
 
                 <TouchableOpacity 
                     style={[
@@ -135,10 +137,10 @@ export default function Profile() {
                         <Ionicons name="help-circle-outline" size={24} color={colors.tint} />
                         <View style={styles.actionButtonText}>
                             <Text style={[styles.actionButtonTitle, { color: colors.text }]}>
-                                Hjelp og støtte
+                                {t('profileTab.helpSupport')}
                             </Text>
                             <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}>
-                                Kontaktinformasjon og support
+                                {t('profileTab.helpSupportDesc')}
                             </Text>
                         </View>
                     </View>
@@ -152,13 +154,13 @@ export default function Profile() {
                 {/* Help and Support dropdown content */}
                 {showHelpSupport && (
                     <View style={[styles.dropdownContent, { backgroundColor: colors.contextBackground }]}>
-                        <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}>
-                            E-post: 
+                        <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}> 
+                            {t('profileTab.emailLabel')} 
                             <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('mailto:support@chorechamp.com')}>
                                 support@chorechamp.com
                             </Text>
                             {'\n\n'}
-                            Telefon: 
+                            {t('profileTab.phoneLabel')} 
                             <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('tel:+4712345678')}>
                                 +47 123 45 678
                             </Text>
@@ -178,10 +180,10 @@ export default function Profile() {
                         <Ionicons name="information-circle-outline" size={24} color={colors.tint} />
                         <View style={styles.actionButtonText}>
                             <Text style={[styles.actionButtonTitle, { color: colors.text }]}>
-                                Om Appen
+                                {t('profileTab.aboutApp')}
                             </Text>
                             <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}>
-                                Informasjon om ChoreChamp og utviklerne
+                                {t('profileTab.aboutAppDesc')}
                             </Text>
                         </View>
                     </View>
@@ -196,14 +198,7 @@ export default function Profile() {
                 {showAboutApp && (
                     <View style={[styles.dropdownContent, { backgroundColor: colors.contextBackground }]}>
                         <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}>
-                            ChoreChamp er en app for å organisere og administrere oppgaver i hjemmet. 
-                            Man kan opprette husstander, tildele oppgaver, og følge med på fremdriften i leaderboards med et poengsystem. 
-                            Appen er utviklet for å gjøre vanlige husoppgaver til en morsom og engasjerende konkurranse for hele familien.{'\n\n'}
-                            Appen er utviklet av:{'\n'}
-                            - Emil Berglund{'\n'}
-                            - Andreas B. Olaussen{'\n'}
-                            - Sebastian W. Thomsen{'\n'}
-                            - Ida Tollaksen
+                            {t('profileTab.aboutAppLong')}
                         </Text>
                     </View>
                 )}

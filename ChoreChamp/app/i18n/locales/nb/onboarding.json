@@ -7,6 +7,110 @@
     "footer": "Du kan endre dette i innstillinger senere."
   }
   ,
+  "notificationsTab": {
+    "heading": "Varsler",
+    "youHave": "Du har",
+    "unread": "uleste varslinger",
+    "today": "I dag",
+    "thisWeek": "Denne uken",
+    "earlier": "Tidligere",
+    "upToDate": "Du er ajour",
+    "unreadTab": "Uleste",
+    "previousTab": "Tidligere varsler",
+    "receivedPoints": "Mottok {{points}} poeng",
+    "minAgo": "{{count}} min siden",
+    "hoursAgo": "{{count}} timer siden",
+    "oneDayAgo": "1 dag siden",
+    "daysAgo": "{{count}} dager siden"
+  }
+  ,
+  "profileTab": {
+    "heading": "Profil &\nInnstillinger",
+    "editProfile": "Rediger profil",
+    "myAccount": "Min konto",
+    "myAccountDesc": "Administrer konto informasjon og personlige innstillinger",
+    "myHouseholds": "Mine husstander",
+    "myHouseholdsDesc": "Se og administrer dine tilknyttede husstander",
+    "appSettings": "App innstillinger",
+    "appSettingsDesc": "Tilpass appens funksjonalitet og utseende",
+    "logout": "Logg ut",
+    "logoutDesc": "Logg ut av din konto",
+    "more": "Mer",
+    "helpSupport": "Hjelp og støtte",
+    "helpSupportDesc": "Kontaktinformasjon og support",
+    "emailLabel": "E-post:",
+    "phoneLabel": "Telefon:",
+    "aboutApp": "Om Appen",
+    "aboutAppDesc": "Informasjon om ChoreChamp og utviklerne",
+    "aboutAppLong": "ChoreChamp er en app for å organisere og administrere oppgaver i hjemmet. Du kan opprette husstander, tildele oppgaver og følge med på fremdriften i leaderboards med et poengsystem. Appen er utviklet for å gjøre vanlige husoppgaver til en morsom og engasjerende konkurranse for hele familien.\n\nUtviklet av:\n- Emil Berglund\n- Andreas B. Olaussen\n- Sebastian W. Thomsen\n- Ida Tollaksen\n- Khalid Osman",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "saving": "Lagrer",
+    "nameLabel": "Navn",
+    "namePlaceholder": "Ditt navn",
+    "nameCannotBeEmpty": "Navn kan ikke være tomt",
+    "changeImageHint": "Trykk for å endre profilbilde",
+    "chooseImage": "Velg bilde",
+    "chooseImageSubtitle": "Velg fra galleriet eller ta et bilde",
+    "gallery": "Galleri",
+    "camera": "Kamera",
+    "permissionRequired": "Tillatelse kreves",
+    "permissionGallery": "Galleri-tilgang kreves for å velge et bilde",
+    "couldNotPickImage": "Kunne ikke velge bilde",
+    "permissionCamera": "Kamera-tilgang kreves for å ta et bilde",
+    "couldNotTakePhoto": "Kunne ikke ta bilde",
+    "invalidEmail": "Ugyldig e-postadresse",
+    "enterValidEmail": "Vennligst oppgi en gyldig e-post",
+    "success": "Vellykket",
+    "accountUpdated": "Kontoen din er oppdatert",
+    "personalInfo": "Personlig informasjon",
+    "editInfo": "Rediger informasjon",
+    "memberOfHouseholds": "Medlem av husstander",
+    "yourHouseholds": "Dine husstander",
+    "viewMembers": "Se medlemmer",
+    "manage": "Administrer",
+    "leave": "Forlat husholdning",
+    "joinExistingHousehold": "Bli med i eksisterende husholdning",
+    "newHousehold": "Ny husholdning",
+    "create": "Opprett",
+    "householdName": "Husholdningsnavn",
+    "householdNamePlaceholder": "Skriv inn husholdningsnavn",
+    "youBecomeAdmin": "Du blir administrator for denne husholdningen",
+    "close": "Lukk",
+    "members": "Medlemmer",
+    "membersTotal": "{{count}} medlemmer",
+    "administrator": "Administrator",
+    "adminShort": "Admin",
+    "member": "Medlem",
+    "privacyPermissions": "Personvern & tillatelser",
+    "notifications": "Varsler",
+    "notificationsDesc": "Kontroller hvilke varsler du mottar",
+    "location": "Lokasjon",
+    "locationDesc": "Tillat lokasjonsbaserte påminnelser og funksjoner",
+    "dataAnalysis": "Data & analyse",
+    "dataAnalysisDesc": "Tillat anonymisert bruksdata for å forbedre appen",
+    "autoUpdates": "Automatiske oppdateringer",
+    "autoUpdatesDesc": "Last ned oppdateringer automatisk når tilgjengelig"
+  ,
+  "notSpecified": "Ikke angitt",
+  "darkMode": "Mørk modus",
+  "security": "Sikkerhet",
+  "changePassword": "Endre passord",
+  "changePasswordDesc": "Oppdater passordet ditt",
+  "privacyShort": "Se hvordan vi håndterer dataene dine",
+  "privacyLong": "Vi lagrer kun nødvendig informasjon for å levere tjenesten.\nAll data krypteres og lagres sikkert.\nDu kan når som helst be om innsyn eller sletting av dataene dine.\nVi følger GDPR og norsk personvernlovgivning.",
+  "dangerZone": "Farlig sone",
+  "deleteAccount": "Slett konto",
+  "deleteAccountDesc": "Permanent slett kontoen din og alle data",
+  "deleteAccountConfirm": "Er du sikker på at du vil slette kontoen din? Denne handlingen kan ikke angres.",
+  "delete": "Slett",
+  "accountDeleted": "Konto slettet",
+  "accountDeletedMessage": "Din konto har blitt slettet"
+    ,
+    "nameVisibleInfo": "Navnet ditt vil være synlig for andre husholdningsmedlemmer.",
+    "nameVisibleinfo": "Navnet ditt vil være synlig for andre husholdningsmedlemmer."
+  }
+  ,
   "accountcheck": {
     "title": "Har du allerede en konto?",
     "subtitle": "Velg om du vil logge inn eller opprette en ny konto",
@@ -74,4 +178,126 @@
     "or": "eller",
     "createAccount": "Opprett ny konto"
   }
+  ,
+  "dashboard": {
+    "todayTasks": "Dagens oppgaver:",
+    "leaderboard": "Ledertavle:",
+    "pointsShort": "p"
+  },
+  "history": {
+    "title": "Historikk",
+    "householdLabel": "Husholdning",
+    "searchPlaceholder": "Søk i historikk...",
+    "filterTitle": "Filtrer historikk",
+    "filters": {
+      "completed": "Fullført",
+      "notCompleted": "Ikke fullført",
+      "thisMonth": "Denne måneden",
+      "previousMonth": "Forrige måned",
+      "highActivity": "Høy aktivitet",
+      "lowActivity": "Lav aktivitet"
+    },
+    "clearFilters": "Fjern alle",
+    "applyFilters": "Bruk filtre",
+    "summaryWeek": "Oppsummering - Uke {{week}}",
+    "allTasksWere": "Alle oppgaver ble:",
+    "totalTasks": "Antall oppgaver: {{count}}",
+    "status": {
+      "completed": "Fullført",
+      "notCompleted": "Ikke fullført"
+    }
+  },
+  "weekdays": {
+    "mon": "Man",
+    "tue": "Tir",
+    "wed": "Ons",
+    "thu": "Tor",
+    "fri": "Fre",
+    "sat": "Lør",
+    "sun": "Søn"
+  }
+  ,
+  "greeting": {
+    "morning": "God morgen",
+    "forenoon": "God formiddag",
+    "afternoon": "God dag",
+    "evening": "God kveld",
+    "night": "God natt"
+  }
+  ,
+  "taskDetails": {
+    "title": "Oppgavedetaljer",
+    "status": {
+      "completed": "Fullført",
+      "notCompleted": "Ikke fullført"
+    },
+    "time": "Tid",
+    "duration": "Varighet",
+    "assignedTo": "Tildelt til",
+    "description": "Beskrivelse",
+    "noDescription": "Ingen beskrivelse.",
+    "minutes": "{{count}} minutter"
+  ,
+    "action": {
+      "markComplete": "Marker som fullført"
+    }
+  }
+  ,
+    "addTask": {
+        "title": "Opprett nytt oppdrag",
+        "selectDate": "Velg dato",
+        "selectTime": "Velg tid",
+        "time": {
+          "from": "Fra",
+          "to": "Til"
+        },
+        "otherDate": {
+          "first": "Annen",
+          "second": "dato"
+        },
+        "preset": {
+          "forvarsel": "Forvarsel",
+          "repeat": "Gjenta"
+        },
+        "assign": "Tilordne",
+        "save": "Lagre"
+      },
+      "calendar": {
+        "months": {
+          "january": "Januar",
+          "february": "Februar",
+          "march": "Mars",
+          "april": "April",
+          "may": "Mai",
+          "june": "Juni",
+          "july": "Juli",
+          "august": "August",
+          "september": "September",
+          "october": "Oktober",
+          "november": "November",
+          "december": "Desember"
+        },
+        "weekdays": {
+          "mon": "Ma",
+          "tue": "Ti",
+          "wed": "On",
+          "thu": "To",
+          "fri": "Fr",
+          "sat": "Lø",
+          "sun": "Sø"
+        },
+        "today": "I dag",
+        "cancel": "Avbryt"
+      },
+      "days": {
+        "full": {
+          "sun": "Søndag",
+          "mon": "Mandag",
+          "tue": "Tirsdag",
+          "wed": "Onsdag",
+          "thu": "Torsdag",
+          "fri": "Fredag",
+          "sat": "Lørdag"
+        }
+      }
 }

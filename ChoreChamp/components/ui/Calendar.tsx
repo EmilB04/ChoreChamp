@@ -1,5 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Modal,
     Platform,
@@ -27,6 +28,7 @@ export default function Calendar({
     minDate,
 }: CalendarProps) {
     const { colors } = useTheme();
+    const { t } = useTranslation('onboarding');
     const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
 
     const getDaysInMonth = (date: Date) => {
@@ -146,21 +148,29 @@ export default function Calendar({
     };
 
     const monthNames = [
-        'Januar',
-        'Februar',
-        'Mars',
-        'April',
-        'Mai',
-        'Juni',
-        'Juli',
-        'August',
-        'September',
-        'Oktober',
-        'November',
-        'Desember',
+        t('calendar.months.january'),
+        t('calendar.months.february'),
+        t('calendar.months.march'),
+        t('calendar.months.april'),
+        t('calendar.months.may'),
+        t('calendar.months.june'),
+        t('calendar.months.july'),
+        t('calendar.months.august'),
+        t('calendar.months.september'),
+        t('calendar.months.october'),
+        t('calendar.months.november'),
+        t('calendar.months.december'),
     ];
 
-    const weekDays = ['Ma', 'Ti', 'On', 'To', 'Fr', 'Lø', 'Sø'];
+    const weekDays = [
+        t('calendar.weekdays.mon'),
+        t('calendar.weekdays.tue'),
+        t('calendar.weekdays.wed'),
+        t('calendar.weekdays.thu'),
+        t('calendar.weekdays.fri'),
+        t('calendar.weekdays.sat'),
+        t('calendar.weekdays.sun'),
+    ];
 
     return (
         <Modal
@@ -239,8 +249,8 @@ export default function Calendar({
                                     { backgroundColor: colors.tint },
                                 ]}
                             >
-                                <Text style={[styles.footerButtonText, { color: colors.darkText }]}>
-                                    I dag
+                                <Text style={[styles.footerButtonText, { color: colors.darkText }]}> 
+                                    {t('calendar.today')}
                                 </Text>
                             </TouchableOpacity>
 
@@ -251,8 +261,8 @@ export default function Calendar({
                                     { backgroundColor: colors.statusFailedText },
                                 ]}
                             >
-                                <Text style={[styles.footerButtonText, { color: colors.darkText }]}>
-                                    Avbryt
+                                <Text style={[styles.footerButtonText, { color: colors.darkText }]}> 
+                                    {t('calendar.cancel')}
                                 </Text>
                             </TouchableOpacity>
                         </View>

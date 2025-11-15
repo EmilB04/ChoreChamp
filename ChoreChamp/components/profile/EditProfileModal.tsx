@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import * as ImagePicker from 'expo-image-picker';
+import { useTranslation } from 'react-i18next';
 
 interface EditProfileModalProps {
     visible: boolean;
@@ -32,13 +33,14 @@ export default function EditProfileModal({
     onSave,
 }: EditProfileModalProps) {
     const { colors } = useTheme();
+    const { t } = useTranslation('onboarding');
     const [name, setName] = useState(currentName);
     const [imageUri, setImageUri] = useState(currentImageUri);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSave = () => {
         if (name.trim() === '') {
-            Alert.alert('Feil', 'Navnet kan ikke være tomt');
+            Alert.alert(t('profileTab.error'), t('profileTab.nameCannotBeEmpty'));
             return;
         }
         
@@ -64,7 +66,7 @@ export default function EditProfileModal({
             const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
             
             if (permissionResult.granted === false) {
-                Alert.alert('Tillatelse kreves', 'Du må gi tillatelse til å få tilgang til bildegalleri');
+                Alert.alert(t('profileTab.permissionRequired'), t('profileTab.permissionGallery'));
                 return;
             }
 
@@ -80,7 +82,7 @@ export default function EditProfileModal({
                 setImageUri(result.assets[0].uri);
             }
         } catch (error) {
-            Alert.alert('Feil', 'Kunne ikke velge bilde');
+            Alert.alert(t('profileTab.error'), t('profileTab.couldNotPickImage'));
         }
     };
 
@@ -90,7 +92,7 @@ export default function EditProfileModal({
             const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
             
             if (permissionResult.granted === false) {
-                Alert.alert('Tillatelse kreves', 'Du må gi tillatelse til å bruke kameraet');
+                Alert.alert(t('profileTab.permissionRequired'), t('profileTab.permissionCamera'));
                 return;
             }
 
@@ -105,18 +107,18 @@ export default function EditProfileModal({
                 setImageUri(result.assets[0].uri);
             }
         } catch (error) {
-            Alert.alert('Feil', 'Kunne ikke ta bilde');
+            Alert.alert(t('profileTab.error'), t('profileTab.couldNotTakePhoto'));
         }
     };
 
     const showImageOptions = () => {
         Alert.alert(
-            'Velg bilde',
-            'Hvordan vil du legge til et profilbilde?',
+            t('profileTab.chooseImage'),
+            t('profileTab.chooseImageSubtitle'),
             [
-                { text: 'Galleri', onPress: pickImage },
-                { text: 'Kamera', onPress: takePhoto },
-                { text: 'Avbryt', style: 'cancel' },
+                { text: t('profileTab.gallery'), onPress: pickImage },
+                { text: t('profileTab.camera'), onPress: takePhoto },
+                { text: t('profileTab.cancel'), style: 'cancel' },
             ]
         );
     };
@@ -135,11 +137,11 @@ export default function EditProfileModal({
                 {/* Header */}
                 <View style={[styles.header, { borderBottomColor: colors.contextBackground }]}>
                     <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-                        <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
+                        <Text style={[styles.cancelText, { color: colors.text }]}>{t('profileTab.cancel')}</Text>
                     </TouchableOpacity>
-                    
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Rediger profil</Text>
-                    
+
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>{t('profileTab.editProfile')}</Text>
+
                     <TouchableOpacity 
                         onPress={handleSave} 
                         style={styles.headerButton}
@@ -149,7 +151,7 @@ export default function EditProfileModal({
                             styles.saveText, 
                             { color: isLoading ? colors.lightDarkText : colors.tint }
                         ]}>
-                            {isLoading ? 'Lagrer...' : 'Lagre'}
+                            {isLoading ? t('profileTab.saving') : t('profileTab.save')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -164,13 +166,13 @@ export default function EditProfileModal({
                             </View>
                         </TouchableOpacity>
                         <Text style={[styles.imageHint, { color: colors.lightDarkText }]}>
-                            Trykk for å endre profilbilde
+                            {t('profileTab.changeImageHint')}
                         </Text>
                     </View>
 
                     {/* Name Section */}
                     <View style={styles.nameSection}>
-                        <Text style={[styles.label, { color: colors.text }]}>Navn</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>{t('profileTab.nameLabel')}</Text>
                         <TextInput
                             style={[
                                 styles.nameInput,
@@ -182,7 +184,7 @@ export default function EditProfileModal({
                             ]}
                             value={name}
                             onChangeText={setName}
-                            placeholder="Skriv inn navn"
+                            placeholder={t('profileTab.namePlaceholder')}
                             placeholderTextColor={colors.lightDarkText}
                             maxLength={50}
                         />
@@ -193,8 +195,8 @@ export default function EditProfileModal({
 
                     {/* Additional Info */}
                     <View style={styles.infoSection}>
-                        <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-                            Ditt navn vil være synlig for andre medlemmer i dine husstander.
+                        <Text style={[styles.infoText, { color: colors.lightDarkText }]}> 
+                            {t('profileTab.nameVisibleInfo')}
                         </Text>
                     </View>
                 </ScrollView>

@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import Header from './Header';
+import { useTranslation } from 'react-i18next';
 
 interface MyHouseholdsScreenProps {
     onBack: () => void;
@@ -34,6 +35,7 @@ interface Household {
 
 export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) {
     const { colors } = useTheme();
+    const { t } = useTranslation('onboarding');
     
     // Sample household data generated with ai
     const [households, setHouseholds] = useState<Household[]>([
@@ -139,7 +141,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Header 
-                title="Mine husstander" 
+                title={t('profileTab.myHouseholds')} 
                 onBack={onBack}
                 rightElement={
                     <TouchableOpacity onPress={() => setShowCreateModal(true)}>
@@ -151,15 +153,15 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {/* Info Section */}
                 <View style={styles.section}>
-                    <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-                        Du er medlem av {households.length} husstand{households.length !== 1 ? 'er' : ''}
+                    <Text style={[styles.infoText, { color: colors.lightDarkText }]}> 
+                        {t('profileTab.memberOfHouseholds', { count: households.length })}
                     </Text>
                 </View>
 
                 {/* Households List */}
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        Dine husstander
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}> 
+                        {t('profileTab.yourHouseholds')}
                     </Text>
                     
                     {households.map((household) => (
@@ -179,7 +181,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                                     styles.roleText,
                                                     { color: household.role === 'admin' ? colors.darkText : colors.lightDarkText }
                                                 ]}>
-                                                    {household.role === 'admin' ? 'Administrator' : 'Medlem'}
+                                                    {household.role === 'admin' ? t('profileTab.administrator') : t('profileTab.member')}
                                                 </Text>
                                             </View>
                                         </View>
@@ -189,9 +191,9 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                 <View style={styles.householdStats}>
                                     <View style={styles.statItem}>
                                         <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
-                                        <Text style={[styles.statText, { color: colors.lightDarkText }]}>
-                                            {household.members.length} medlemmer
-                                        </Text>
+                                                <Text style={[styles.statText, { color: colors.lightDarkText }]}>
+                                                    {t('profileTab.membersTotal', { count: household.members.length })}
+                                                </Text>
                                     </View>
                                 </View>
                             </View>
@@ -204,8 +206,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                     onPress={() => handleShowMembers(household)}
                                 >
                                     <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
-                                    <Text style={[styles.actionButtonText, { color: colors.lightDarkText }]}>
-                                        Se medlemmer
+                                        <Text style={[styles.actionButtonText, { color: colors.lightDarkText }]}>
+                                        {t('profileTab.viewMembers')}
                                     </Text>
                                 </TouchableOpacity>
                                 
@@ -214,8 +216,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         style={[styles.actionButton, { borderColor: colors.tint }]}
                                     >
                                         <Ionicons name="settings-outline" size={16} color={colors.tint} />
-                                        <Text style={[styles.actionButtonText, { color: colors.tint }]}>
-                                            Administrer
+                                        <Text style={[styles.actionButtonText, { color: colors.tint }]}> 
+                                            {t('profileTab.manage')}
                                         </Text>
                                     </TouchableOpacity>
                                 ) : (
@@ -224,8 +226,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         onPress={() => handleLeaveHousehold(household)}
                                     >
                                         <Ionicons name="exit-outline" size={16} color="#ef4444" />
-                                        <Text style={[styles.actionButtonText, { color: '#ef4444' }]}>
-                                            Forlat
+                                        <Text style={[styles.actionButtonText, { color: '#ef4444' }]}> 
+                                            {t('profileTab.leave')}
                                         </Text>
                                     </TouchableOpacity>
                                 )}
@@ -240,8 +242,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                         style={[styles.joinButton, { backgroundColor: colors.contextBackground, borderColor: colors.tint }]}
                     >
                         <Ionicons name="add-circle-outline" size={24} color={colors.tint} />
-                        <Text style={[styles.joinButtonText, { color: colors.tint }]}>
-                            Bli med i eksisterende husstand
+                        <Text style={[styles.joinButtonText, { color: colors.tint }]}> 
+                            {t('profileTab.joinExistingHousehold')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -257,16 +259,16 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
                     <View style={[styles.modalHeader, { borderBottomColor: colors.contextBackground }]}>
                         <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-                            <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
+                            <Text style={[styles.cancelText, { color: colors.text }]}>{t('profileTab.cancel')}</Text>
                         </TouchableOpacity>
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>Ny husstand</Text>
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profileTab.newHousehold')}</Text>
                         <TouchableOpacity onPress={handleCreateHousehold}>
-                            <Text style={[styles.saveText, { color: colors.tint }]}>Opprett</Text>
+                            <Text style={[styles.saveText, { color: colors.tint }]}>{t('profileTab.create')}</Text>
                         </TouchableOpacity>
                     </View>
                     
                     <View style={styles.modalContent}>
-                        <Text style={[styles.inputLabel, { color: colors.text }]}>Husstandsnavn</Text>
+                        <Text style={[styles.inputLabel, { color: colors.text }]}>{t('profileTab.householdName')}</Text>
                         <TextInput
                             style={[styles.textInput, { 
                                 backgroundColor: colors.contextBackground,
@@ -275,12 +277,12 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             }]}
                             value={newHouseholdName}
                             onChangeText={setNewHouseholdName}
-                            placeholder="F.eks. Familie Hansen"
+                            placeholder={t('profileTab.householdNamePlaceholder')}
                             placeholderTextColor={colors.lightDarkText}
                             maxLength={30}
                         />
                         <Text style={[styles.inputHint, { color: colors.lightDarkText }]}>
-                            Du blir automatisk administrator for den nye husstanden
+                            {t('profileTab.youBecomeAdmin')}
                         </Text>
                     </View>
                 </View>
@@ -296,17 +298,17 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
                     <View style={[styles.modalHeader, { borderBottomColor: colors.contextBackground }]}>
                         <TouchableOpacity onPress={() => setShowMembersModal(false)}>
-                            <Text style={[styles.cancelText, { color: colors.text }]}>Lukk</Text>
+                            <Text style={[styles.cancelText, { color: colors.text }]}>{t('profileTab.close')}</Text>
                         </TouchableOpacity>
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>
-                            {selectedHousehold?.name} - Medlemmer
+                        <Text style={[styles.modalTitle, { color: colors.text }]}> 
+                            {selectedHousehold?.name} - {t('profileTab.members')}
                         </Text>
                         <View style={{ width: 40 }} />
                     </View>
                     
                     <ScrollView style={styles.modalContent}>
-                        <Text style={[styles.memberCountText, { color: colors.lightDarkText }]}>
-                            {selectedHousehold?.members.length} medlemmer totalt
+                        <Text style={[styles.memberCountText, { color: colors.lightDarkText }]}> 
+                            {t('profileTab.membersTotal', { count: selectedHousehold?.members.length ?? 0 })}
                         </Text>
                         
                         {selectedHousehold?.members.map((member) => (
@@ -339,7 +341,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                                     styles.memberRoleText,
                                                     { color: member.role === 'admin' ? colors.darkText : colors.lightDarkText }
                                                 ]}>
-                                                    {member.role === 'admin' ? 'Admin' : 'Medlem'}
+                                                    {member.role === 'admin' ? t('profileTab.adminShort') : t('profileTab.member')}
                                                 </Text>
                                             </View>
                                         </View>

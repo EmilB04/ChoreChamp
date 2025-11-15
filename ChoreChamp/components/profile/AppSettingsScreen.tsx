@@ -9,6 +9,7 @@ import {
     View,
 } from 'react-native';
 import Header from './Header';
+import { useTranslation } from 'react-i18next';
 
 interface AppSettingsScreenProps {
     onBack: () => void;
@@ -17,6 +18,7 @@ interface AppSettingsScreenProps {
 export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
+    const { t } = useTranslation('onboarding');
     
     // State for toggles - initialize from userData, with fallbacks for legacy data
     const [notifications, setNotifications] = useState(userData.notificationsEnabled ?? false);
@@ -39,24 +41,24 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
     return(
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Header 
-                title="App Innstillinger" 
+                title={t('profileTab.appSettings')} 
                 onBack={onBack} 
             />
 
             {/* Settings */}
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        Personvern og tillatelser
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}> 
+                        {t('profileTab.privacyPermissions')}
                     </Text>
                     
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
+                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}> 
                         <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Varslinger
+                            <Text style={[styles.switchLabel, { color: colors.text }]}> 
+                                {t('profileTab.notifications')}
                             </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Tillat at vi sender varslinger til deg
+                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}> 
+                                {t('profileTab.notificationsDesc')}
                             </Text>
                         </View>
                         <Switch
@@ -67,13 +69,13 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
                         />
                     </View>
                     
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
+                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}> 
                         <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Lokasjon
+                            <Text style={[styles.switchLabel, { color: colors.text }]}> 
+                                {t('profileTab.location')}
                             </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Tillat at vi bruker lokasjonen din
+                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}> 
+                                {t('profileTab.locationDesc')}
                             </Text>
                         </View>
                         <Switch
@@ -84,13 +86,13 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
                         />
                     </View>
                     
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
+                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}> 
                         <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Data analysering
+                            <Text style={[styles.switchLabel, { color: colors.text }]}> 
+                                {t('profileTab.dataAnalysis')}
                             </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Tillat at vi bruker dataene dine for å forbedre appen
+                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}> 
+                                {t('profileTab.dataAnalysisDesc')}
                             </Text>
                         </View>
                         <Switch
@@ -101,13 +103,13 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
                         />
                     </View>
                     
-                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}>
+                    <View style={[styles.switchRow, styles.infoCard, { backgroundColor: colors.contextBackground }]}> 
                         <View style={styles.switchInfo}>
-                            <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                Automatiske oppdateringer
+                            <Text style={[styles.switchLabel, { color: colors.text }]}> 
+                                {t('profileTab.autoUpdates')}
                             </Text>
-                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                Oppdaterer appen automatisk ved nye versjoner
+                            <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}> 
+                                {t('profileTab.autoUpdatesDesc')}
                             </Text>
                         </View>
                         <Switch

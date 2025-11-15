@@ -7,6 +7,110 @@
     "footer": "Du kannst dies später in den Einstellungen ändern."
   }
   ,
+  "notificationsTab": {
+    "heading": "Benachrichtigungen",
+    "youHave": "Du hast",
+    "unread": "ungelesene Benachrichtigungen",
+    "today": "Heute",
+    "thisWeek": "Diese Woche",
+    "earlier": "Früher",
+    "upToDate": "Du bist auf dem Laufenden",
+    "unreadTab": "Ungelesen",
+    "previousTab": "Frühere Benachrichtigungen",
+    "receivedPoints": "Erhielt {{points}} Punkte",
+    "minAgo": "vor {{count}} Min.",
+    "hoursAgo": "vor {{count}} Std.",
+    "oneDayAgo": "vor 1 Tag",
+    "daysAgo": "vor {{count}} Tagen"
+  }
+  ,
+  "profileTab": {
+    "heading": "Profil &\nEinstellungen",
+    "editProfile": "Profil bearbeiten",
+    "myAccount": "Mein Konto",
+    "myAccountDesc": "Verwalte Kontoinformationen und persönliche Einstellungen",
+    "myHouseholds": "Meine Haushalte",
+    "myHouseholdsDesc": "Zeige und verwalte deine verknüpften Haushalte",
+    "appSettings": "App-Einstellungen",
+    "appSettingsDesc": "Passe Funktionalität und Aussehen der App an",
+    "logout": "Abmelden",
+    "logoutDesc": "Von deinem Konto abmelden",
+    "more": "Mehr",
+    "helpSupport": "Hilfe & Support",
+    "helpSupportDesc": "Kontaktinformationen und Support",
+    "emailLabel": "E-Mail:",
+    "phoneLabel": "Telefon:",
+    "aboutApp": "Über die App",
+    "aboutAppDesc": "Informationen zu ChoreChamp und den Entwicklern",
+    "aboutAppLong": "ChoreChamp ist eine App zum Organisieren und Verwalten von Hausarbeiten. Du kannst Haushalte erstellen, Aufgaben zuweisen und den Fortschritt über Bestenlisten mit einem Punktesystem verfolgen. Die App wurde entwickelt, um alltägliche Aufgaben in einen unterhaltsamen und ansprechenden Wettbewerb für die ganze Familie zu verwandeln.\n\nEntwickelt von:\n- Emil Berglund\n- Andreas B. Olaussen\n- Sebastian W. Thomsen\n- Ida Tollaksen\n- Khalid Osman",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Speichert",
+    "nameLabel": "Name",
+    "namePlaceholder": "Dein Name",
+    "nameCannotBeEmpty": "Name darf nicht leer sein",
+    "changeImageHint": "Tippe, um das Profilbild zu ändern",
+    "chooseImage": "Bild auswählen",
+    "chooseImageSubtitle": "Aus Galerie wählen oder Foto machen",
+    "gallery": "Galerie",
+    "camera": "Kamera",
+    "permissionRequired": "Berechtigung erforderlich",
+    "permissionGallery": "Galeriezugriff ist erforderlich, um ein Bild auszuwählen",
+    "couldNotPickImage": "Bild konnte nicht ausgewählt werden",
+    "permissionCamera": "Kamerazugriff ist erforderlich, um ein Foto zu machen",
+    "couldNotTakePhoto": "Foto konnte nicht gemacht werden",
+    "invalidEmail": "Ungültige E-Mail-Adresse",
+    "enterValidEmail": "Bitte gib eine gültige E-Mail ein",
+    "success": "Erfolgreich",
+    "accountUpdated": "Dein Konto wurde aktualisiert",
+    "personalInfo": "Persönliche Informationen",
+    "editInfo": "Informationen bearbeiten",
+    "memberOfHouseholds": "Mitglied von Haushalten",
+    "yourHouseholds": "Deine Haushalte",
+    "viewMembers": "Mitglieder anzeigen",
+    "manage": "Verwalten",
+    "leave": "Haushalt verlassen",
+    "joinExistingHousehold": "Bestehendem Haushalt beitreten",
+    "newHousehold": "Neuer Haushalt",
+    "create": "Erstellen",
+    "householdName": "Haushaltsname",
+    "householdNamePlaceholder": "Haushaltsname eingeben",
+    "youBecomeAdmin": "Du wirst Administrator dieses Haushalts",
+    "close": "Schließen",
+    "members": "Mitglieder",
+    "membersTotal": "{{count}} Mitglieder",
+  "administrator": "Administrator",
+  "adminShort": "Admin",
+  "member": "Mitglied",
+    "privacyPermissions": "Datenschutz & Berechtigungen",
+    "notifications": "Benachrichtigungen",
+    "notificationsDesc": "Steuere, welche Benachrichtigungen du erhältst",
+    "location": "Standort",
+    "locationDesc": "Standortbasierte Erinnerungen und Funktionen erlauben",
+    "dataAnalysis": "Daten & Analyse",
+    "dataAnalysisDesc": "Anonymisierte Nutzerdaten zur Verbesserung der App erlauben",
+    "autoUpdates": "Automatische Updates",
+    "autoUpdatesDesc": "Updates automatisch herunterladen, wenn verfügbar"
+    ,
+    "notSpecified": "Nicht angegeben",
+    "darkMode": "Dunkler Modus",
+    "security": "Sicherheit",
+    "changePassword": "Passwort ändern",
+    "changePasswordDesc": "Aktualisiere dein Passwort",
+    "privacyShort": "Sieh, wie wir deine Daten verarbeiten",
+    "privacyLong": "Wir speichern nur notwendige Informationen, um den Dienst bereitzustellen.\nAlle Daten werden verschlüsselt und sicher gespeichert.\nDu kannst jederzeit Zugriff auf deine Daten oder deren Löschung beantragen.\nWir halten uns an die DSGVO und geltende Datenschutzgesetze.",
+    "dangerZone": "Gefahrenzone",
+    "deleteAccount": "Konto löschen",
+    "deleteAccountDesc": "Lösche dein Konto und alle Daten dauerhaft",
+    "deleteAccountConfirm": "Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "delete": "Löschen",
+    "accountDeleted": "Konto gelöscht",
+    "accountDeletedMessage": "Dein Konto wurde gelöscht"
+    ,
+    "nameVisibleInfo": "Dein Name wird für andere Haushaltsmitglieder sichtbar sein.",
+    "nameVisibleinfo": "Dein Name wird für andere Haushaltsmitglieder sichtbar sein."
+  }
+  ,
   "accountcheck": {
     "title": "Hast du bereits ein Konto?",
     "subtitle": "Wähle, ob du dich anmelden oder ein neues Konto erstellen möchtest",
@@ -74,4 +178,126 @@
     "or": "oder",
     "createAccount": "Neues Konto erstellen"
   }
+  ,
+  "dashboard": {
+    "todayTasks": "Heutige Aufgaben:",
+    "leaderboard": "Bestenliste:",
+    "pointsShort": "Pkt."
+  },
+  "history": {
+    "title": "Verlauf",
+    "householdLabel": "Haushalt",
+    "searchPlaceholder": "Suche im Verlauf...",
+    "filterTitle": "Verlauf filtern",
+    "filters": {
+      "completed": "Abgeschlossen",
+      "notCompleted": "Nicht abgeschlossen",
+      "thisMonth": "Diesen Monat",
+      "previousMonth": "Letzten Monat",
+      "highActivity": "Hohe Aktivität",
+      "lowActivity": "Niedrige Aktivität"
+    },
+    "clearFilters": "Alle entfernen",
+    "applyFilters": "Filter anwenden",
+    "summaryWeek": "Zusammenfassung - Woche {{week}}",
+    "allTasksWere": "Alle Aufgaben waren:",
+    "totalTasks": "Anzahl Aufgaben: {{count}}",
+    "status": {
+      "completed": "Abgeschlossen",
+      "notCompleted": "Nicht abgeschlossen"
+    }
+  },
+  "weekdays": {
+    "mon": "Mo",
+    "tue": "Di",
+    "wed": "Mi",
+    "thu": "Do",
+    "fri": "Fr",
+    "sat": "Sa",
+    "sun": "So"
+  }
+  ,
+  "greeting": {
+    "morning": "Guten Morgen",
+    "forenoon": "Guten Morgen",
+    "afternoon": "Guten Tag",
+    "evening": "Guten Abend",
+    "night": "Gute Nacht"
+  }
+  ,
+  "taskDetails": {
+    "title": "Aufgabendetails",
+    "status": {
+      "completed": "Abgeschlossen",
+      "notCompleted": "Nicht abgeschlossen"
+    },
+    "time": "Zeit",
+    "duration": "Dauer",
+    "assignedTo": "Zugewiesen an",
+    "description": "Beschreibung",
+    "noDescription": "Keine Beschreibung.",
+    "minutes": "{{count}} Minuten"
+  ,
+    "action": {
+      "markComplete": "Als erledigt markieren"
+    }
+  }
+  ,
+    "addTask": {
+        "title": "Neue Aufgabe erstellen",
+        "selectDate": "Datum auswählen",
+        "selectTime": "Uhrzeit auswählen",
+        "time": {
+          "from": "Von",
+          "to": "Bis"
+        },
+        "otherDate": {
+          "first": "Anderes",
+          "second": "Datum"
+        },
+        "preset": {
+          "forvarsel": "Erinnerung",
+          "repeat": "Wiederholen"
+        },
+        "assign": "Zuweisen",
+        "save": "Speichern"
+      },
+      "calendar": {
+        "months": {
+          "january": "Januar",
+          "february": "Februar",
+          "march": "März",
+          "april": "April",
+          "may": "Mai",
+          "june": "Juni",
+          "july": "Juli",
+          "august": "August",
+          "september": "September",
+          "october": "Oktober",
+          "november": "November",
+          "december": "Dezember"
+        },
+        "weekdays": {
+          "mon": "Mo",
+          "tue": "Di",
+          "wed": "Mi",
+          "thu": "Do",
+          "fri": "Fr",
+          "sat": "Sa",
+          "sun": "So"
+        },
+        "today": "Heute",
+        "cancel": "Abbrechen"
+      },
+      "days": {
+        "full": {
+          "sun": "Sonntag",
+          "mon": "Montag",
+          "tue": "Dienstag",
+          "wed": "Mittwoch",
+          "thu": "Donnerstag",
+          "fri": "Freitag",
+          "sat": "Samstag"
+        }
+      }
 }

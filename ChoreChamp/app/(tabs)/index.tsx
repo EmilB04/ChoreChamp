@@ -14,6 +14,11 @@ import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import commonStyles from "../commonStyles";
+import i18n from "../i18n/i18n";
+import { useLocalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "react-i18next";
+
 
 // TODO:
 // 1. Fetch user data dynamically
@@ -23,6 +28,8 @@ import commonStyles from "../commonStyles";
 export default function Dashboard() {
   const { colors } = useTheme();
   const { userData } = useUser();
+  const params = useLocalSearchParams();
+  const { t } = useTranslation("onboarding");
 
   // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -32,13 +39,22 @@ export default function Dashboard() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
+    // Apply language from ?lang query param (same pattern as onboarding screens)
+    const lang = params?.lang as string | undefined;
+    if (lang) {
+      i18n.changeLanguage(lang);
+      AsyncStorage.setItem("appLanguage", lang).catch(() => {
+        /* ignore */
+      });
+    }
+
     const updateTime = () => {
       setCurrentTime(new Date());
     };
     updateTime(); // Update immediately on mount
     const interval = setInterval(updateTime, 10000); // Update every 10 seconds
     return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []);
+  }, [params?.lang]);
 
   // TODO: Replace with database fetch
   const todayTasks: Task[] = [
@@ -122,8 +138,16 @@ export default function Dashboard() {
   const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Handle Sunday
   mondayDate.setDate(today.getDate() - daysFromMonday);
 
-  // Generate week days
-  const weekDays = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"];
+  // Generate week days (localized)
+  const weekDays = [
+    t("weekdays.mon"),
+    t("weekdays.tue"),
+    t("weekdays.wed"),
+    t("weekdays.thu"),
+    t("weekdays.fri"),
+    t("weekdays.sat"),
+    t("weekdays.sun"),
+  ];
   const weekDates = [];
 
   // Populate week dates array
@@ -265,7 +289,7 @@ export default function Dashboard() {
               { color: colors.text, marginBottom: 16 },
             ]}
           >
-            Dagens oppgaver:
+            {t("dashboard.todayTasks")}
           </Text>
 
           {/* Hourly Calendar */}
@@ -402,9 +426,9 @@ export default function Dashboard() {
 
         {/* Leaderboard */}
         <View style={styles.leaderboardWrapper}>
-          <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-            Ledertavle:
-          </Text>
+          <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>{
+            t("dashboard.leaderboard")
+          }</Text>
 
           {/* Top 3 Podium */}
           <View style={styles.podiumContainer}>
@@ -425,7 +449,7 @@ export default function Dashboard() {
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
                 <Text style={[styles.podiumPoints, { color: colors.text }]}>
-                  {leaderboardData[1].points} pts
+                  {leaderboardData[1].points} {t("dashboard.pointsShort")}
                 </Text>
               </View>
             </View>
@@ -450,7 +474,7 @@ export default function Dashboard() {
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
                 <Text style={[styles.podiumPoints, { color: colors.text }]}>
-                  {leaderboardData[0].points} pts
+                  {leaderboardData[0].points} {t("dashboard.pointsShort")}
                 </Text>
               </View>
             </View>
@@ -472,7 +496,7 @@ export default function Dashboard() {
               <View style={styles.pointsContainer}>
                 <Text style={styles.pointsIcon}>🏆</Text>
                 <Text style={[styles.podiumPoints, { color: colors.text }]}>
-                  {leaderboardData[2].points} pts
+                  {leaderboardData[2].points} {t("dashboard.pointsShort")}
                 </Text>
               </View>
             </View>
@@ -525,7 +549,7 @@ export default function Dashboard() {
                     { color: user.isCurrentUser ? colors.black : colors.text },
                   ]}
                 >
-                  {user.points} pts
+                  {user.points} {t("dashboard.pointsShort")}
                 </Text>
               </View>
             ))}
@@ -544,7 +568,7 @@ export default function Dashboard() {
           selectedTask.assignedTo === userData.name
             ? [
                 {
-                  label: "Marker som fullført",
+                  label: t("taskDetails.action.markComplete"),
                   iconName: "checkmark-circle-outline",
                   variant: "success",
                   onPress: () => {

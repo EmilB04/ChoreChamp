@@ -16,9 +16,9 @@ const OnboardingScreen = () => {
     const opacity = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
-        const INITIAL_DELAY = 1500; // Delay before starting the animation in MS
+        const INITIAL_DELAY = 2500; // Delay before starting the animation in MS
 
-        const ANIM_DURATION = 3000; // Duration of the animation in MS
+        const ANIM_DURATION = 3500; // Duration of the animation in MS
 
         let navTimer: ReturnType<typeof setTimeout> | undefined;
 

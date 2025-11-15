@@ -7,6 +7,110 @@
     "footer": "You can change this later in settings."
   }
   ,
+  "notificationsTab": {
+    "heading": "Notifications",
+    "youHave": "You have",
+    "unread": "unread notifications",
+    "today": "Today",
+    "thisWeek": "This week",
+    "earlier": "Earlier",
+    "upToDate": "You're up to date",
+    "unreadTab": "Unread",
+    "previousTab": "Previous notifications",
+    "receivedPoints": "Received {{points}} points",
+    "minAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} hours ago",
+    "oneDayAgo": "1 day ago",
+    "daysAgo": "{{count}} days ago"
+  }
+  ,
+  "profileTab": {
+    "heading": "Profile &\nSettings",
+    "editProfile": "Edit profile",
+    "myAccount": "My account",
+    "myAccountDesc": "Manage account information and personal settings",
+    "myHouseholds": "My households",
+    "myHouseholdsDesc": "View and manage your linked households",
+    "appSettings": "App settings",
+    "appSettingsDesc": "Customize app functionality and appearance",
+    "logout": "Log out",
+    "logoutDesc": "Sign out of your account",
+    "more": "More",
+    "helpSupport": "Help & Support",
+    "helpSupportDesc": "Contact information and support",
+    "emailLabel": "Email:",
+    "phoneLabel": "Phone:",
+    "aboutApp": "About the app",
+    "aboutAppDesc": "Information about ChoreChamp and the developers",
+    "aboutAppLong": "ChoreChamp is an app to organize and manage household chores. You can create households, assign tasks, and track progress with leaderboards using a points system. The app is designed to make everyday chores into a fun and engaging competition for the whole family.\n\nDeveloped by:\n- Emil Berglund\n- Andreas B. Olaussen\n- Sebastian W. Thomsen\n- Ida Tollaksen\n- Khalid Osman",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your name",
+    "nameCannotBeEmpty": "Name cannot be empty",
+    "changeImageHint": "Tap to change profile image",
+    "chooseImage": "Choose image",
+    "chooseImageSubtitle": "Select from gallery or take a photo",
+    "gallery": "Gallery",
+    "camera": "Camera",
+    "permissionRequired": "Permission required",
+    "permissionGallery": "Gallery access is required to choose an image",
+    "couldNotPickImage": "Could not pick image",
+    "permissionCamera": "Camera access is required to take a photo",
+    "couldNotTakePhoto": "Could not take photo",
+    "invalidEmail": "Invalid email address",
+    "enterValidEmail": "Please enter a valid email",
+    "success": "Success",
+    "accountUpdated": "Your account has been updated",
+    "personalInfo": "Personal information",
+    "editInfo": "Edit information",
+    "memberOfHouseholds": "Member of households",
+    "yourHouseholds": "Your households",
+    "viewMembers": "View members",
+    "manage": "Manage",
+    "leave": "Leave household",
+    "joinExistingHousehold": "Join existing household",
+    "newHousehold": "New household",
+    "create": "Create",
+    "householdName": "Household name",
+    "householdNamePlaceholder": "Enter household name",
+    "youBecomeAdmin": "You will become admin of this household",
+    "close": "Close",
+    "members": "Members",
+  "membersTotal": "{{count}} members",
+  "administrator": "Administrator",
+  "adminShort": "Admin",
+  "member": "Member",
+    "privacyPermissions": "Privacy & permissions",
+    "notifications": "Notifications",
+    "notificationsDesc": "Control which notifications you receive",
+    "location": "Location",
+    "locationDesc": "Allow location-based reminders and features",
+    "dataAnalysis": "Data & analysis",
+    "dataAnalysisDesc": "Allow anonymized usage data to improve the app",
+    "autoUpdates": "Automatic updates",
+    "autoUpdatesDesc": "Download updates automatically when available"
+    ,
+    "notSpecified": "Not specified",
+    "darkMode": "Dark mode",
+    "security": "Security",
+    "changePassword": "Change password",
+    "changePasswordDesc": "Update your password",
+    "privacyShort": "See how we handle your data",
+    "privacyLong": "We only store necessary information to deliver the service.\nAll data is encrypted and stored securely.\nYou can request access or deletion of your data at any time.\nWe follow GDPR and applicable local privacy laws.",
+    "dangerZone": "Danger zone",
+    "deleteAccount": "Delete account",
+    "deleteAccountDesc": "Permanently delete your account and all data",
+    "deleteAccountConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+    "delete": "Delete",
+    "accountDeleted": "Account deleted",
+    "accountDeletedMessage": "Your account has been deleted"
+    ,
+    "nameVisibleInfo": "Your name will be visible to other household members.",
+    "nameVisibleinfo": "Your name will be visible to other household members."
+  }
+  ,
   "accountcheck": {
     "title": "Do you already have an account?",
     "subtitle": "Choose whether to sign in or create a new account",
@@ -74,4 +178,127 @@
     "or": "or",
     "createAccount": "Create new account"
   }
+  ,
+  "dashboard": {
+    "todayTasks": "Today's tasks:",
+    "leaderboard": "Leaderboard:"
+    ,
+    "pointsShort": "pts"
+  },
+  "history": {
+    "title": "History",
+    "householdLabel": "Household",
+    "searchPlaceholder": "Search history...",
+    "filterTitle": "Filter history",
+    "filters": {
+      "completed": "Completed",
+      "notCompleted": "Not completed",
+      "thisMonth": "This month",
+      "previousMonth": "Previous month",
+      "highActivity": "High activity",
+      "lowActivity": "Low activity"
+    },
+    "clearFilters": "Clear all",
+    "applyFilters": "Apply filters",
+    "summaryWeek": "Summary - Week {{week}}",
+    "allTasksWere": "All tasks were:",
+    "totalTasks": "Total tasks: {{count}}",
+    "status": {
+      "completed": "Completed",
+      "notCompleted": "Not completed"
+    }
+  },
+  "weekdays": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  }
+  ,
+  "greeting": {
+    "morning": "Good morning",
+    "forenoon": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Good night"
+  }
+  ,
+  "taskDetails": {
+    "title": "Task details",
+    "status": {
+      "completed": "Completed",
+      "notCompleted": "Not completed"
+    },
+    "time": "Time",
+    "duration": "Duration",
+    "assignedTo": "Assigned to",
+    "description": "Description",
+    "noDescription": "No description.",
+    "minutes": "{{count}} minutes"
+  ,
+    "action": {
+      "markComplete": "Mark as complete"
+    }
+  }
+  ,
+    "addTask": {
+      "title": "Create new task",
+      "selectDate": "Select date",
+      "selectTime": "Select time",
+      "time": {
+        "from": "From",
+        "to": "To"
+      },
+      "otherDate": {
+        "first": "Other",
+        "second": "date"
+      },
+      "preset": {
+        "forvarsel": "Reminder",
+        "repeat": "Repeat"
+      },
+      "assign": "Assign",
+      "save": "Save"
+    },
+    "calendar": {
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "weekdays": {
+        "mon": "Mo",
+        "tue": "Tu",
+        "wed": "We",
+        "thu": "Th",
+        "fri": "Fr",
+        "sat": "Sa",
+        "sun": "Su"
+      },
+      "today": "Today",
+      "cancel": "Cancel"
+    },
+    "days": {
+      "full": {
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wed": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday",
+        "sat": "Saturday"
+      }
+    }
 }
