@@ -197,22 +197,26 @@ export default function EditProfileModal({
               onPress={showImageOptions}
               style={styles.imageContainer}
             >
-              {isDicebearAvatar(imageUri) ? (
-                <View
-                  style={[
-                    styles.profileImage,
-                    {
-                      borderRadius: 60,
-                      overflow: "hidden",
-                    },
-                  ]}
-                >
-                  <SvgXml
-                    xml={generateAvatarSvg(parseDicebearUri(imageUri)!)}
-                    width={120}
-                    height={120}
-                  />
+              {!imageUri ? (
+                <View style={[styles.profileImage, {alignItems: 'center', justifyContent: 'center', backgroundColor: colors.tint}]}>
+                  <Ionicons name="person" size={80} color={colors.darkText} />
                 </View>
+              ) : isDicebearAvatar(imageUri) ? (
+              <View
+                style={[
+                  styles.profileImage,
+                  {
+                    borderRadius: 60,
+                    overflow: "hidden",
+                  },
+                ]}
+              >
+                <SvgXml
+                  xml={generateAvatarSvg(parseDicebearUri(imageUri)!)}
+                  width={120}
+                  height={120}
+                />
+              </View>
               ) : (
                 <Image source={{ uri: imageUri }} style={styles.profileImage} />
               )}
