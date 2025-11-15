@@ -17,6 +17,12 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import {
+  isDicebearAvatar,
+  parseDicebearUri,
+  generateAvatarSvg,
+} from "@/lib/avatarUtils";
+import { SvgXml } from "react-native-svg";
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
 import commonStyles from "../commonStyles";
 
@@ -105,15 +111,20 @@ export default function Profile() {
                 <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
                     Profil & {"\n"}Innstillinger
                 </Text>
-                {userData.imageUri ? (
-                    <Image
-                        source={{ uri: userData.imageUri }}
-                        style={styles.avatar}
+                {!userData.imageUri ? (
+                <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                    <Ionicons name="person" size={40} color={colors.darkText} />
+                </View>
+                ) : isDicebearAvatar(userData.imageUri) ? (
+                <View style={[styles.avatar, { overflow: "hidden" }]}>
+                    <SvgXml
+                    xml={generateAvatarSvg(parseDicebearUri(userData.imageUri)!)}
+                    width="100%"
+                    height="100%"
                     />
+                </View>
                 ) : (
-                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                        <Ionicons name="person" size={40} color={colors.darkText} />
-                    </View>
+                <Image source={{ uri: userData.imageUri }} style={styles.avatar} />
                 )}
                 <Text style={[styles.name, { color: colors.darkText }]}>{userData.username}</Text>
                 <View style={styles.separator} />

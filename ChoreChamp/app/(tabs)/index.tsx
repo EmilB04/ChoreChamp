@@ -18,6 +18,13 @@ import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import commonStyles from "../commonStyles";
+import {
+  isDicebearAvatar,
+  parseDicebearUri,
+  generateAvatarSvg,
+} from "@/lib/avatarUtils";
+import { SvgXml } from "react-native-svg";
+import { Ionicons } from "@expo/vector-icons";
 
 // TODO:
 // 1. Fetch user data dynamically
@@ -432,10 +439,21 @@ export default function Dashboard() {
           <WelcomeGreeting username={userData.username} />
           <View style={styles.profileSection}>
             <View style={styles.profileContainer}>
-              <Image
-                source={{ uri: userData.imageUri }}
-                style={styles.profileImage}
-              />
+            {!userData.imageUri ? (
+                <View style={[styles.profileImage, {justifyContent: 'center', paddingLeft: 2, paddingTop: 5}]}>
+                    <Ionicons name="person" size={40} color={colors.darkText} />
+                </View>
+                ) : isDicebearAvatar(userData.imageUri) ? (
+                <View style={[styles.profileImage, { borderRadius: 18, overflow: "hidden" }]}>
+                    <SvgXml
+                    xml={generateAvatarSvg(parseDicebearUri(userData.imageUri)!)}
+                    width="100%"
+                    height="100%"
+                    />
+                </View>
+                ) : (
+                <Image source={{ uri: userData.imageUri }} style={styles.profileImage} />
+                )}
             </View>
           </View>
         </View>
