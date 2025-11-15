@@ -1,12 +1,11 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import { View, StyleSheet } from "react-native";
-
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useTheme } from "@/contexts/ThemeContext";
 
-// Floating Tab Button Component
+// Floating Tab Button Components
 function FloatingTabButton(props: any) {
   return (
     <HapticTab
