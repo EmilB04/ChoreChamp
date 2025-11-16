@@ -8,6 +8,7 @@ export interface UserData {
     username: string;  // Display name, defaults to firstName + lastName
     imageUri: string;
     email?: string;
+    birthDate?: string;
     phone?: string;
     household?: (DocumentReference | string)[];  // Array of Firestore references to households
     points?: number;

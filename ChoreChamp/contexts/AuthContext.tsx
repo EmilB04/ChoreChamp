@@ -33,15 +33,12 @@ import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from "firebase/firest
 import * as AuthSession from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import Constants from "expo-constants";
-<<<<<<< HEAD
-import * as AuthSession from "expo-auth-session";
-=======
 import * as WebBrowser from "expo-web-browser";
->>>>>>> main
 
 // Local imports
 import { auth, db } from "@/lib/firebase";
 import type { AppUser } from "@/types/types";
+import { createUser, type UserData } from "@/services/userService";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -77,12 +74,35 @@ const authRequestConfig = isExpoGo
 
 export type AuthContextType = {
     user: FirebaseUser | null;
+    loading: boolean;
+
+    // Email and password
     signIn: (email: string, password: string) => Promise<void>;
     signUp: (email: string, password: string, displayName?: string) => Promise<void>;
+
+    // Phone and password
+    signInWithPhone: (phone: string, countryCode: string, password: string) => Promise<void>;
+    signUpWithPhoneProfile: (params: {
+        firstName: string;
+        lastName: string;
+        phone: string;
+        countryCode: string;
+        birthDate: string; 
+        password: string;
+    }) => Promise<void>;
+
+
     logOut: () => Promise<void>;
-    loading: boolean;
+
+    // Google
     signInWithGoogle: () => Promise<void>;
 }
+
+function buildEmailFromPhone (phone: string, countryCode: string) {
+    const digits = phone.replace(/\D/g, "");
+    const countryDigits = countryCode.replace("+", "");
+    return `${countryDigits}${digits}@chorechamp.app`;
+};
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -94,15 +114,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);
     const [loading, setLoading] = useState(true);
 
-<<<<<<< HEAD
-       const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-        ...authRequestConfig,
-=======
     const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
         androidClientId: EXTRA.ANDROID_CLIENT_ID,
         iosClientId: EXTRA.IOS_CLIENT_ID,
         webClientId: EXTRA.WEB_CLIENT_ID,
->>>>>>> main
         scopes: ['openid', 'profile', 'email'],
         responseType: 'id_token',
         redirectUri
@@ -130,21 +145,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             if (!firebaseUser) return;
 
-<<<<<<< HEAD
             try {
                 const ref = doc(db, "users", firebaseUser.uid);
-                const snap = await getDoc(ref);
-                if (!snap.exists()) {
-                const data: AppUser = {
-                    name: firebaseUser.displayName ?? "",
-                    language: "nb",
-                    profilePicture: firebaseUser.photoURL ?? "",
-                    householdId: [],
-                    role: { admin: true },
-                    createdAt: serverTimestamp() as unknown as Timestamp,
-                };
-                await setDoc(ref, data);
-=======
+                const snapshot = await getDoc(ref);
+
                 if (!snapshot.exists()) {
                     const displayName = firebaseUser.displayName ?? "";
                     const docData: AppUser = {
@@ -157,15 +161,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
                         createdAt: serverTimestamp() as unknown as Timestamp,
                     };
                     await setDoc(ref, docData);
->>>>>>> main
                 }
             } catch (err) {
                 console.error("create/read user doc failed", err);
             }
-            });
+        });
 
-            return unsub;
-        }, []);
+        return unsub;
+    }, []);
 
 
     const value = useMemo<AuthContextType>(() => ({
@@ -181,9 +184,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 await updateProfile(credential.user, { displayName });
             }
         },
+
+        async signInWithPhone(phone, countryCode, password) {
+            const email = buildEmailFromPhone(phone, countryCode);
+            await signInWithEmailAndPassword(auth, email, password);
+        },
+
+        async signUpWithPhoneProfile({
+            firstName,
+            lastName,
+            phone,
+            countryCode,
+            birthDate,
+            password,
+        }) {
+            const email = buildEmailFromPhone(phone, countryCode);
+            const fullName = `${firstName} ${lastName}`.trim();
+
+            const credential = await createUserWithEmailAndPassword(auth, email, password);
+
+            await updateProfile(credential.user, { displayName: fullName });
+
+            const userDoc: Omit<UserData, "id"> = {
+                firstName,
+                lastName,
+                username: fullName,
+                imageUri: "",
+                email, 
+                phone: `${countryCode} ${phone}`,
+                birthDate, 
+                household: [],
+                points: 0,
+                language: "nb",
+                notificationsEnabled: true, 
+                locationEnabled: false, 
+                darkModeEnabled: true, 
+                role: { admin: true },
+            };
+
+            await createUser(credential.user.uid, userDoc);
+        },
+
         async logOut() {
             await signOut(auth);
         },
+        
         async signInWithGoogle() {
             if (!googleRequest) return;
             try {

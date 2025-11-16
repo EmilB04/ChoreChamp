@@ -11,6 +11,7 @@ import { Animated, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import i18n from '../../i18n/i18n';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Login() {
     const router = useRouter();
@@ -21,6 +22,7 @@ export default function Login() {
     const scrollViewRef = useRef<ScrollView>(null);
     const phoneRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
+    const { signInWithPhone } = useAuth();
 
     const [phone, setPhone] = useState('');
     const [countryCode, setCountryCode] = useState('+47');
@@ -156,11 +158,11 @@ export default function Login() {
         setError(null);
         setLoading(true);
         try {
-            await new Promise((r) => setTimeout(r, 700));
-            // TODO: Implement actual login logic
+            await signInWithPhone(phone, countryCode, password);
             router.replace('/(tabs)');
-        } catch {
-            setError(t('login.errorInvalidCredentials'));
+        } catch (e: any){
+            console.error(e);
+            setError(t('login.errorInvalidCredentials') || 'Feil telefonnummer eller passord');
         } finally {
             setLoading(false);
         }
