@@ -1,7 +1,7 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation } from '@/hooks/useEntranceAnimation';
 import { useBorderAnimations, useFormAnimations, usePickerAnimations } from '@/hooks/useFormAnimations';
-import { formatPhoneNumber, stripCountryCode, validatePhone } from '@/utils/formValidation';
+import { validatePhone } from '@/utils/formValidation';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import i18n from '../../i18n/i18n';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePhoneField } from '@/hooks/usePhoneField';
 
 export default function Login() {
     const router = useRouter();
@@ -24,13 +25,22 @@ export default function Login() {
     const passwordRef = useRef<TextInput>(null);
     const { signInWithPhone } = useAuth();
 
-    const [phone, setPhone] = useState('');
-    const [countryCode, setCountryCode] = useState('+47');
-    const [showCountryPicker, setShowCountryPicker] = useState(false);
+    const {
+        phone,
+        countryCode,
+        showCountryPicker, 
+        setShowCountryPicker,
+        phoneError, 
+        setPhoneError, 
+        handlePhoneChange,
+        handlePhoneBlur,
+        isPhoneValid,
+        setCountryCode,
+    } = usePhoneField("+47");
+
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [phoneError, setPhoneError] = useState<string | null>(null);
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [activeField, setActiveField] = useState<'phone' | 'password' | null>(null);
@@ -92,31 +102,6 @@ export default function Login() {
         }
         const validation = validatePhone(phone, countryCode);
         return validation.isValid;
-    };
-
-    // Handle phone blur
-    const handlePhoneBlur = () => {
-        setTimeout(() => {
-            // Strip country code and clean the input
-            const cleaned = stripCountryCode(phone);
-
-            // Format with spacing when user leaves the field
-            const formatted = formatPhoneNumber(cleaned, countryCode);
-
-            setPhone(formatted);
-
-            // Validate phone number
-            if (formatted.trim()) {
-                const validation = validatePhone(formatted, countryCode);
-                if (!validation.isValid) {
-                    setPhoneError(validation.error || t('login.errorInvalidPhone'));
-                } else {
-                    setPhoneError(null);
-                }
-            } else {
-                setPhoneError(null);
-            }
-        }, 100);
     };
 
     // Handle password blur
@@ -183,13 +168,6 @@ export default function Login() {
     const selectCountryCode = (code: string) => {
         setCountryCode(code);
         setShowCountryPicker(false);
-    };
-
-    // Handle phone change
-    const handlePhoneChange = (text: string) => {
-        setPhone(text);
-        setError(null);
-        setPhoneError(null);
     };
 
     return (
