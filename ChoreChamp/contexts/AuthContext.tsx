@@ -12,7 +12,15 @@
 // https://docs.expo.dev/versions/latest/sdk/constants/
 
 // React imports
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+
 
 // Firebase Auth imports
 import type { User as FirebaseUser } from "firebase/auth";
@@ -48,6 +56,10 @@ type Extra = {
     IOS_CLIENT_ID: string;
     WEB_CLIENT_ID: string;
 }
+
+type AuthProviderProps = {
+  children: ReactNode;
+};
 
 const EXTRA = (Constants.expoConfig?.extra ?? {}) as Extra;
 
@@ -105,10 +117,6 @@ function buildEmailFromPhone (phone: string, countryCode: string) {
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-type AuthProviderProps = {
-    children: React.ReactNode;
-}
 
 export function AuthProvider({ children }: AuthProviderProps) {
     const [user, setUser] = useState<FirebaseUser | null>(null);

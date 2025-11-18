@@ -13,6 +13,7 @@ import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import i18n from '../../i18n/i18n';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePhoneField } from '@/hooks/usePhoneField';
+import { COUNTRY_CODES } from '@/constants/countryCodes';
 
 export default function Login() {
     const router = useRouter();
@@ -44,13 +45,6 @@ export default function Login() {
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [activeField, setActiveField] = useState<'phone' | 'password' | null>(null);
-
-    const countryCodes = [
-        { code: '+47', country: 'Norge', flag: '🇳🇴' },
-        { code: '+44', country: 'Storbritannia', flag: '🇬🇧' },
-        { code: '+34', country: 'Spania', flag: '🇪🇸' },
-        { code: '+49', country: 'Tyskland', flag: '🇩🇪' },
-    ];
 
     // Use entrance animation hook for initial page load
     const { fadeAnim, slideAnim } = useEntranceAnimation();
@@ -239,7 +233,7 @@ export default function Login() {
                                             activeOpacity={0.7}
                                         >
                                             <Text style={[styles.countryCodeText, { color: colors.text }]}>
-                                                {countryCodes.find(c => c.code === countryCode)?.flag} {countryCode}
+                                                {COUNTRY_CODES.find(c => c.code === countryCode)?.flag} {countryCode}
                                             </Text>
                                             <Animated.View style={{
                                                 transform: [{
@@ -302,7 +296,7 @@ export default function Login() {
                                             nestedScrollEnabled={true}
                                             importantForAccessibility="no-hide-descendants"
                                         >
-                                            {countryCodes.map((item) => (
+                                            {COUNTRY_CODES.map((item) => (
                                                 <TouchableOpacity
                                                     key={item.code}
                                                     onPress={() => selectCountryCode(item.code)}
