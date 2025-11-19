@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, doc, DocumentReference, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { addDoc, arrayUnion, collection, doc, DocumentReference, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 
 export interface Household {
     id: string;
@@ -189,5 +189,152 @@ export async function getHouseholdMembers(householdId: string): Promise<{
     } catch (error) {
         console.error('💥 Error fetching household members:', error);
         return [];
+    }
+}
+
+/**
+ * Create a new household
+ * @param familyName - Name of the household
+ * @param creatorId - User ID of the creator
+ * @returns The created household ID
+ */
+export async function createHousehold(familyName: string, creatorId: string): Promise<string | null> {
+    console.log('🏠 createHousehold called with:', { familyName, creatorId });
+    
+    try {
+        // Create the household document
+        const householdsRef = collection(db, 'households');
+        const newHousehold = {
+            familyName: familyName.trim(),
+            familyMembers: [`/users/${creatorId}`],
+            points: {},
+            createdAt: new Date(),
+            createdBy: creatorId,
+        };
+        
+        const docRef = await addDoc(householdsRef, newHousehold);
+        console.log('✅ Household created with ID:', docRef.id);
+        
+        // Add household reference to user's household array
+        const userRef = doc(db, 'users', creatorId);
+        const householdRef = doc(db, 'households', docRef.id);
+        await updateDoc(userRef, {
+            household: arrayUnion(householdRef)
+        });
+        console.log('✅ Added household reference to user');
+        
+        return docRef.id;
+    } catch (error) {
+        console.error('💥 Error creating household:', error);
+        return null;
+    }
+}
+
+/**
+ * Join an existing household using a household code
+ * @param householdCode - The household ID code (e.g., "NMogPiBLWF4nmwsHBTlP")
+ * @param userId - User ID of the person joining
+ * @returns Success status
+ */
+export async function joinHousehold(householdCode: string, userId: string): Promise<{ success: boolean; error?: string; householdName?: string }> {
+    console.log('🏠 joinHousehold called with:', { householdCode, userId });
+    
+    try {
+        // Check if household exists
+        const householdRef = doc(db, 'households', householdCode);
+        const householdDoc = await getDoc(householdRef);
+        
+        if (!householdDoc.exists()) {
+            console.warn('⚠️ Household not found:', householdCode);
+            return { success: false, error: 'Husstand ikke funnet. Sjekk koden og prøv igjen.' };
+        }
+        
+        const householdData = householdDoc.data();
+        const userPath = `/users/${userId}`;
+        
+        // Check if user is already a member
+        if (householdData.familyMembers && householdData.familyMembers.includes(userPath)) {
+            console.log('⚠️ User already a member of this household');
+            return { success: false, error: 'Du er allerede medlem av denne husstanden.' };
+        }
+        
+        // Add user to household's familyMembers
+        await updateDoc(householdRef, {
+            familyMembers: arrayUnion(userPath)
+        });
+        console.log('✅ Added user to household familyMembers');
+        
+        // Add household reference to user's household array
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+            household: arrayUnion(householdRef)
+        });
+        console.log('✅ Added household reference to user');
+        
+        return { 
+            success: true, 
+            householdName: householdData.familyName || 'Husstand' 
+        };
+    } catch (error) {
+        console.error('💥 Error joining household:', error);
+        return { success: false, error: 'En feil oppstod. Vennligst prøv igjen.' };
+    }
+}
+
+/**
+ * Leave a household
+ * @param householdId - The household ID to leave
+ * @param userId - User ID of the person leaving
+ * @returns Success status
+ */
+export async function leaveHousehold(householdId: string, userId: string): Promise<{ success: boolean; error?: string }> {
+    console.log('🏠 leaveHousehold called with:', { householdId, userId });
+    
+    try {
+        const householdRef = doc(db, 'households', householdId);
+        const householdDoc = await getDoc(householdRef);
+        
+        if (!householdDoc.exists()) {
+            return { success: false, error: 'Husstand ikke funnet.' };
+        }
+        
+        const householdData = householdDoc.data();
+        const userPath = `/users/${userId}`;
+        
+        // Remove user from household's familyMembers
+        const updatedMembers = (householdData.familyMembers || []).filter(
+            (member: string) => member !== userPath
+        );
+        
+        await updateDoc(householdRef, {
+            familyMembers: updatedMembers
+        });
+        console.log('✅ Removed user from household familyMembers');
+        
+        // Remove household reference from user's household array
+        const userRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const updatedHouseholds = (userData.household || []).filter((ref: DocumentReference | string) => {
+                if (typeof ref === 'string') {
+                    return !ref.includes(householdId);
+                } else if (ref && typeof ref === 'object' && 'id' in ref) {
+                    return (ref as any).id !== householdId;
+                }
+                return true;
+            });
+            
+            await updateDoc(userRef, {
+                household: updatedHouseholds
+            });
+            console.log('✅ Removed household reference from user');
+        }
+        
+        return { success: true };
+    } catch (error) {
+        console.error('💥 Error leaving household:', error);
+        return { success: false, error: 'En feil oppstod. Vennligst prøv igjen.' };
     }
 }

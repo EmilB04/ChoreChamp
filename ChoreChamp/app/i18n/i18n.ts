@@ -1,18 +1,35 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import en from './locales/en/onboarding.json';
-import nb from './locales/nb/onboarding.json';
-import es from './locales/es/onboarding.json';
-import de from './locales/de/onboarding.json';
+import deOnboarding from './locales/de/onboarding.json';
+import enOnboarding from './locales/en/onboarding.json';
+import esOnboarding from './locales/es/onboarding.json';
+import nbOnboarding from './locales/nb/onboarding.json';
+
+import dePermissions from './locales/de/permissions.json';
+import enPermissions from './locales/en/permissions.json';
+import esPermissions from './locales/es/permissions.json';
+import nbPermissions from './locales/nb/permissions.json';
 
 const resources = {
-  en: { onboarding: en },
-  nb: { onboarding: nb },
-  es: { onboarding: es },
-  de: { onboarding: de },
+  en: { 
+    onboarding: enOnboarding,
+    permissions: enPermissions,
+  },
+  nb: { 
+    onboarding: nbOnboarding,
+    permissions: nbPermissions,
+  },
+  es: { 
+    onboarding: esOnboarding,
+    permissions: esPermissions,
+  },
+  de: { 
+    onboarding: deOnboarding,
+    permissions: dePermissions,
+  },
 };
 
 let _i18nInitialized = false;
@@ -35,7 +52,7 @@ export async function initI18n() {
       lng: defaultLanguage,
       fallbackLng: 'en',
       resources,
-      ns: ['onboarding'],
+      ns: ['onboarding', 'permissions'],
       defaultNS: 'onboarding',
       interpolation: { escapeValue: false },
     });

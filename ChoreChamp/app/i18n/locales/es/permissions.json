@@ -1,0 +1,17 @@
+{
+  "camera": {
+    "title": "Permiso de cámara requerido",
+    "message": "Has denegado el acceso a la cámara. Para usar la cámara, debes habilitar el permiso en la configuración de la aplicación.",
+    "usageDescription": "Esta aplicación necesita acceso a tu cámara para tomar fotos de perfil."
+  },
+  "mediaLibrary": {
+    "title": "Permiso de biblioteca de fotos requerido",
+    "message": "Has denegado el acceso a la biblioteca de fotos. Para seleccionar fotos, debes habilitar el permiso en la configuración de la aplicación.",
+    "usageDescription": "Esta aplicación necesita acceso a tu biblioteca de fotos para seleccionar fotos de perfil."
+  },
+  "openSettings": "Abrir configuración",
+  "cancel": "Cancelar",
+  "error": "Error",
+  "couldNotOpenSettings": "No se pudo abrir la configuración",
+  "couldNotRequestPermission": "No se pudo solicitar permiso"
+}

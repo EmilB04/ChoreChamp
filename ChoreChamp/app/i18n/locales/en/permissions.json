@@ -1,0 +1,17 @@
+{
+  "camera": {
+    "title": "Camera Permission Required",
+    "message": "You have denied camera access. To use the camera, you need to enable the permission in app settings.",
+    "usageDescription": "This app needs access to your camera to take profile pictures."
+  },
+  "mediaLibrary": {
+    "title": "Photo Library Permission Required",
+    "message": "You have denied photo library access. To select photos, you need to enable the permission in app settings.",
+    "usageDescription": "This app needs access to your photo library to select profile pictures."
+  },
+  "openSettings": "Open Settings",
+  "cancel": "Cancel",
+  "error": "Error",
+  "couldNotOpenSettings": "Could not open settings",
+  "couldNotRequestPermission": "Could not request permission"
+}

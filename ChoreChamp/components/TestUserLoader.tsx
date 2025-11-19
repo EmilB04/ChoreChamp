@@ -14,6 +14,7 @@
  * ⚠️ IMPORTANT: Remove this component before production deployment!
  */
 
+import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
@@ -21,6 +22,7 @@ import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 
 export default function TestUserLoader() {
     const { loadSpecificUser } = useUser();
+    const { colors } = useTheme();
     const [userId, setUserId] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -42,32 +44,47 @@ export default function TestUserLoader() {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { 
+            backgroundColor: colors.contextBackground,
+            borderColor: colors.tint,
+        }]}>
             <View style={styles.header}>
-                <Ionicons name="flask" size={20} color="#ff9500" />
-                <Text style={styles.title}>🧪 Test User Loader</Text>
+                <Ionicons name="flask" size={20} color={colors.tint} />
+                <Text style={[styles.title, { color: colors.text }]}>
+                    🧪 Test User Loader
+                </Text>
             </View>
             
             <TextInput
-                style={styles.input}
+                style={[styles.input, { 
+                    backgroundColor: colors.background,
+                    borderColor: colors.tint,
+                    color: colors.text,
+                }]}
                 placeholder="Enter user ID from Firestore"
+                placeholderTextColor={colors.lightDarkText}
                 value={userId}
                 onChangeText={setUserId}
                 autoCapitalize="none"
                 autoCorrect={false}
+                keyboardType="default"
             />
             
             <TouchableOpacity 
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[
+                    styles.button,
+                    { backgroundColor: colors.tint },
+                    loading && styles.buttonDisabled
+                ]}
                 onPress={handleLoadUser}
                 disabled={loading}
             >
-                <Text style={styles.buttonText}>
+                <Text style={[styles.buttonText, { color: colors.darkText }]}>
                     {loading ? 'Loading...' : 'Load User'}
                 </Text>
             </TouchableOpacity>
 
-            <Text style={styles.hint}>
+            <Text style={[styles.hint, { color: colors.lightDarkText }]}>
                 💡 Find user IDs in Firebase Console → Firestore → users collection
             </Text>
         </View>
@@ -76,12 +93,11 @@ export default function TestUserLoader() {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fff3cd',
         borderWidth: 2,
-        borderColor: '#ff9500',
         borderRadius: 12,
         padding: 16,
-        margin: 16,
+        marginTop: 16,
+        marginBottom: 20,
     },
     header: {
         flexDirection: 'row',
@@ -92,19 +108,15 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#856404',
     },
     input: {
-        backgroundColor: '#ffffff',
         borderWidth: 1,
-        borderColor: '#ff9500',
         borderRadius: 8,
         padding: 12,
         fontSize: 14,
         marginBottom: 12,
     },
     button: {
-        backgroundColor: '#ff9500',
         borderRadius: 8,
         padding: 12,
         alignItems: 'center',
@@ -113,13 +125,11 @@ const styles = StyleSheet.create({
         opacity: 0.5,
     },
     buttonText: {
-        color: '#ffffff',
         fontSize: 14,
         fontWeight: '600',
     },
     hint: {
         fontSize: 12,
-        color: '#856404',
         marginTop: 8,
         fontStyle: 'italic',
     },

@@ -1,9 +1,15 @@
 import AppSettingsScreen from '@/components/profile/AppSettingsScreen';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
+import TestUserLoader from '@/components/TestUserLoader';
 import UserLoadingState from '@/components/UserLoadingState';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
+import {
+    generateAvatarSvg,
+    isDicebearAvatar,
+    parseDicebearUri,
+} from "@/lib/avatarUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from 'expo-router';
 import React, { useState } from "react";
@@ -17,11 +23,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import {
-  isDicebearAvatar,
-  parseDicebearUri,
-  generateAvatarSvg,
-} from "@/lib/avatarUtils";
 import { SvgXml } from "react-native-svg";
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
 import commonStyles from "../commonStyles";
@@ -140,6 +141,7 @@ export default function Profile() {
             {/* Settings */}
             <ScrollView 
                 style={[commonStyles.container, styles.menu, { flex: 1 }]}
+                keyboardShouldPersistTaps="handled"
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -267,6 +269,9 @@ export default function Profile() {
                         </Text>
                     </View>
                 )}
+                
+                {/* Test User Loader - Remove before production */}
+                <TestUserLoader />
             </ScrollView>
 
             {/* Edit Profile Modal */}
