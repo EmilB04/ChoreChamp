@@ -179,8 +179,13 @@ export default function Dashboard() {
 
   // Handle marking task as complete
   const handleCompleteTask = async (taskId: number, firebaseTaskId: string) => {
+    if (!userData?.id) {
+      console.error('❌ No user ID available');
+      return;
+    }
+
     try {
-      const success = await markTaskAsComplete(firebaseTaskId);
+      const success = await markTaskAsComplete(firebaseTaskId, userData.id);
       if (success) {
         // Update the local state to reflect the change
         setAllTasks(prevTasks => 

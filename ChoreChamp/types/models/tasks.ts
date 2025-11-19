@@ -10,4 +10,9 @@ export type Task = {
     timeEnd: Date;
     timeStart: Date;
     title: string;
+    // Weekly leaderboard tracking
+    completedAt?: Date;     // When was the task completed?
+    completedBy?: string;   // User ID who completed it
+    weekNumber?: number;    // ISO week number (1-53)
+    year?: number;          // Year when completed
 }

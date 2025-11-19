@@ -1,5 +1,6 @@
 import { db } from '@/lib/firebase';
 import { addDoc, collection, doc, getDocs, Timestamp, updateDoc } from 'firebase/firestore';
+import { getWeekInfo } from '@/utils/weekUtils';
 
 export interface TaskData {
     id: string;
@@ -14,6 +15,11 @@ export interface TaskData {
     householdId: string;
     points: number;
     done: boolean;
+    // Weekly leaderboard tracking
+    completedAt?: Date;     // When was the task completed?
+    completedBy?: string;   // User ID who completed it
+    weekNumber?: number;    // ISO week number (1-53)
+    year?: number;          // Year when completed
 }
 
 export interface CreateTaskInput {
@@ -135,17 +141,29 @@ export async function getTodayTasksForUser(userId: string): Promise<TaskData[]> 
 /**
  * Mark a task as complete
  * @param taskId - The task's document ID
+ * @param userId - The user ID who is completing the task
  */
-export async function markTaskAsComplete(taskId: string): Promise<boolean> {
-    if (!taskId) {
+export async function markTaskAsComplete(taskId: string, userId: string): Promise<boolean> {
+    if (!taskId || !userId) {
         return false;
     }
     
     try {
         const taskRef = doc(db, 'tasks', taskId);
+        
+        // Get current timestamp and week info
+        const now = new Date();
+        const { weekNumber, year } = getWeekInfo(now);
+        
         await updateDoc(taskRef, {
-            done: true
+            done: true,
+            completedAt: Timestamp.fromDate(now),
+            completedBy: userId,
+            weekNumber: weekNumber,
+            year: year
         });
+        
+        console.log(`✅ Task ${taskId} completed in week ${weekNumber} of ${year}`);
         
         return true;
     } catch (error) {
@@ -166,8 +184,15 @@ export async function markTaskAsIncomplete(taskId: string): Promise<boolean> {
     try {
         const taskRef = doc(db, 'tasks', taskId);
         await updateDoc(taskRef, {
-            done: false
+            done: false,
+            // Remove completion tracking
+            completedAt: null,
+            completedBy: null,
+            weekNumber: null,
+            year: null
         });
+        
+        console.log(`↩️ Task ${taskId} marked as incomplete`);
         
         return true;
     } catch (error) {
