@@ -37,7 +37,9 @@ export default function UserLoadingState({ pageName = 'Page' }: UserLoadingState
 
     // 🧪 TEST FUNCTION: Load a specific user for testing
     const testLoadUser = async () => {
-        const testUserId = 'fDJg4O6VMlk09ulBHYbd'; // Note: 4O6 with letter O, not zero
+        const testUserId = '000'; // Note: 4O6 with letter O, not zero
+        // const testUserId = 'fDJg4O6VMlk09ulBHYbd'; // Note: 4O6 with letter O, not zero
+
         console.log(`🧪 [${pageName}] Loading test user:`, testUserId);
         await loadSpecificUser(testUserId);
     };

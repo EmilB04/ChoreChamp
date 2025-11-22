@@ -14,4 +14,6 @@ export interface Task {
   timeStart?: Date; // Full Date object for start time
   timeEnd?: Date; // Full Date object for end time
   firebaseId?: string; // Firebase document ID for updates
+  imgEvidence?: string; // URL to image evidence when task is completed
+  verificationStatus?: 'not_reviewed' | 'verified' | 'rejected'; // Admin verification status
 }
