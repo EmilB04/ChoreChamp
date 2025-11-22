@@ -972,65 +972,71 @@ export default function Dashboard() {
                       ]
                     : []
                   ),
-                  // Admin verification buttons (only show for tasks not yet verified)
-                  ...(selectedTask.verificationStatus === 'not_reviewed' 
+                  // Admin-only buttons
+                  ...((userData?.role?.admin === true)
                     ? [
-                        {
-                          label: "Godkjenn",
-                          iconName: "checkmark-done-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
-                          variant: "success" as const,
-                          onPress: async () => {
-                            if (selectedTask.firebaseId) {
-                              await handleVerifyTask(selectedTask.id, selectedTask.firebaseId);
-                              setIsModalVisible(false);
-                            }
-                          },
-                        },
-                        {
-                          label: "Avvis",
-                          iconName: "close-circle-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
-                          variant: "danger" as const,
-                          onPress: async () => {
-                            if (selectedTask.firebaseId) {
-                              await handleRejectTask(selectedTask.id, selectedTask.firebaseId);
-                              setIsModalVisible(false);
-                            }
-                          },
-                        },
-                      ]
-                    : []
-                  ),
-                  // Undo verification button (only show for verified tasks)
-                  ...(selectedTask.verificationStatus === 'verified' 
-                    ? [
-                        {
-                          label: "Angre godkjenning",
-                          iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
-                          variant: "secondary" as const,
-                          onPress: async () => {
-                            if (selectedTask.firebaseId) {
-                              await handleResetVerification(selectedTask.id, selectedTask.firebaseId);
-                              setIsModalVisible(false);
-                            }
-                          },
-                        },
-                      ]
-                    : []
-                  ),
-                  // Undo rejection button (only show for rejected tasks)
-                  ...(selectedTask.verificationStatus === 'rejected' 
-                    ? [
-                        {
-                          label: "Angre avvisning",
-                          iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
-                          variant: "secondary" as const,
-                          onPress: async () => {
-                            if (selectedTask.firebaseId) {
-                              await handleResetVerification(selectedTask.id, selectedTask.firebaseId);
-                              setIsModalVisible(false);
-                            }
-                          },
-                        },
+                        // Admin verification buttons (only show for tasks not yet verified)
+                        ...(selectedTask.verificationStatus === 'not_reviewed'
+                          ? [
+                              {
+                                label: "Godkjenn",
+                                iconName: "checkmark-done-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "success" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleVerifyTask(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                              {
+                                label: "Avvis",
+                                iconName: "close-circle-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "danger" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleRejectTask(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                            ]
+                          : []
+                        ),
+                        // Undo verification button (only show for verified tasks)
+                        ...(selectedTask.verificationStatus === 'verified'
+                          ? [
+                              {
+                                label: "Angre godkjenning",
+                                iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "secondary" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleResetVerification(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                            ]
+                          : []
+                        ),
+                        // Undo rejection button (only show for rejected tasks)
+                        ...(selectedTask.verificationStatus === 'rejected'
+                          ? [
+                              {
+                                label: "Angre avvisning",
+                                iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "secondary" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleResetVerification(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                            ]
+                          : []
+                        ),
                       ]
                     : []
                   ),
