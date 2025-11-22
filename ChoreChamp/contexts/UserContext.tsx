@@ -35,6 +35,7 @@ interface UserContextType {
     updateUserData: (data: Partial<UserData>) => Promise<void>;
     refreshUserData: () => Promise<void>;
     loadSpecificUser: (userId: string) => Promise<void>; // For testing
+    resetToAuthUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -46,13 +47,16 @@ interface UserProviderProps {
 export function UserProvider({ children }: UserProviderProps) {
     const [userData, setUserData] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [authUserId, setAuthUserId] = useState<string | null>(null);
 
     // Fetch user data when auth state changes
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
             if (user) {
+                setAuthUserId(user.uid);
                 await loadUserData(user.uid);
             } else {
+                setAuthUserId(null);
                 setUserData(null);
                 setLoading(false);
             }
@@ -110,15 +114,29 @@ export function UserProvider({ children }: UserProviderProps) {
         }
     };
 
-    // Manually refresh user data from Firestore
+
+    // Manually refresh user data from Firestore (reloads current userData)
     const refreshUserData = async () => {
         if (userData?.id) {
             await loadUserData(userData.id);
         }
     };
 
+    // Always reload the authenticated user (not test user)
+    const resetToAuthUser = async () => {
+        if (authUserId) {
+            await loadUserData(authUserId);
+        }
+    };
+
     // FOR TESTING: Load a specific user by ID (bypasses auth)
     const loadSpecificUser = async (userId: string) => {
+        // Only allow test user override if not logged in, or if explicitly not the auth user
+        if (authUserId && userId === authUserId) {
+            // If trying to load the real user, just reload
+            await loadUserData(authUserId);
+            return;
+        }
         console.log('🧪 TEST MODE: Force loading user:', userId);
         await loadUserData(userId);
     };
@@ -129,6 +147,7 @@ export function UserProvider({ children }: UserProviderProps) {
         updateUserData,
         refreshUserData,
         loadSpecificUser,
+        resetToAuthUser,
     };
 
     return (
