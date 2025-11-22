@@ -8,6 +8,7 @@ export interface TaskData {
     timeStart: Date;
     timeEnd: Date;
     assignedTo: string;  // User ID reference path like "/users/userId"
+    assignedToName?: string; // Display name of assigned user
     createdBy: string;   // User ID reference path
     createdByName?: string; // Display name of creator
     createdByAvatar?: string; // Avatar URL of creator
@@ -59,7 +60,27 @@ export async function getTasksForUser(userId: string): Promise<TaskData[]> {
             
             // Check if this task is assigned to the current user
             if (assignedUserId === userId) {
-                tasks.push(parseTaskDocument(docSnap));
+                
+                // Convert Firestore timestamps to Date objects
+                const timeStart = data.timeStart?.toDate ? data.timeStart.toDate() : new Date(data.timeStart);
+                const timeEnd = data.timeEnd?.toDate ? data.timeEnd.toDate() : new Date(data.timeEnd);
+                
+                tasks.push({
+                    id: docSnap.id,
+                    title: data.title || 'Untitled Task',
+                    description: data.description,
+                    timeStart,
+                    timeEnd,
+                    assignedTo: data.assignedTo || '',
+                    createdBy: data.createdBy || '',
+                    createdByName: data.createdByName || '',
+                    createdByAvatar: data.createdByAvatar || '',
+                    householdId: data.householdId || '',
+                    points: data.points || 0,
+                    done: data.done || false,
+                    imgEvidence: data.imgEvidence || '',
+                    verificationStatus: data.verificationStatus || 'not_reviewed',
+                });
             }
         });
         
@@ -295,32 +316,6 @@ function extractUserId(assignedToField: any): string {
 }
 
 /**
- * Parse Firestore document snapshot into TaskData object
- */
-function parseTaskDocument(docSnap: any): TaskData {
-    const data = docSnap.data();
-    const timeStart = data.timeStart?.toDate ? data.timeStart.toDate() : new Date(data.timeStart);
-    const timeEnd = data.timeEnd?.toDate ? data.timeEnd.toDate() : new Date(data.timeEnd);
-    
-    return {
-        id: docSnap.id,
-        title: data.title || 'Untitled Task',
-        description: data.description,
-        timeStart,
-        timeEnd,
-        assignedTo: data.assignedTo || '',
-        createdBy: data.createdBy || '',
-        createdByName: data.createdByName || '',
-        createdByAvatar: data.createdByAvatar || '',
-        householdId: data.householdId || '',
-        points: data.points || 0,
-        done: data.done || false,
-        imgEvidence: data.imgEvidence || '',
-        verificationStatus: data.verificationStatus || 'not_reviewed',
-    };
-}
-
-/**
  * Get week number from a date (ISO 8601 week)
  */
 function getWeekNumber(date: Date): { week: number; year: number } {
@@ -374,32 +369,36 @@ export async function getWeeklySummariesForHousehold(householdId: string): Promi
         const tasks: TaskData[] = [];
         
         querySnapshot.forEach((docSnap) => {
-            tasks.push(parseTaskDocument(docSnap));
-        });
-        
-        // Group tasks by week
-        const weekMap = new Map<string, TaskData[]>();
-        
-        tasks.forEach(task => {
-            const { week, year } = getWeekNumber(task.timeStart);
-            const weekKey = `${year}-W${week}`;
+            const data = docSnap.data();
+            const timeStart = data.timeStart?.toDate ? data.timeStart.toDate() : new Date(data.timeStart);
+            const timeEnd = data.timeEnd?.toDate ? data.timeEnd.toDate() : new Date(data.timeEnd);
             
-            if (!weekMap.has(weekKey)) {
-                weekMap.set(weekKey, []);
-            }
-            weekMap.get(weekKey)?.push(task);
+            tasks.push({
+                id: docSnap.id,
+                title: data.title || 'Untitled Task',
+                description: data.description,
+                timeStart,
+                timeEnd,
+                assignedTo: data.assignedTo || '',
+                createdBy: data.createdBy || '',
+                createdByName: data.createdByName || '',
+                createdByAvatar: data.createdByAvatar || '',
+                householdId: data.householdId || '',
+                points: data.points || 0,
+                done: data.done || false,
+                imgEvidence: data.imgEvidence || '',
+                verificationStatus: data.verificationStatus || 'not_reviewed',
+            });
         });
         
-        // Collect all unique user IDs across all weeks for batch fetching
+        // Collect all unique user IDs from assignedTo and createdBy fields
         const allUserIds = new Set<string>();
-        for (const weekTasks of weekMap.values()) {
-            weekTasks.forEach(task => {
-                if (task.done) {
-                    const userId = extractUserId(task.assignedTo);
-                    if (userId) allUserIds.add(userId);
-                }
-            });
-        }
+        tasks.forEach(task => {
+            const assignedUserId = extractUserId(task.assignedTo);
+            const createdByUserId = extractUserId(task.createdBy);
+            if (assignedUserId) allUserIds.add(assignedUserId);
+            if (createdByUserId) allUserIds.add(createdByUserId);
+        });
         
         // Fetch all user data once and cache it
         const userDataCache = new Map<string, string>();
@@ -424,6 +423,27 @@ export async function getWeeklySummariesForHousehold(householdId: string): Promi
             const usersData = await Promise.all(userDataPromises);
             usersData.forEach(u => userDataCache.set(u.userId, u.name));
         }
+        
+        // Add user names to tasks
+        tasks.forEach(task => {
+            const assignedUserId = extractUserId(task.assignedTo);
+            const createdByUserId = extractUserId(task.createdBy);
+            task.assignedToName = userDataCache.get(assignedUserId) || 'Ukjent bruker';
+            task.createdByName = userDataCache.get(createdByUserId) || 'Ukjent bruker';
+        });
+        
+        // Group tasks by week
+        const weekMap = new Map<string, TaskData[]>();
+        
+        tasks.forEach(task => {
+            const { week, year } = getWeekNumber(task.timeStart);
+            const weekKey = `${year}-W${week}`;
+            
+            if (!weekMap.has(weekKey)) {
+                weekMap.set(weekKey, []);
+            }
+            weekMap.get(weekKey)?.push(task);
+        });
         
         // Create weekly summaries
         const weeklySummaries: WeeklySummary[] = [];

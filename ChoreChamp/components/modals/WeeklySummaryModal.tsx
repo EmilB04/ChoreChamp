@@ -191,6 +191,27 @@ export default function WeeklySummaryModal({
                     </Text>
                   )}
 
+                  <View style={styles.taskInfo}>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="calendar-outline" size={14} color={colors.lightNonInteractiveText} />
+                      <Text style={[styles.infoText, { color: colors.lightNonInteractiveText }]}>
+                        {formatDate(task.timeStart)} - {formatDate(task.timeEnd)}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="person-outline" size={14} color={colors.lightNonInteractiveText} />
+                      <Text style={[styles.infoText, { color: colors.lightNonInteractiveText }]}>
+                        Tildelt til: {task.assignedToName || 'Ukjent'}
+                      </Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                      <Ionicons name="create-outline" size={14} color={colors.lightNonInteractiveText} />
+                      <Text style={[styles.infoText, { color: colors.lightNonInteractiveText }]}>
+                        Opprettet av: {task.createdByName || 'Ukjent'}
+                      </Text>
+                    </View>
+                  </View>
+
                   <View style={styles.taskFooter}>
                     <Text
                       style={[
@@ -327,6 +348,19 @@ const styles = StyleSheet.create({
   taskDescription: {
     fontSize: 14,
     marginBottom: 8,
+  },
+  taskInfo: {
+    marginTop: 6,
+    marginBottom: 8,
+    gap: 4,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  infoText: {
+    fontSize: 12,
   },
   taskFooter: {
     flexDirection: "row",
