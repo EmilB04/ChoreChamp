@@ -11,6 +11,7 @@ import { requestPermissionWithCheck } from "@/lib/permissionUtils";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Image,
@@ -42,6 +43,7 @@ export default function EditProfileModal({
     onSave,
 }: EditProfileModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation('app');
   const [username, setUsername] = useState(currentUsername);
   const [imageUri, setImageUri] = useState(currentImageUri);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +51,7 @@ export default function EditProfileModal({
 
     const handleSave = async () => {
         if (username.trim() === '') {
-            Alert.alert('Feil', 'Brukernavnet kan ikke være tomt');
+          Alert.alert(t('profile.editProfileForm.errors.emptyTitle'), t('profile.editProfileForm.errors.empty'));
             return;
         }
         
@@ -61,13 +63,10 @@ export default function EditProfileModal({
             onClose();
             
             // Then show success message
-            Alert.alert(
-                'Suksess!',
-                'Profilen din er oppdatert'
-            );
+            Alert.alert(t('profile.editProfileForm.successTitle'), t('profile.editProfileForm.successMessage'));
         } catch (error) {
             console.error('Error saving profile:', error);
-            Alert.alert('Feil', 'Kunne ikke lagre profilen. Vennligst prøv igjen.');
+            Alert.alert(t('profile.editProfileForm.errorTitle'), t('profile.editProfileForm.errorMessage'));
         } finally {
             setIsLoading(false); 
         }
@@ -101,7 +100,7 @@ export default function EditProfileModal({
                 setImageUri(result.assets[0].uri);
             }
         } catch (error) {
-            Alert.alert('Feil', 'Kunne ikke velge bilde');
+            Alert.alert(t('profile.editProfileForm.errorTitle'), t('profile.editProfileForm.errorPickImage'));
             console.error('Error picking image:', error);
         }
     };
@@ -126,7 +125,7 @@ export default function EditProfileModal({
         setImageUri(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert('Feil', 'Kunne ikke ta bilde');
+      Alert.alert(t('profile.editProfileForm.errorTitle'), t('profile.editProfileForm.errorTakePhoto'));
             console.error('Error taking photo:', error);
     }
   };
@@ -138,12 +137,16 @@ export default function EditProfileModal({
   };
 
   const showImageOptions = () => {
-    Alert.alert("Velg bilde", "Hvordan vil du legge til et profilbilde?", [
-      { text: "Galleri", onPress: pickImage },
-      { text: "Kamera", onPress: takePhoto },
-      { text: "Avatar", onPress: () => setShowAvatarModal(true) },
-      { text: "Avbryt", style: "cancel" },
-    ]);
+    Alert.alert(
+      t('profile.editProfileForm.selectImageTitle'),
+      t('profile.editProfileForm.selectImageMessage'),
+      [
+        { text: t('profile.editProfileForm.gallery'), onPress: pickImage },
+        { text: t('profile.editProfileForm.camera'), onPress: takePhoto },
+        { text: t('profile.editProfileForm.avatar'), onPress: () => setShowAvatarModal(true) },
+        { text: t('profile.cancel'), style: 'cancel' },
+      ]
+    );
   };
 
     return (
@@ -162,24 +165,24 @@ export default function EditProfileModal({
             >
                 {/* Header */}
                 <View style={[styles.header, { borderBottomColor: colors.contextBackground }]}>
-                    <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-                        <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
-                    </TouchableOpacity>
-                    
-                    <Text style={[styles.headerTitle, { color: colors.text }]}>Rediger profil</Text>
-                    
-                    <TouchableOpacity 
-                        onPress={handleSave} 
-                        style={styles.headerButton}
-                        disabled={isLoading}
-                    >
-                        <Text style={[
-                            styles.saveText, 
-                            { color: isLoading ? colors.lightDarkText : colors.tint }
-                        ]}>
-                            {isLoading ? 'Lagrer...' : 'Lagre'}
-                        </Text>
-                    </TouchableOpacity>
+                  <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
+                    <Text style={[styles.cancelText, { color: colors.text }]}>{t('profile.cancel')}</Text>
+                  </TouchableOpacity>
+
+                  <Text style={[styles.headerTitle, { color: colors.text }]}>{t('profile.editProfile')}</Text>
+
+                  <TouchableOpacity 
+                    onPress={handleSave} 
+                    style={styles.headerButton}
+                    disabled={isLoading}
+                  >
+                    <Text style={[
+                      styles.saveText, 
+                      { color: isLoading ? colors.lightDarkText : colors.tint }
+                    ]}>
+                      {isLoading ? t('profile.saving') : t('profile.save')}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
         <ScrollView 
@@ -226,14 +229,14 @@ export default function EditProfileModal({
                 <Ionicons name="camera" size={20} color={colors.darkText} />
               </View>
             </TouchableOpacity>
-            <Text style={[styles.imageHint, { color: colors.lightDarkText }]}>
-              Trykk for å endre profilbilde
-            </Text>
+              <Text style={[styles.imageHint, { color: colors.lightDarkText }]}> 
+                {t('profile.editProfileForm.imageHint')}
+              </Text>
           </View>
 
                     {/* Username Section */}
                     <View style={styles.nameSection}>
-                        <Text style={[styles.label, { color: colors.text }]}>Brukernavn</Text>
+                        <Text style={[styles.label, { color: colors.text }]}>{t('profile.editProfileForm.usernameLabel')}</Text>
                         <TextInput
                             style={[
                                 styles.nameInput,
@@ -245,7 +248,7 @@ export default function EditProfileModal({
                             ]}
                             value={username}
                             onChangeText={setUsername}
-                            placeholder="Skriv inn brukernavn"
+                          placeholder={t('profile.editProfileForm.usernamePlaceholder')}
                             placeholderTextColor={colors.lightDarkText}
                             maxLength={30}
                         />
@@ -256,9 +259,9 @@ export default function EditProfileModal({
 
           {/* Additional Info */}
           <View style={styles.infoSection}>
-            <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-              Ditt brukernavn vil være synlig for andre medlemmer i dine husstander.
-            </Text>
+              <Text style={[styles.imageHint, { color: colors.lightDarkText }]}> 
+                {t('profile.editProfileForm.usernameHint')}
+              </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

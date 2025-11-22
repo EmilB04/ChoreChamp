@@ -3,6 +3,7 @@ import { useUser } from "@/contexts/UserContext";
 import { getHouseholdsForUser, getUserHouseholds, Household } from "@/services/householdService";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
     FlatList,
     Modal,
@@ -28,6 +29,7 @@ export default function History() {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
+  const { t } = useTranslation('app');
 
   // Fetch user's households
   useEffect(() => {
@@ -98,21 +100,21 @@ export default function History() {
     }
   };
 
-  // Available filter options
+  // Available filter options (use internal ids, render labels via i18n)
   const filterOptions = [
-    "Fullført",
-    "Ikke fullført",
-    "Denne måneden",
-    "Forrige måned",
-    "Høy aktivitet",
-    "Lav aktivitet"
+    { id: 'completed', labelKey: 'history.filters.options.completed' },
+    { id: 'not_completed', labelKey: 'history.filters.options.notCompleted' },
+    { id: 'this_month', labelKey: 'history.filters.options.thisMonth' },
+    { id: 'prev_month', labelKey: 'history.filters.options.prevMonth' },
+    { id: 'high_activity', labelKey: 'history.filters.options.highActivity' },
+    { id: 'low_activity', labelKey: 'history.filters.options.lowActivity' },
   ];
 
-  // Define mutually exclusive filter groups
+  // Define mutually exclusive filter groups (by id)
   const mutuallyExclusiveGroups = [
-    ["Fullført", "Ikke fullført"],
-    ["Denne måneden", "Forrige måned"],
-    ["Høy aktivitet", "Lav aktivitet"]
+    ['completed', 'not_completed'],
+    ['this_month', 'prev_month'],
+    ['high_activity', 'low_activity'],
   ];
 
   // Helper function to handle filter selection with mutual exclusion
@@ -146,6 +148,7 @@ export default function History() {
     {
       week: "40",
       title: "Oppsummering - Uke 40",
+      statusId: 'completed',
       status: "Fullført",
       count: 9,
       finishedCount: 9,
@@ -157,6 +160,7 @@ export default function History() {
     {
       week: "39",
       title: "Oppsummering - Uke 39",
+      statusId: 'not_completed',
       status: "Ikke fullført",
       count: 5,
       finishedCount: 3,
@@ -168,6 +172,7 @@ export default function History() {
     {
       week: "38",
       title: "Oppsummering - Uke 38",
+      statusId: 'completed',
       status: "Fullført",
       count: 7,
       finishedCount: 7,
@@ -179,6 +184,7 @@ export default function History() {
     {
       week: "37",
       title: "Oppsummering - Uke 37",
+      statusId: 'completed',
       status: "Fullført",
       count: 12,
       finishedCount: 12,
@@ -190,6 +196,7 @@ export default function History() {
     {
       week: "36",
       title: "Oppsummering - Uke 36",
+      statusId: 'not_completed',
       status: "Ikke fullført",
       count: 4,
       finishedCount: 2,
@@ -201,6 +208,7 @@ export default function History() {
     {
       week: "35",
       title: "Oppsummering - Uke 35",
+      statusId: 'completed',
       status: "Fullført",
       count: 8,
       finishedCount: 8,
@@ -212,6 +220,7 @@ export default function History() {
     {
       week: "41",
       title: "Oppsummering - Uke 41",
+      statusId: 'completed',
       status: "Fullført",
       count: 11,
       finishedCount: 11,
@@ -223,6 +232,7 @@ export default function History() {
     {
       week: "34",
       title: "Oppsummering - Uke 34",
+      statusId: 'not_completed',
       status: "Ikke fullført",
       count: 3,
       finishedCount: 1,
@@ -273,20 +283,20 @@ export default function History() {
     // If no filters selected, show all (for this household and search)
     if (selectedFilters.length === 0) return true;
 
-    // Apply selected filters
-    return selectedFilters.every(filter => {
-      switch (filter) {
-        case "Fullført":
-          return item.status === "Fullført";
-        case "Ikke fullført":
-          return item.status === "Ikke fullført";
-        case "Denne måneden":
+    // Apply selected filters (selectedFilters contains ids)
+    return selectedFilters.every(filterId => {
+      switch (filterId) {
+        case 'completed':
+          return item.statusId === 'completed';
+        case 'not_completed':
+          return item.statusId === 'not_completed';
+        case 'this_month':
           return getItemMonth(item) === getCurrentMonth();
-        case "Forrige måned":
+        case 'prev_month':
           return getItemMonth(item) === getPreviousMonth();
-        case "Høy aktivitet":
+        case 'high_activity':
           return item.count >= 8; // Consider 8+ tasks as high activity
-        case "Lav aktivitet":
+        case 'low_activity':
           return item.count < 8; // Consider less than 8 tasks as low activity
         default:
           return true;
@@ -300,19 +310,19 @@ export default function History() {
     >
       {/* Header */}
       <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
-        Historikk
+        {t('history.title')}
       </Text>
 
       {loadingHouseholds ? (
         <View style={styles.centerMessage}>
           <Text style={[styles.messageText, { color: colors.text }]}>
-            Laster husstander...
+            {t('history.loadingHouseholds')}
           </Text>
         </View>
       ) : households.length === 0 ? (
         <View style={styles.centerMessage}>
           <Text style={[styles.messageText, { color: colors.text }]}>
-            Du er ikke medlem av noen husstander ennå.
+            {t('history.noHouseholds')}
           </Text>
         </View>
       ) : (
@@ -326,7 +336,7 @@ export default function History() {
             onPress={() => setShowHouseholdDropdown(!showHouseholdDropdown)}
           >
             <Text style={[styles.dropdownText, { color: colors.darkText }]}>
-              Husholdning: {household}{" "}
+              {t('history.householdLabel')}: {household}{" "}
               <Ionicons
                 name={showHouseholdDropdown ? "chevron-up" : "chevron-down"}
                 size={16}
@@ -368,7 +378,7 @@ export default function History() {
         <View style={[styles.searchBar, { backgroundColor: colors.contextBackground }]}>
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Søk i historikk..."
+            placeholder={t('history.searchPlaceholder')}
             placeholderTextColor={colors.lightNonInteractiveText}
             value={searchText}
             onChangeText={setSearchText}
@@ -399,7 +409,7 @@ export default function History() {
         >
           <View style={[styles.filterModal, { backgroundColor: colors.contextBackground }]}>
             <View style={styles.filterHeader}>
-              <Text style={[styles.filterTitle, { color: colors.text }]}>Filtrer historikk</Text>
+              <Text style={[styles.filterTitle, { color: colors.text }]}>{t('history.filters.title')}</Text>
               <TouchableOpacity onPress={() => setShowFiltersModal(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
@@ -407,22 +417,22 @@ export default function History() {
 
             <FlatList
               data={filterOptions}
-              keyExtractor={(item) => item}
+              keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[
                     styles.filterOption,
-                    selectedFilters.includes(item) && { backgroundColor: colors.tint }
+                    selectedFilters.includes(item.id) && { backgroundColor: colors.tint }
                   ]}
-                  onPress={() => handleFilterSelection(item)}
+                  onPress={() => handleFilterSelection(item.id)}
                 >
                   <Text style={[
                     styles.filterOptionText,
-                    { color: selectedFilters.includes(item) ? colors.darkText : colors.text }
+                    { color: selectedFilters.includes(item.id) ? colors.darkText : colors.text }
                   ]}>
-                    {item}
+                    {t(item.labelKey)}
                   </Text>
-                  {selectedFilters.includes(item) && (
+                  {selectedFilters.includes(item.id) && (
                     <Ionicons name="checkmark" size={20} color={colors.darkText} />
                   )}
                 </TouchableOpacity>
@@ -436,7 +446,7 @@ export default function History() {
                 onPress={() => setSelectedFilters([])}
               >
                 <Text style={[styles.clearFiltersText, { color: colors.statusFailedText }]}>
-                  Fjern alle
+                  {t('history.filters.clearAll')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -444,7 +454,7 @@ export default function History() {
                 onPress={() => setShowFiltersModal(false)}
               >
                 <Text style={[styles.applyFiltersText, { color: colors.darkText }]}>
-                  Bruk filtre
+                  {t('history.filters.apply')}
                 </Text>
               </TouchableOpacity>
             </View>

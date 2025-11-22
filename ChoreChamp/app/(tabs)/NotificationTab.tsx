@@ -2,11 +2,13 @@ import Notification from "@/components/notifications/notification";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import commonStyles from "../commonStyles";
 
 export default function Notifications() {
     const { colors } = useTheme();
+    const { t } = useTranslation('app');
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
     const [selectedNotification, setSelectedNotification] = useState<typeof notifications[0] | null>(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -125,15 +127,15 @@ export default function Notifications() {
         const notificationTime = new Date(timestamp);
         const diffInMinutes = Math.floor((now.getTime() - notificationTime.getTime()) / (1000 * 60));
 
-        if (diffInMinutes < 60) return `${diffInMinutes} min siden`;
+        if (diffInMinutes < 60) return t('notifications.minutesAgo', { count: diffInMinutes });
 
         const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return `${diffInHours} timer siden`;
+        if (diffInHours < 24) return t('notifications.hoursAgo', { count: diffInHours });
 
         const diffInDays = Math.floor(diffInHours / 24);
-        if (diffInDays === 1) return "1 dag siden";
+        if (diffInDays === 1) return t('notifications.oneDayAgo');
 
-        return `${diffInDays} dager siden`;
+        return t('notifications.daysAgo', { count: diffInDays });
     };
 
     // If a notification is selected, show the detail view
@@ -151,11 +153,13 @@ export default function Notifications() {
         <View style={[commonStyles.container, { backgroundColor: colors.background }]}>
             <View style={styles.mainContent}>
                 <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
-                    Varsler
+                    {t('notifications.title')}
                 </Text>
                 {unreadNotifications.length > 0 && (
-                    <Text style={[styles.subtitle, { color: colors.lightDarkText }]}>
-                        Du har <Text style={{ color: colors.tint }}>{unreadNotifications.length} uleste varslinger</Text>
+                    <Text style={[styles.subtitle, { color: colors.lightDarkText }]}> 
+                        {t('notifications.youHave')}{' '}
+                        <Text style={{ color: colors.tint }}>{unreadNotifications.length}</Text>{' '}
+                        {t('notifications.unread')}
                     </Text>
                 )}
 
@@ -179,7 +183,7 @@ export default function Notifications() {
                             {groupedNotifications.today.filter(n => !n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>I dag</Text>
+                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>{t('notifications.today')}</Text>
                                         <Text style={[styles.sectionDivider, {borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.today.filter(n => !n.read).map((notification) => (
@@ -219,7 +223,7 @@ export default function Notifications() {
                             {groupedNotifications.thisWeek.filter(n => !n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>Denne uken</Text>
+                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>{t('notifications.thisWeek')}</Text>
                                         <Text style={[styles.sectionDivider, { borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.thisWeek.filter(n => !n.read).map((notification) => (
@@ -259,7 +263,7 @@ export default function Notifications() {
                             {groupedNotifications.earlier.filter(n => !n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>Tidligere</Text>
+                                        <Text style={[styles.sectionTitle, { color: colors.lightNonInteractiveText }]}>{t('notifications.earlier')}</Text>
                                         <Text style={[styles.sectionDivider, { borderColor: colors.white }]}></Text>
                                     </View>
                                     {groupedNotifications.earlier.filter(n => !n.read).map((notification) => (
@@ -299,7 +303,7 @@ export default function Notifications() {
                             {unreadNotifications.length === 0 && (
                                 <View style={styles.emptyState}>
                                     <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>💬</Text>
-                                    <Text style={[styles.emptyStateText, { color: colors.tint }]}>Du er ajour</Text>
+                                    <Text style={[styles.emptyStateText, { color: colors.tint }]}>{t('notifications.youAreUpToDate')}</Text>
                                 </View>
                             )}
                         </ScrollView>
@@ -321,7 +325,7 @@ export default function Notifications() {
                             {groupedNotifications.thisWeek.filter(n => n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Denne uken</Text>
+                                        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('notifications.thisWeek')}</Text>
                                     </View>
                                     {groupedNotifications.thisWeek.filter(n => n.read).map((notification) => (
                                         <TouchableOpacity
@@ -363,7 +367,7 @@ export default function Notifications() {
                             {groupedNotifications.earlier.filter(n => n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
-                                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Tidligere</Text>
+                                        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('notifications.earlier')}</Text>
                                     </View>
                                     {groupedNotifications.earlier.filter(n => n.read).map((notification) => (
                                         <TouchableOpacity
@@ -387,8 +391,8 @@ export default function Notifications() {
                                                         </Text>
                                                     )}
                                                     {notification.points && (
-                                                        <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}>
-                                                            Mottok {notification.points} poeng
+                                                        <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}> 
+                                                            {t('notifications.receivedPoints', { count: notification.points })}
                                                         </Text>
                                                     )}
                                                     <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
@@ -405,7 +409,7 @@ export default function Notifications() {
                             {notifications.filter(n => n.read).length === 0 && (
                                 <View style={styles.emptyState}>
                                     <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>💬</Text>
-                                    <Text style={[styles.emptyStateText, { color: colors.lightDarkText }]}>Du er ajour</Text>
+                                    <Text style={[styles.emptyStateText, { color: colors.lightDarkText }]}>{t('notifications.youAreUpToDate')}</Text>
                                 </View>
                             )}
                         </ScrollView>
@@ -425,7 +429,7 @@ export default function Notifications() {
                         styles.switcherText,
                         { color: selectedTab === 'unread' ? colors.tint : colors.text }
                     ]}>
-                        Uleste
+                        {t('notifications.unreadTab')}
                     </Text>
                 </TouchableOpacity>
 
@@ -440,7 +444,7 @@ export default function Notifications() {
                         styles.switcherText,
                         { color: selectedTab === 'previous' ? colors.tint : colors.text }
                     ]}>
-                        Tidligere varsler
+                        {t('notifications.previousTab')}
                     </Text>
                 </TouchableOpacity>
             </View>

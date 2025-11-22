@@ -1,0 +1,330 @@
+{
+  "dashboard": {
+    "title": "Today's tasks:",
+    "loadingTasks": "Loading tasks...",
+    "noTasks": "No tasks for this day 🎉"
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "forenoon": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Good night"
+  },
+  "alerts": {
+    "permissionRequiredTitle": "Permission required",
+    "permissionRequiredMessage": "We need access to the camera to take a photo as proof.",
+    "ok": "OK",
+    "successTitle": "Success!",
+    "successComplete": "Task completed with photo evidence",
+    "errorTitle": "Error",
+    "couldNotComplete": "Could not complete task: {{msg}}",
+    "verifiedTitle": "Verified",
+    "verifiedMessage": "Task has been verified",
+    "rejectedTitle": "Rejected",
+    "rejectedMessage": "Task has been rejected",
+    "resetTitle": "Reset",
+    "resetMessage": "Verification has been reset"
+  },
+  "history": {
+    "title": "History",
+    "loadingHouseholds": "Loading households...",
+    "noHouseholds": "You are not member of any households yet.",
+    "householdLabel": "Household",
+    "searchPlaceholder": "Search history...",
+    "week": "Week",
+    "allTasksWere": "All tasks were:",
+    "tasksCount": "Tasks: {{count}}",
+    "filters": {
+      "title": "Filter history",
+      "options": {
+        "completed": "Completed",
+        "notCompleted": "Not completed",
+        "thisMonth": "This month",
+        "prevMonth": "Previous month",
+        "highActivity": "High activity",
+        "lowActivity": "Low activity"
+      },
+      "clearAll": "Clear all",
+      "apply": "Apply filters"
+    },
+    "status": {
+      "completed": "Completed",
+      "notCompleted": "Not completed"
+    }
+  },
+  "addTask": {
+    "title": "Create new\ntask",
+    "selectDate": "Select date",
+    "selectTime": "Select time",
+    "otherDate": "Other",
+    "otherDateSub": "date",
+    "fromLabel": "From",
+    "toLabel": "To",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Add a title...",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Add a description...",
+    "pointsLabel": "Points",
+    "assignTitle": "Assign",
+    "loadingMembers": "Loading members...",
+    "noMembers": "No household members",
+    "noHouseholdTitle": "You are not a member of a household",
+    "noHouseholdBody": "You must be member of a household to create tasks. Go to the profile page to create or join a household.",
+    "notMemberTitle": "Not a household member",
+    "notMemberMessage": "You must be a member of a household to create tasks. Go to the profile page to create or join a household.",
+    "errorTitle": "Error",
+    "selectPerson": "Please select who will perform the task",
+    "couldNotIdentifyUser": "Could not identify the user",
+    "couldNotFindHousehold": "Could not find household ID",
+    "successTitle": "Success!",
+    "successMessage": "Task created",
+    "createFailed": "Could not create the task. Please try again.",
+    "createError": "An error occurred while creating the task",
+    "saving": "Saving...",
+    "saveButton": "Save",
+    "cancel": "Cancel",
+    "selectStartTime": "Select start time",
+    "selectEndTime": "Select end time",
+    "done": "Done"
+  },
+  "leaderboard": {
+    "title": "Leaderboard:",
+    "loading": "Loading leaderboard...",
+    "noMembers": "No household members",
+    "needMore": "Need at least 3 members for leaderboard"
+  },
+  "actions": {
+    "undo": "Undo",
+    "verify": "Verify",
+    "reject": "Reject",
+    "undoVerify": "Undo verification",
+    "undoReject": "Undo rejection",
+    "complete": "Complete"
+  },
+  "weekdays": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "points": {
+    "short": "pts"
+  }
+  ,
+  "months": {
+    "january": "January",
+    "february": "February",
+    "march": "March",
+    "april": "April",
+    "may": "May",
+    "june": "June",
+    "july": "July",
+    "august": "August",
+    "september": "September",
+    "october": "October",
+    "november": "November",
+    "december": "December"
+  },
+  "calendar": {
+    "today": "Today",
+    "cancel": "Cancel"
+  }
+  ,
+  "notifications": {
+    "title": "Notifications",
+    "youHave": "You have",
+    "unread": "unread notifications",
+    "unreadTab": "Unread",
+    "previousTab": "Previous notifications",
+    "today": "Today",
+    "thisWeek": "This week",
+    "earlier": "Earlier",
+    "youAreUpToDate": "You're all caught up",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} hrs ago",
+    "oneDayAgo": "1 day ago",
+    "daysAgo": "{{count}} days ago",
+    "receivedPoints": "Received {{count}} points"
+    ,
+    "detailTitle": "Notification",
+    "timeLabel": "Time",
+    "pointsLabel": "Points",
+    "statusLabel": "Status",
+    "readLabel": "Read ✅",
+    "unreadLabel": "Unread ❌",
+    "markAsRead": "Mark as read",
+    "markAsUnread": "Mark as unread"
+  }
+  ,
+  "profile": {
+    "title": "Profile &\nSettings",
+    "editProfile": "Edit profile",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+
+    "editProfileForm": {
+      "imageHint": "Tap to change profile picture",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "Enter username",
+      "usernameHint": "Your username will be visible to other household members.",
+      "errors": {
+        "emptyTitle": "Error",
+        "empty": "Username cannot be empty"
+      },
+      "successTitle": "Success!",
+      "successMessage": "Your profile has been updated",
+      "errorTitle": "Error",
+      "errorMessage": "Could not save profile. Please try again.",
+      "errorPickImage": "Could not pick image",
+      "errorTakePhoto": "Could not take photo",
+      "selectImageTitle": "Choose image",
+      "selectImageMessage": "How would you like to add a profile picture?",
+      "gallery": "Gallery",
+      "camera": "Camera",
+      "avatar": "Avatar"
+    },
+
+    "notSpecified": "Not specified",
+
+    "account": {
+      "title": "My account",
+      "description": "Manage account information and personal settings",
+      "editInfo": "Edit information",
+      "personalInfoTitle": "Personal information",
+      "firstNameLabel": "First name",
+      "firstNamePlaceholder": "First name",
+      "lastNameLabel": "Last name",
+      "lastNamePlaceholder": "Last name",
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "invalidEmailTitle": "Invalid email",
+      "invalidEmailMessage": "Please enter a valid email address",
+      "invalidNameTitle": "Invalid name",
+      "invalidNameMessage": "First name cannot be empty",
+      "successTitle": "Success!",
+      "successMessage": "Your account information has been updated",
+      "securityTitle": "Security",
+      "changePassword": "Change password",
+      "changePasswordDescription": "Update your password",
+      "privacy": "Privacy",
+      "privacyDescription": "See how we handle your data",
+      "privacyBody": "We only store the information necessary to provide the service. All data is encrypted and stored securely. You can request access or deletion of your data at any time. We follow GDPR and applicable privacy laws.",
+      "dangerZoneTitle": "Danger Zone",
+      "deleteAccount": "Delete account",
+      "deleteAccountDescription": "Permanently delete your account and all data",
+      "deleteConfirmTitle": "Delete account",
+      "deleteConfirmMessage": "Are you sure you want to delete your account? This action cannot be undone.",
+      "deleteConfirmAction": "Delete",
+      "deleteSuccessTitle": "Account deleted",
+      "deleteSuccessMessage": "Your account has been deleted"
+    },
+
+    "households": {
+      "title": "My households",
+      "description": "View and manage your linked households",
+      "loading": "Loading households...",
+      "emptyTitle": "You are not member of any households yet.",
+      "emptyBody": "Create a new household or join an existing one",
+      "createHousehold": "Create household",
+      "joinWithCode": "Join with code",
+      "youAreMemberOf": "You are member of {{count}} household{{count, plural, one{} other{s}}}",
+      "yourHouseholdsTitle": "Your households",
+      "roleAdmin": "Administrator",
+      "roleMember": "Member",
+      "members": "members",
+      "viewMembers": "View members",
+      "manage": "Manage",
+      "share": "Share",
+      "leave": "Leave",
+      "actionsTitle": "Actions",
+      "createNewTitle": "Create new household",
+      "createNewDescription": "Start a new household and invite members",
+      "joinTitle": "Join a household",
+      "joinDescription": "Use an invitation code to join",
+      "createModalTitle": "New household",
+      "creating": "Creating...",
+      "create": "Create",
+      "householdNameLabel": "Household name",
+      "householdNamePlaceholder": "e.g. The Hansen Family",
+      "membersTitle": "Members",
+      "loadingMembers": "Loading members...",
+      "memberRoleAdmin": "Admin",
+      "memberRoleMember": "Member",
+      "joinModalTitle": "Join household",
+      "joining": "Joining...",
+      "join": "Join",
+      "joinCodeLabel": "Household code",
+      "joinCodePlaceholder": "Enter household code",
+      "joinCodeHint": "The code looks like: NMogPiBLWF4nmwsHBTlP\nOr paste the full link: households/NMogPiBLWF4nmwsHBTlP"
+      ,
+      "nameEmptyMessage": "Household name cannot be empty",
+      "userNotIdentifiedMessage": "Could not identify the user",
+      "createSuccessMessage": "Household \"{{name}}\" created!",
+      "createFailedMessage": "Could not create household. Please try again.",
+      "createErrorMessage": "An error occurred while creating the household",
+      "joinCodeEmptyMessage": "Please enter a household code",
+      "joinSuccessMessage": "You are now a member of \"{{name}}\"!",
+      "joinFailedMessage": "Could not join the household.",
+      "joinErrorMessage": "An error occurred. Please try again.",
+      "leaveConfirmTitle": "Leave household",
+      "leaveConfirmMessage": "Are you sure you want to leave \"{{name}}\"?",
+      "leaveConfirmAction": "Leave",
+      "leaveFailedMessage": "Could not leave the household.",
+      "leaveSuccessMessage": "You have left \"{{name}}\"",
+      "leaveErrorMessage": "An error occurred. Please try again.",
+      "loadMembersErrorMessage": "Could not load members",
+      "shareTitle": "Share household code",
+      "shareMessage": "Join our household \"{{name}}\"!\n\nUse this code: {{code}}\n\nOr copy the full link: households/{{code}}",
+      "copyCodeLabel": "Copy code",
+      "copiedMessage": "Code \"{{code}}\" copied!",
+      "closeLabel": "Close",
+      "createHint": "You will automatically be administrator for the new household",
+      "membersTotal": "{{count}} members total"
+    },
+
+    "appSettings": {
+      "title": "App settings",
+      "description": "Customize app functionality and appearance",
+      "sectionTitle": "App settings",
+      "notifications": "Push notifications",
+      "notificationsDescription": "Receive alerts about new tasks and messages",
+      "darkMode": "Dark mode",
+      "darkModeDescription": "Switch the theme between light and dark",
+      "locationServices": "Location services",
+      "locationServicesDescription": "Allow the app to use your location for location-based tasks"
+    },
+
+    "logout": {
+      "title": "Sign out",
+      "description": "Sign out of your account"
+    },
+
+    "more": "More",
+    "help": {
+      "title": "Help & support",
+      "description": "Contact information and support"
+    },
+    "contact": {
+      "emailLabel": "Email:",
+      "phoneLabel": "Phone:"
+    },
+    "about": {
+      "title": "About the app",
+      "description": "Information about ChoreChamp and the developers",
+      "body": "ChoreChamp is an app for organizing and managing household chores. You can create households, assign tasks, and follow progress with leaderboards and a points system. The app was created to make everyday chores fun and engaging for the whole family.\n\nDeveloped by:\n- Emil Berglund\n- Andreas B. O. Skaarberg\n- Sebastian W. Thomsen\n- Ida Tollaksen\n- Khalid H. Osman"
+    },
+    "testUserLoader": {
+      "title": "Test User Loader",
+      "reset": "Reset to Authenticated User",
+      "placeholder": "Enter user ID from Firestore",
+      "loading": "Loading...",
+      "load": "Load User",
+      "hint": "💡 Find user IDs in Firebase Console → Firestore → users collection"
+    }
+  }
+}

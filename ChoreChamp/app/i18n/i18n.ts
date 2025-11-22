@@ -13,22 +13,31 @@ import enPermissions from './locales/en/permissions.json';
 import esPermissions from './locales/es/permissions.json';
 import nbPermissions from './locales/nb/permissions.json';
 
+import deApp from './locales/de/app.json';
+import enApp from './locales/en/app.json';
+import esApp from './locales/es/app.json';
+import nbApp from './locales/nb/app.json';
+
 const resources = {
   en: { 
     onboarding: enOnboarding,
     permissions: enPermissions,
+    app: enApp,
   },
   nb: { 
     onboarding: nbOnboarding,
     permissions: nbPermissions,
+    app: nbApp,
   },
   es: { 
     onboarding: esOnboarding,
     permissions: esPermissions,
+    app: esApp,
   },
   de: { 
     onboarding: deOnboarding,
     permissions: dePermissions,
+    app: deApp,
   },
 };
 
@@ -52,8 +61,8 @@ export async function initI18n() {
       lng: defaultLanguage,
       fallbackLng: 'en',
       resources,
-      ns: ['onboarding', 'permissions'],
-      defaultNS: 'onboarding',
+        ns: ['onboarding', 'permissions', 'app'],
+        defaultNS: 'onboarding',
       interpolation: { escapeValue: false },
     });
 

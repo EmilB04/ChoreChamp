@@ -8,6 +8,7 @@ import {
     Image,
 } from "react-native";
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import Header from '../profile/Header';
 
 interface Notification {
@@ -31,6 +32,7 @@ interface NotificationProps {
 
 export default function Notification({ notification, onBack, onToggleReadStatus, rightElement }: NotificationProps) {
     const { colors } = useTheme();
+    const { t } = useTranslation('app');
 
     const formatTimestamp = (timestamp: string): string => {
         const date = new Date(timestamp);
@@ -49,7 +51,7 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Header 
-                title="Varsling"
+                title={t('notifications.detailTitle')}
                 onBack={onBack}
                 rightElement={rightElement}
             />
@@ -72,7 +74,7 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
 
                         <View style={styles.infoRow}>
                             <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
-                                Tid
+                                {t('notifications.timeLabel')}
                             </Text>
                             <Text style={[styles.infoValue, { color: colors.text }]}>
                                 {formatTimestamp(notification.timestamp)}
@@ -82,7 +84,7 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                         {notification.points !== null && (
                             <View style={styles.infoRow}>
                                 <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
-                                    Poeng
+                                    {t('notifications.pointsLabel')}
                                 </Text>
                                 <Text style={[styles.infoValue, { color: colors.text }]}>
                                     {notification.points}
@@ -92,10 +94,10 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
 
                         <View style={styles.infoRow}>
                             <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
-                                Status
+                                {t('notifications.statusLabel')}
                             </Text>
                             <Text style={[styles.infoValue, { color: colors.text }]}>
-                                {notification.read ? "Lest ✅" : "Ulest ❌"}
+                                {notification.read ? t('notifications.readLabel') : t('notifications.unreadLabel')}
                             </Text>
                         </View>
                     </View>
@@ -110,7 +112,7 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                         >
                             <Ionicons name="checkmark-circle-outline" size={20} color={colors.darkText} />
                             <Text style={[styles.actionButtonText, { color: colors.darkText }]}>
-                                Marker som lest
+                                {t('notifications.markAsRead')}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -122,7 +124,7 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                         >
                             <Ionicons name="mail-unread-outline" size={20} color={colors.tint} />
                             <Text style={[styles.actionButtonText, { color: colors.tint }]}>
-                                Marker som ulest
+                                {t('notifications.markAsUnread')}
                             </Text>
                         </TouchableOpacity>
                     </View>
