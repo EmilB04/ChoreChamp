@@ -1,6 +1,7 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ScrollView,
     StyleSheet,
@@ -17,6 +18,7 @@ interface AppSettingsScreenProps {
 export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
+    const { t } = useTranslation('app');
 
     const handleNotificationToggle = (value: boolean) => {
         updateUserData({ notificationsEnabled: value });
@@ -31,28 +33,24 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
     };
 
     return(
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}> 
             <Header 
-                title="App Innstillinger" 
+                title={t('profile.appSettings.title')}
                 onBack={onBack} 
             />
 
             {/* Settings */}
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                        App-innstillinger
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}> 
+                        {t('profile.appSettings.sectionTitle')}
                     </Text>
                     
                     <View style={[styles.infoCard, { backgroundColor: colors.contextBackground }]}>
                         <View style={styles.switchRow}>
                             <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Push-varsler
-                                </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Motta varsler om nye oppgaver og meldinger
-                                </Text>
+                                <Text style={[styles.switchLabel, { color: colors.text }]}>{t('profile.appSettings.notifications')}</Text>
+                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>{t('profile.appSettings.notificationsDescription')}</Text>
                             </View>
                             <Switch
                                 value={userData?.notificationsEnabled || false}
@@ -64,12 +62,8 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
                         
                         <View style={styles.switchRow}>
                             <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Mørk modus
-                                </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Endre fargetema mellom lys og mørk modus
-                                </Text>
+                                <Text style={[styles.switchLabel, { color: colors.text }]}>{t('profile.appSettings.darkMode')}</Text>
+                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>{t('profile.appSettings.darkModeDescription')}</Text>
                             </View>
                             <Switch
                                 value={userData?.darkModeEnabled}
@@ -81,12 +75,8 @@ export default function AppSettingsScreen({ onBack }: AppSettingsScreenProps) {
                         
                         <View style={styles.switchRow}>
                             <View style={styles.switchInfo}>
-                                <Text style={[styles.switchLabel, { color: colors.text }]}>
-                                    Lokasjonstjenester
-                                </Text>
-                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>
-                                    Tillat appen å bruke din lokasjon for stedbaserte oppgaver
-                                </Text>
+                                <Text style={[styles.switchLabel, { color: colors.text }]}>{t('profile.appSettings.locationServices')}</Text>
+                                <Text style={[styles.switchDescription, { color: colors.lightDarkText }]}>{t('profile.appSettings.locationServicesDescription')}</Text>
                             </View>
                             <Switch
                                 value={userData?.locationEnabled || false}

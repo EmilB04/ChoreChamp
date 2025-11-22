@@ -3,6 +3,7 @@ import { useUser } from '@/contexts/UserContext';
 import { createHousehold, getHouseholdMembers, getHouseholdsForUser, getUserHouseholds, joinHousehold, leaveHousehold } from '@/services/householdService';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Alert,
     Image,
@@ -37,6 +38,7 @@ interface Household {
 export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) {
     const { colors } = useTheme();
     const { userData, refreshUserData } = useUser();
+    const { t } = useTranslation('app');
     
     // Fetch households from database
     const [households, setHouseholds] = useState<Household[]>([]);
@@ -136,12 +138,12 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 
     const handleCreateHousehold = async () => {
         if (newHouseholdName.trim() === '') {
-            Alert.alert('Feil', 'Husstandsnavnet kan ikke være tomt');
+            Alert.alert(t('alerts.errorTitle'), t('profile.households.nameEmptyMessage'));
             return;
         }
 
         if (!userData?.id) {
-            Alert.alert('Feil', 'Kunne ikke identifisere brukeren');
+            Alert.alert(t('alerts.errorTitle'), t('profile.households.userNotIdentifiedMessage'));
             return;
         }
 
@@ -149,7 +151,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
         try {
             const householdId = await createHousehold(newHouseholdName.trim(), userData.id);
             
-            if (householdId) {
+                if (householdId) {
                 // Refresh user data to get updated household array
                 await refreshUserData();
                 
@@ -158,13 +160,13 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 
                 setNewHouseholdName('');
                 setShowCreateModal(false);
-                Alert.alert('Suksess', `Husstand "${newHouseholdName.trim()}" er opprettet!`);
+                Alert.alert(t('alerts.successTitle'), t('profile.households.createSuccessMessage', { name: newHouseholdName.trim() }));
             } else {
-                Alert.alert('Feil', 'Kunne ikke opprette husstanden. Vennligst prøv igjen.');
+                Alert.alert(t('alerts.errorTitle'), t('profile.households.createFailedMessage'));
             }
         } catch (error) {
             console.error('Error creating household:', error);
-            Alert.alert('Feil', 'En feil oppstod ved oppretting av husstanden.');
+            Alert.alert(t('alerts.errorTitle'), t('profile.households.createErrorMessage'));
         } finally {
             setIsCreating(false);
         }
@@ -172,12 +174,12 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 
     const handleJoinHousehold = async () => {
         if (joinCode.trim() === '') {
-            Alert.alert('Feil', 'Vennligst skriv inn en husstandskode');
+            Alert.alert(t('alerts.errorTitle'), t('profile.households.joinCodeEmptyMessage'));
             return;
         }
 
         if (!userData?.id) {
-            Alert.alert('Feil', 'Kunne ikke identifisere brukeren');
+            Alert.alert(t('alerts.errorTitle'), t('profile.households.userNotIdentifiedMessage'));
             return;
         }
 
@@ -200,13 +202,13 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 
                 setJoinCode('');
                 setShowJoinModal(false);
-                Alert.alert('Suksess', `Du er nå medlem av "${result.householdName}"!`);
+                Alert.alert(t('alerts.successTitle'), t('profile.households.joinSuccessMessage', { name: result.householdName }));
             } else {
-                Alert.alert('Feil', result.error || 'Kunne ikke bli med i husstanden.');
+                Alert.alert(t('alerts.errorTitle'), result.error || t('profile.households.joinFailedMessage'));
             }
         } catch (error) {
             console.error('Error joining household:', error);
-            Alert.alert('Feil', 'En feil oppstod. Vennligst prøv igjen.');
+            Alert.alert(t('alerts.errorTitle'), t('profile.households.joinErrorMessage'));
         } finally {
             setIsJoining(false);
         }
@@ -214,12 +216,12 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 
     const handleLeaveHousehold = (household: Household) => {
         Alert.alert(
-            'Forlat husstand',
-            `Er du sikker på at du vil forlate "${household.name}"?`,
+            t('profile.households.leaveConfirmTitle'),
+            t('profile.households.leaveConfirmMessage', { name: household.name }),
             [
-                { text: 'Avbryt', style: 'cancel' },
+                { text: t('profile.cancel'), style: 'cancel' },
                 {
-                    text: 'Forlat',
+                    text: t('profile.households.leaveConfirmAction'),
                     style: 'destructive',
                     onPress: async () => {
                         if (!userData?.id) return;
@@ -234,13 +236,13 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                 // Refresh households list
                                 await fetchHouseholds();
                                 
-                                Alert.alert('Vellykket', `Du har forlatt "${household.name}"`);
+                                Alert.alert(t('alerts.successTitle'), t('profile.households.leaveSuccessMessage', { name: household.name }));
                             } else {
-                                Alert.alert('Feil', result.error || 'Kunne ikke forlate husstanden.');
+                                Alert.alert(t('alerts.errorTitle'), result.error || t('profile.households.leaveFailedMessage'));
                             }
                         } catch (error) {
                             console.error('Error leaving household:', error);
-                            Alert.alert('Feil', 'En feil oppstod. Vennligst prøv igjen.');
+                            Alert.alert(t('alerts.errorTitle'), t('profile.households.leaveErrorMessage'));
                         }
                     }
                 }
@@ -264,7 +266,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
             setHouseholdMembers(transformedMembers);
         } catch (error) {
             console.error('Error loading members:', error);
-            Alert.alert('Feil', 'Kunne ikke laste medlemmer');
+            Alert.alert(t('alerts.errorTitle'), t('profile.households.loadMembersErrorMessage'));
         } finally {
             setLoadingMembers(false);
         }
@@ -272,28 +274,28 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 
     const handleShareHousehold = (household: Household) => {
         const code = household.id;
-        const message = `Bli med i vår husstand "${household.name}"!\n\nBruk denne koden: ${code}\n\nEller kopier hele denne linken: households/${code}`;
+        const message = t('profile.households.shareMessage', { name: household.name, code });
         
         Alert.alert(
-            'Del husstandskode',
+            t('profile.households.shareTitle'),
             message,
             [
                 {
-                    text: 'Kopier kode',
+                    text: t('profile.households.copyCodeLabel'),
                     onPress: () => {
                         // In a real app, you'd use Clipboard API
-                        Alert.alert('Kopiert', `Koden "${code}" er kopiert!`);
+                        Alert.alert(t('alerts.successTitle'), t('profile.households.copiedMessage', { code }));
                     }
                 },
-                { text: 'Lukk', style: 'cancel' }
+                { text: t('profile.cancel'), style: 'cancel' }
             ]
         );
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}> 
             <Header 
-                title="Mine husstander" 
+                title={t('profile.households.title')}
                 onBack={onBack}
                 rightElement={
                     <TouchableOpacity onPress={() => setShowCreateModal(true)}>
@@ -306,18 +308,18 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 {loading ? (
                     <View style={styles.loadingContainer}>
                         <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-                            Laster husstander...
+                            {t('profile.households.loading')}
                         </Text>
                     </View>
                 ) : households.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="home-outline" size={64} color={colors.lightDarkText} />
-                        <Text style={[styles.emptyText, { color: colors.text }]}>
-                            Du er ikke medlem av noen husstander ennå
-                        </Text>
-                        <Text style={[styles.emptySubtext, { color: colors.lightDarkText }]}>
-                            Opprett en ny husstand eller bli med i en eksisterende
-                        </Text>
+                            <Ionicons name="home-outline" size={64} color={colors.lightDarkText} />
+                            <Text style={[styles.emptyText, { color: colors.text }]}> 
+                                {t('profile.households.emptyTitle')}
+                            </Text>
+                            <Text style={[styles.emptySubtext, { color: colors.lightDarkText }]}> 
+                                {t('profile.households.emptyBody')}
+                            </Text>
                         
                         {/* Action Buttons */}
                         <View style={styles.emptyActions}>
@@ -327,7 +329,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             >
                                 <Ionicons name="add" size={24} color={colors.darkText} />
                                 <Text style={[styles.primaryButtonText, { color: colors.darkText }]}>
-                                    Opprett husstand
+                                    {t('profile.households.createHousehold')}
                                 </Text>
                             </TouchableOpacity>
                             
@@ -340,7 +342,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             >
                                 <Ionicons name="enter-outline" size={24} color={colors.tint} />
                                 <Text style={[styles.secondaryButtonText, { color: colors.tint }]}>
-                                    Bli med med kode
+                                    {t('profile.households.joinWithCode')}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -349,15 +351,15 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                     <>
                         {/* Info Section */}
                         <View style={styles.section}>
-                            <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-                                Du er medlem av {households.length} husstand{households.length !== 1 ? 'er' : ''}
+                            <Text style={[styles.infoText, { color: colors.lightDarkText }]}> 
+                                {t('profile.households.youAreMemberOf', { count: households.length })}
                             </Text>
                         </View>
 
                         {/* Households List */}
                         <View style={styles.section}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                                Dine husstander
+                                {t('profile.households.yourHouseholdsTitle')}
                             </Text>
                             
                             {households.map((household) => (
@@ -377,7 +379,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                                     styles.roleText,
                                                     { color: household.role === 'admin' ? colors.darkText : colors.lightDarkText }
                                                 ]}>
-                                                    {household.role === 'admin' ? 'Administrator' : 'Medlem'}
+                                                    {household.role === 'admin' ? t('profile.households.roleAdmin') : t('profile.households.roleMember')}
                                                 </Text>
                                             </View>
                                         </View>
@@ -389,7 +391,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         <View style={styles.statItem}>
                                             <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
                                             <Text style={[styles.statText, { color: colors.lightDarkText }]}>
-                                                {household.members.length} medlemmer
+                                                {household.members.length} {t('profile.households.members')}
                                             </Text>
                                         </View>
                                     </View>
@@ -405,9 +407,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         onPress={() => handleShowMembers(household)}
                                     >
                                         <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
-                                        <Text style={[styles.actionButtonText, { color: colors.lightDarkText }]}>
-                                            Se medlemmer
-                                        </Text>
+                                        <Text style={[styles.actionButtonText, { color: colors.lightDarkText }]}> {t('profile.households.viewMembers')}</Text>
                                     </TouchableOpacity>
                                 )}
                                 
@@ -416,9 +416,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         style={[styles.actionButton, { borderColor: colors.tint }]}
                                     >
                                         <Ionicons name="settings-outline" size={16} color={colors.tint} />
-                                        <Text style={[styles.actionButtonText, { color: colors.tint }]}>
-                                            Administrer
-                                        </Text>
+                                        <Text style={[styles.actionButtonText, { color: colors.tint }]}> {t('profile.households.manage')}</Text>
                                     </TouchableOpacity>
                                 ) : (
                                     <>
@@ -427,18 +425,14 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                             onPress={() => handleShareHousehold(household)}
                                         >
                                             <Ionicons name="share-outline" size={16} color={colors.tint} />
-                                            <Text style={[styles.actionButtonText, { color: colors.tint }]}>
-                                                Del
-                                            </Text>
+                                            <Text style={[styles.actionButtonText, { color: colors.tint }]}> {t('profile.households.share')}</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity 
                                             style={[styles.actionButton, styles.leaveButton]}
                                             onPress={() => handleLeaveHousehold(household)}
                                         >
                                             <Ionicons name="exit-outline" size={16} color="#ef4444" />
-                                            <Text style={[styles.actionButtonText, { color: '#ef4444' }]}>
-                                                Forlat
-                                            </Text>
+                                            <Text style={[styles.actionButtonText, { color: '#ef4444' }]}>{t('profile.households.leave')}</Text>
                                         </TouchableOpacity>
                                     </>
                                 )}
@@ -448,8 +442,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                     </View>
                     {/* Action Buttons Section */}
                     <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                            Handlinger
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}> 
+                            {t('profile.households.actionsTitle')}
                         </Text>
                         
                         <TouchableOpacity 
@@ -460,11 +454,11 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                 <Ionicons name="add" size={24} color={colors.darkText} />
                             </View>
                             <View style={styles.actionCardContent}>
-                                <Text style={[styles.actionCardTitle, { color: colors.text }]}>
-                                    Opprett ny husstand
+                                <Text style={[styles.actionCardTitle, { color: colors.text }]}> 
+                                    {t('profile.households.createNewTitle')}
                                 </Text>
-                                <Text style={[styles.actionCardDescription, { color: colors.lightDarkText }]}>
-                                    Start en ny husstand og inviter medlemmer
+                                <Text style={[styles.actionCardDescription, { color: colors.lightDarkText }]}> 
+                                    {t('profile.households.createNewDescription')}
                                 </Text>
                             </View>
                             <Ionicons name="chevron-forward" size={20} color={colors.lightDarkText} />
@@ -478,11 +472,11 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                 <Ionicons name="enter-outline" size={24} color={colors.darkText} />
                             </View>
                             <View style={styles.actionCardContent}>
-                                <Text style={[styles.actionCardTitle, { color: colors.text }]}>
-                                    Bli med i husstand
+                                <Text style={[styles.actionCardTitle, { color: colors.text }]}> 
+                                    {t('profile.households.joinTitle')}
                                 </Text>
-                                <Text style={[styles.actionCardDescription, { color: colors.lightDarkText }]}>
-                                    Bruk en invitasjonskode for å bli med
+                                <Text style={[styles.actionCardDescription, { color: colors.lightDarkText }]}> 
+                                    {t('profile.households.joinDescription')}
                                 </Text>
                             </View>
                             <Ionicons name="chevron-forward" size={20} color={colors.lightDarkText} />
@@ -501,21 +495,21 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
                     <View style={[styles.modalHeader, { borderBottomColor: colors.contextBackground }]}>
                         <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-                            <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
+                            <Text style={[styles.cancelText, { color: colors.text }]}>{t('profile.cancel')}</Text>
                         </TouchableOpacity>
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>Ny husstand</Text>
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profile.households.createModalTitle')}</Text>
                         <TouchableOpacity 
                             onPress={handleCreateHousehold}
                             disabled={isCreating}
                         >
                             <Text style={[styles.saveText, { color: isCreating ? colors.lightDarkText : colors.tint }]}>
-                                {isCreating ? 'Oppretter...' : 'Opprett'}
+                                {isCreating ? t('profile.households.creating') : t('profile.households.create')}
                             </Text>
                         </TouchableOpacity>
                     </View>
                     
                     <View style={styles.modalContent}>
-                        <Text style={[styles.inputLabel, { color: colors.text }]}>Husstandsnavn</Text>
+                        <Text style={[styles.inputLabel, { color: colors.text }]}>{t('profile.households.householdNameLabel')}</Text>
                         <TextInput
                             style={[styles.textInput, { 
                                 backgroundColor: colors.contextBackground,
@@ -524,12 +518,12 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             }]}
                             value={newHouseholdName}
                             onChangeText={setNewHouseholdName}
-                            placeholder="F.eks. Familie Hansen"
+                            placeholder={t('profile.households.householdNamePlaceholder')}
                             placeholderTextColor={colors.lightDarkText}
                             maxLength={30}
                         />
-                        <Text style={[styles.inputHint, { color: colors.lightDarkText }]}>
-                            Du blir automatisk administrator for den nye husstanden
+                        <Text style={[styles.inputHint, { color: colors.lightDarkText }]}> 
+                            {t('profile.households.createHint')}
                         </Text>
                     </View>
                 </View>
@@ -545,10 +539,10 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
                     <View style={[styles.modalHeader, { borderBottomColor: colors.contextBackground }]}>
                         <TouchableOpacity onPress={() => setShowMembersModal(false)}>
-                            <Text style={[styles.cancelText, { color: colors.text }]}>Lukk</Text>
+                            <Text style={[styles.cancelText, { color: colors.text }]}>{t('profile.cancel')}</Text>
                         </TouchableOpacity>
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>
-                            {selectedHousehold?.name} - Medlemmer
+                        <Text style={[styles.modalTitle, { color: colors.text }]}> 
+                            {selectedHousehold?.name} - {t('profile.households.membersTitle')}
                         </Text>
                         <View style={{ width: 40 }} />
                     </View>
@@ -556,14 +550,14 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                     <ScrollView style={styles.modalContent}>
                         {loadingMembers ? (
                             <View style={styles.loadingContainer}>
-                                <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
-                                    Laster medlemmer...
+                                <Text style={[styles.infoText, { color: colors.lightDarkText }]}> 
+                                    {t('profile.households.loadingMembers')}
                                 </Text>
                             </View>
                         ) : (
                             <>
                                 <Text style={[styles.memberCountText, { color: colors.lightDarkText }]}>
-                                    {householdMembers.length} medlemmer totalt
+                                    {t('profile.households.membersTotal', { count: householdMembers.length })}
                                 </Text>
                                 
                                 {householdMembers.map((member) => (
@@ -596,7 +590,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                                     styles.memberRoleText,
                                                     { color: member.role === 'admin' ? colors.darkText : colors.lightDarkText }
                                                 ]}>
-                                                    {member.role === 'admin' ? 'Admin' : 'Medlem'}
+                                                    {member.role === 'admin' ? t('profile.households.memberRoleAdmin') : t('profile.households.memberRoleMember')}
                                                 </Text>
                                             </View>
                                         </View>
@@ -620,21 +614,21 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
                     <View style={[styles.modalHeader, { borderBottomColor: colors.contextBackground }]}>
                         <TouchableOpacity onPress={() => setShowJoinModal(false)}>
-                            <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
+                            <Text style={[styles.cancelText, { color: colors.text }]}>{t('profile.cancel')}</Text>
                         </TouchableOpacity>
-                        <Text style={[styles.modalTitle, { color: colors.text }]}>Bli med i husstand</Text>
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profile.households.joinModalTitle')}</Text>
                         <TouchableOpacity 
                             onPress={handleJoinHousehold}
                             disabled={isJoining}
                         >
                             <Text style={[styles.saveText, { color: isJoining ? colors.lightDarkText : colors.tint }]}>
-                                {isJoining ? 'Bli med...' : 'Bli med'}
+                                {isJoining ? t('profile.households.joining') : t('profile.households.join')}
                             </Text>
                         </TouchableOpacity>
                     </View>
                     
                     <View style={styles.modalContent}>
-                        <Text style={[styles.inputLabel, { color: colors.text }]}>Husstandskode</Text>
+                        <Text style={[styles.inputLabel, { color: colors.text }]}>{t('profile.households.joinCodeLabel')}</Text>
                         <TextInput
                             style={[styles.textInput, { 
                                 backgroundColor: colors.contextBackground,
@@ -643,14 +637,13 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             }]}
                             value={joinCode}
                             onChangeText={setJoinCode}
-                            placeholder="Skriv inn husstandskode"
+                            placeholder={t('profile.households.joinCodePlaceholder')}
                             placeholderTextColor={colors.lightDarkText}
                             autoCapitalize="none"
                             autoCorrect={false}
                         />
                         <Text style={[styles.inputHint, { color: colors.lightDarkText }]}>
-                            Koden er på formatet: NMogPiBLWF4nmwsHBTlP{'\n'}
-                            Eller du kan lime inn: households/NMogPiBLWF4nmwsHBTlP
+                            {t('profile.households.joinCodeHint')}
                         </Text>
                     </View>
                 </View>

@@ -5,6 +5,7 @@ import { getWeeklySummariesForHousehold, WeeklySummary } from "@/services/taskSe
 import WeeklySummaryModal from "@/components/modals/WeeklySummaryModal";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
     FlatList,
     Modal,
@@ -35,6 +36,7 @@ export default function History() {
   const [selectedSummary, setSelectedSummary] = useState<WeeklySummary | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const { colors } = useTheme();
+  const { t } = useTranslation('app');
 
   // Shared household fetching logic
   const fetchHouseholds = async () => {
@@ -128,21 +130,21 @@ export default function History() {
     }
   };
 
-  // Available filter options
+  // Available filter options (use internal ids, render labels via i18n)
   const filterOptions = [
-    "Fullført",
-    "Ikke fullført",
-    "Denne måneden",
-    "Forrige måned",
-    "Høy aktivitet",
-    "Lav aktivitet"
+    { id: 'completed', labelKey: 'history.filters.options.completed' },
+    { id: 'not_completed', labelKey: 'history.filters.options.notCompleted' },
+    { id: 'this_month', labelKey: 'history.filters.options.thisMonth' },
+    { id: 'prev_month', labelKey: 'history.filters.options.prevMonth' },
+    { id: 'high_activity', labelKey: 'history.filters.options.highActivity' },
+    { id: 'low_activity', labelKey: 'history.filters.options.lowActivity' },
   ];
 
-  // Define mutually exclusive filter groups
+  // Define mutually exclusive filter groups (by id)
   const mutuallyExclusiveGroups = [
-    ["Fullført", "Ikke fullført"],
-    ["Denne måneden", "Forrige måned"],
-    ["Høy aktivitet", "Lav aktivitet"]
+    ['completed', 'not_completed'],
+    ['this_month', 'prev_month'],
+    ['high_activity', 'low_activity'],
   ];
 
   // Helper function to handle filter selection with mutual exclusion
@@ -238,19 +240,19 @@ export default function History() {
     >
       {/* Header */}
       <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
-        Historikk
+        {t('history.title')}
       </Text>
 
       {loadingHouseholds ? (
         <View style={styles.centerMessage}>
           <Text style={[styles.messageText, { color: colors.text }]}>
-            Laster husstander...
+            {t('history.loadingHouseholds')}
           </Text>
         </View>
       ) : households.length === 0 ? (
         <View style={styles.centerMessage}>
           <Text style={[styles.messageText, { color: colors.text }]}>
-            Du er ikke medlem av noen husstander ennå.
+            {t('history.noHouseholds')}
           </Text>
         </View>
       ) : (
@@ -264,7 +266,7 @@ export default function History() {
             onPress={() => setShowHouseholdDropdown(!showHouseholdDropdown)}
           >
             <Text style={[styles.dropdownText, { color: colors.darkText }]}>
-              Husholdning: {household}{" "}
+              {t('history.householdLabel')}: {household}{" "}
               <Ionicons
                 name={showHouseholdDropdown ? "chevron-up" : "chevron-down"}
                 size={16}
@@ -307,7 +309,7 @@ export default function History() {
         <View style={[styles.searchBar, { backgroundColor: colors.contextBackground }]}>
           <TextInput
             style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Søk i historikk..."
+            placeholder={t('history.searchPlaceholder')}
             placeholderTextColor={colors.lightNonInteractiveText}
             value={searchText}
             onChangeText={setSearchText}
@@ -338,7 +340,7 @@ export default function History() {
         >
           <View style={[styles.filterModal, { backgroundColor: colors.contextBackground }]}>
             <View style={styles.filterHeader}>
-              <Text style={[styles.filterTitle, { color: colors.text }]}>Filtrer historikk</Text>
+              <Text style={[styles.filterTitle, { color: colors.text }]}>{t('history.filters.title')}</Text>
               <TouchableOpacity onPress={() => setShowFiltersModal(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
@@ -346,22 +348,22 @@ export default function History() {
 
             <FlatList
               data={filterOptions}
-              keyExtractor={(item) => item}
+              keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[
                     styles.filterOption,
-                    selectedFilters.includes(item) && { backgroundColor: colors.tint }
+                    selectedFilters.includes(item.id) && { backgroundColor: colors.tint }
                   ]}
-                  onPress={() => handleFilterSelection(item)}
+                  onPress={() => handleFilterSelection(item.id)}
                 >
                   <Text style={[
                     styles.filterOptionText,
-                    { color: selectedFilters.includes(item) ? colors.darkText : colors.text }
+                    { color: selectedFilters.includes(item.id) ? colors.darkText : colors.text }
                   ]}>
-                    {item}
+                    {t(item.labelKey)}
                   </Text>
-                  {selectedFilters.includes(item) && (
+                  {selectedFilters.includes(item.id) && (
                     <Ionicons name="checkmark" size={20} color={colors.darkText} />
                   )}
                 </TouchableOpacity>
@@ -375,7 +377,7 @@ export default function History() {
                 onPress={() => setSelectedFilters([])}
               >
                 <Text style={[styles.clearFiltersText, { color: colors.statusFailedText }]}>
-                  Fjern alle
+                  {t('history.filters.clearAll')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -383,7 +385,7 @@ export default function History() {
                 onPress={() => setShowFiltersModal(false)}
               >
                 <Text style={[styles.applyFiltersText, { color: colors.darkText }]}>
-                  Bruk filtre
+                  {t('history.filters.apply')}
                 </Text>
               </TouchableOpacity>
             </View>

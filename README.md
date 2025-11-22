@@ -8,21 +8,27 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 
 ## 👥 Contributors
 
-- **[EmilB04](https://github.com/EmilB04)** - Frontend Developer & Project Owner
+- **[EmilB04](https://github.com/EmilB04)** - Fullstack Developer& Project Owner
+  - Frontend setup
   - UI/UX design and implementation
   - Architecture and tab navigation
   - Theme management and responsiveness
+  - Responsible for Tasks (Create, Assign, Verify, Reject, Evidence)
 - **[Khosman23](https://github.com/Khosman23)** - Frontend Developer
   - UI/UX design and implementation
   - Onboarding and user experience
-- **[idatol](https://github.com/idatol)** - Frontend/Backend Developer
+  - Language responsible (i18n)
+- **[idatol](https://github.com/idatol)** - Fullstack Developer
   - UI/UX design and implementation
   - Profile and settings management
-- **[Andolaus](https://github.com/Andolaus)** - Backend Developer
+  - Responsible for Leaderboard 
+- **[Andolaus](https://github.com/Andolaus)** - Fullstack Developer
+  - Backend setup
   - Authentication and database management
   - API development and integration
-- **[Thomsen97](https://github.com/Thomsen97)** - Backend Developer
+- **[Thomsen97](https://github.com/Thomsen97)** - Fullstack Developer
   - Component for task overview
+  - Responsible for HistoryTab
 
 ### ✨ Key Features
 

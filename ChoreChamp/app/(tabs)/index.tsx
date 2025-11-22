@@ -5,13 +5,13 @@ import {
   isDicebearAvatar,
   parseDicebearUri,
 } from "@/lib/avatarUtils";
-import { getHouseholdMembers } from "@/services/householdService";
 import { getTasksForUser, markTaskAsComplete, markTaskAsIncomplete, rejectTask, resetVerification, verifyTask } from "@/services/taskService";
 import type { Task } from "@/types/task";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   RefreshControl,
@@ -27,6 +27,8 @@ import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import commonStyles from "../commonStyles";
+import { getWeeklyLeaderboard } from "@/services/leaderboardService";
+import { getCurrentWeek } from "@/utils/weekUtils";
 
 // TODO:
 // 1. Fetch user data dynamically
@@ -36,6 +38,7 @@ import commonStyles from "../commonStyles";
 export default function Dashboard() {
   const { colors } = useTheme();
   const { userData } = useUser();
+  const { weekNumber, year } = getCurrentWeek();
 
   // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -67,6 +70,8 @@ export default function Dashboard() {
   // State for pull-to-refresh
   const [refreshing, setRefreshing] = useState(false);
 
+  const { t } = useTranslation('app');
+
   // Fetch leaderboard data from household members
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -92,20 +97,22 @@ export default function Dashboard() {
           return;
         }
 
-        const members = await getHouseholdMembers(householdId);
+        // Get weekly leaderboard (already sorted by points)
+        const leaderboard = await getWeeklyLeaderboard(householdId);
 
-        // Sort by points and add position
-        const sortedMembers = members
-          .sort((a, b) => b.points - a.points)
-          .map((member, index) => ({
-            ...member,
-            fullName: `${member.firstName} ${member.lastName}`.trim(),
-            avatar: member.imageUri ? { uri: member.imageUri } : require("@/assets/images/icon.png"),
-            position: index + 1,
-            isCurrentUser: member.id === userData.id,
-          }));
+        // Transform to match UI format
+        const transformedLeaderboard = leaderboard.map((entry, index) => ({
+          id: entry.userId,
+          firstName: entry.firstName,
+          lastName: entry.lastName,
+          fullName: `${entry.firstName} ${entry.lastName}`.trim(),
+          points: entry.points,
+          avatar: entry.imageUri ? { uri: entry.imageUri } : require("@/assets/images/icon.png"),
+          position: index + 1,
+          isCurrentUser: entry.userId === userData.id,
+        }));
 
-        setLeaderboardData(sortedMembers);
+        setLeaderboardData(transformedLeaderboard);
       } catch (error) {
         console.error('❌ Error loading leaderboard:', error);
         setLeaderboardData([]);
@@ -183,15 +190,20 @@ export default function Dashboard() {
 
   // Handle marking task as complete
   const handleCompleteTask = async (taskId: number, firebaseTaskId: string) => {
+    if (!userData?.id) {
+      console.error('❌ No user ID available');
+      return;
+    }
+
     try {
       // Request camera permission
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       
       if (status !== 'granted') {
         Alert.alert(
-          'Tillatelse nødvendig',
-          'Vi trenger tilgang til kameraet for å ta bilde som bevis.',
-          [{ text: 'OK' }]
+          t('alerts.permissionRequiredTitle'),
+          t('alerts.permissionRequiredMessage'),
+          [{ text: t('alerts.ok') }]
         );
         return;
       }
@@ -229,8 +241,8 @@ export default function Dashboard() {
       const base64Image = await base64Promise;
       console.log('🔄 Image converted to base64, size:', base64Image.length);
 
-      // Mark task as complete with image evidence (base64 data URI)
-      const success = await markTaskAsComplete(firebaseTaskId, base64Image);
+      // Mark task as complete with image evidence (base64 data URI) and user tracking
+      const success = await markTaskAsComplete(firebaseTaskId, userData.id, base64Image);
       
       if (success) {
         // Update the local state to reflect the change
@@ -240,13 +252,13 @@ export default function Dashboard() {
           )
         );
         console.log('✅ Task marked as complete with evidence');
-        Alert.alert('Suksess!', 'Oppgaven er fullført med bildebevis');
+        Alert.alert(t('alerts.successTitle'), t('alerts.successComplete'));
       }
     } catch (error: any) {
       console.error('❌ Error completing task:', error);
       console.error('❌ Error message:', error.message);
       console.error('❌ Error code:', error.code);
-      Alert.alert('Feil', `Kunne ikke fullføre oppgaven: ${error.message || 'Ukjent feil'}`);
+      Alert.alert(t('alerts.errorTitle'), t('alerts.couldNotComplete', { msg: error.message || 'Ukjent feil' }));
     }
   };
 
@@ -279,12 +291,12 @@ export default function Dashboard() {
           )
         );
         console.log('✅ Task verified by admin');
-        Alert.alert('Godkjent', 'Oppgaven har blitt godkjent');
+        Alert.alert(t('alerts.verifiedTitle'), t('alerts.verifiedMessage'));
         setIsModalVisible(false);
       }
     } catch (error) {
       console.error('❌ Error verifying task:', error);
-      Alert.alert('Feil', 'Kunne ikke godkjenne oppgaven');
+      Alert.alert(t('alerts.errorTitle'), t('alerts.couldNotComplete', { msg: '' }));
     }
   };
 
@@ -299,12 +311,12 @@ export default function Dashboard() {
           )
         );
         console.log('❌ Task rejected by admin');
-        Alert.alert('Avvist', 'Oppgaven har blitt avvist');
+        Alert.alert(t('alerts.rejectedTitle'), t('alerts.rejectedMessage'));
         setIsModalVisible(false);
       }
     } catch (error) {
       console.error('❌ Error rejecting task:', error);
-      Alert.alert('Feil', 'Kunne ikke avvise oppgaven');
+      Alert.alert(t('alerts.errorTitle'), t('alerts.couldNotComplete', { msg: '' }));
     }
   };
 
@@ -319,12 +331,12 @@ export default function Dashboard() {
           )
         );
         console.log('🔄 Verification status reset');
-        Alert.alert('Tilbakestilt', 'Godkjenningen har blitt angret');
+        Alert.alert(t('alerts.resetTitle'), t('alerts.resetMessage'));
         setIsModalVisible(false);
       }
     } catch (error) {
       console.error('❌ Error resetting verification:', error);
-      Alert.alert('Feil', 'Kunne ikke angre godkjenningen');
+      Alert.alert(t('alerts.errorTitle'), t('alerts.couldNotComplete', { msg: '' }));
     }
   };
 
@@ -349,17 +361,21 @@ export default function Dashboard() {
           }
 
           if (householdId) {
-            const members = await getHouseholdMembers(householdId);
-            const sortedMembers = members
-              .sort((a, b) => b.points - a.points)
-              .map((member, index) => ({
-                ...member,
-                fullName: `${member.firstName} ${member.lastName}`.trim(),
-                avatar: member.imageUri ? { uri: member.imageUri } : require("@/assets/images/icon.png"),
-                position: index + 1,
-                isCurrentUser: member.id === userData.id,
-              }));
-            setLeaderboardData(sortedMembers);
+            // Get weekly leaderboard (already sorted by points)
+            const leaderboard = await getWeeklyLeaderboard(householdId);
+            
+            // Transform to match UI format
+            const transformedLeaderboard = leaderboard.map((entry, index) => ({
+              id: entry.userId,
+              firstName: entry.firstName,
+              lastName: entry.lastName,
+              fullName: `${entry.firstName} ${entry.lastName}`.trim(),
+              points: entry.points,
+              avatar: entry.imageUri ? { uri: entry.imageUri } : require("@/assets/images/icon.png"),
+              position: index + 1,
+              isCurrentUser: entry.userId === userData.id,
+            }));
+            setLeaderboardData(transformedLeaderboard);
           }
         })();
         promises.push(leaderboardPromise);
@@ -435,7 +451,7 @@ export default function Dashboard() {
   mondayDate.setDate(today.getDate() - daysFromMonday);
 
   // Generate week days
-  const weekDays = ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"];
+  const weekDays = [t('weekdays.mon'), t('weekdays.tue'), t('weekdays.wed'), t('weekdays.thu'), t('weekdays.fri'), t('weekdays.sat'), t('weekdays.sun')];
   const weekDates = [];
 
   // Populate week dates array
@@ -621,19 +637,19 @@ export default function Dashboard() {
               { color: colors.text, marginBottom: 16 },
             ]}
           >
-            Dagens oppgaver:
+            {t('dashboard.title')}
           </Text>
 
           {loadingTasks ? (
             <View style={styles.loadingContainer}>
               <Text style={[styles.loadingText, { color: colors.text }]}>
-                Laster oppgaver...
+                {t('dashboard.loadingTasks')}
               </Text>
             </View>
           ) : tasksForSelectedDate.length === 0 ? (
             <View style={styles.loadingContainer}>
               <Text style={[styles.loadingText, { color: colors.lightDarkText }]}>
-                Ingen oppgaver for denne dagen 🎉
+                {t('dashboard.noTasks')}
               </Text>
             </View>
           ) : (
@@ -792,26 +808,31 @@ export default function Dashboard() {
 
         {/* Leaderboard */}
         <View style={styles.leaderboardWrapper}>
-          <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-            Ledertavle:
+          <View style={styles.leaderboardHeader}>
+            <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+            {t('leaderboard.title')}
           </Text>
+            <Text style={[styles.weekIndicator, { color: colors.lightText }]}>
+              Uke {weekNumber}, {year}
+            </Text>
+          </View>
 
           {loadingLeaderboard ? (
             <View style={styles.loadingContainer}>
-              <Text style={[styles.loadingText, { color: colors.text }]}>
-                Laster ledertavle...
+              <Text style={[styles.loadingText, { color: colors.text }]}> 
+                {t('leaderboard.loading')}
               </Text>
             </View>
           ) : leaderboardData.length === 0 ? (
             <View style={styles.loadingContainer}>
-              <Text style={[styles.loadingText, { color: colors.text }]}>
-                Ingen medlemmer i husstanden
+              <Text style={[styles.loadingText, { color: colors.text }]}> 
+                {t('leaderboard.noMembers')}
               </Text>
             </View>
           ) : leaderboardData.length < 3 ? (
             <View style={styles.loadingContainer}>
-              <Text style={[styles.loadingText, { color: colors.text }]}>
-                Trenger minst 3 medlemmer for ledertavle
+              <Text style={[styles.loadingText, { color: colors.text }]}> 
+                {t('leaderboard.needMore')}
               </Text>
             </View>
           ) : (
@@ -819,73 +840,73 @@ export default function Dashboard() {
               {/* Top 3 Podium */}
               <View style={styles.podiumContainer}>
             {/* Second Place */}
-            <View style={styles.podiumPosition}>
-              <View style={[styles.podiumAvatar, styles.secondPlaceAvatar]}>
-                <Image
-                  source={leaderboardData[1].avatar}
-                  style={styles.avatarImage}
-                />
-                <View style={[styles.positionBadge, styles.secondPlaceBadge]}>
-                  <Text style={styles.positionText}>2</Text>
+                <View style={styles.podiumPosition}>
+                  <View style={[styles.podiumAvatar, styles.secondPlaceAvatar]}>
+                    <Image
+                      source={leaderboardData[1].avatar}
+                      style={styles.avatarImage}
+                    />
+                    <View style={[styles.positionBadge, styles.secondPlaceBadge]}>
+                      <Text style={styles.positionText}>2</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.podiumName, { color: colors.text }]}>
+                    {leaderboardData[1].fullName}
+                  </Text>
+                  <View style={styles.pointsContainer}>
+                    <Text style={styles.pointsIcon}>🏆</Text>
+                    <Text style={[styles.podiumPoints, { color: colors.text }]}>
+                      {leaderboardData[1].points} {t('points.short')}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[1].fullName}
-              </Text>
-              <View style={styles.pointsContainer}>
-                <Text style={styles.pointsIcon}>🏆</Text>
-                <Text style={[styles.podiumPoints, { color: colors.text }]}>
-                  {leaderboardData[1].points} pts
-                </Text>
-              </View>
-            </View>
 
             {/* First Place */}
-            <View style={styles.firstPlacePosition}>
-              <View style={[styles.podiumAvatar, styles.firstPlaceAvatar]}>
-                <Image
-                  source={leaderboardData[0].avatar}
-                  style={styles.avatarImage}
-                />
-                <View style={[styles.positionBadge, styles.firstPlaceBadge]}>
-                  <Text style={styles.positionText}>1</Text>
+                <View style={styles.firstPlacePosition}>
+                  <View style={[styles.podiumAvatar, styles.firstPlaceAvatar]}>
+                    <Image
+                      source={leaderboardData[0].avatar}
+                      style={styles.avatarImage}
+                    />
+                    <View style={[styles.positionBadge, styles.firstPlaceBadge]}>
+                      <Text style={styles.positionText}>1</Text>
+                    </View>
+                    <View style={styles.crownContainer}>
+                      <Text style={styles.crown}>👑</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.podiumName, { color: colors.text }]}>
+                    {leaderboardData[0].fullName}
+                  </Text>
+                  <View style={styles.pointsContainer}>
+                    <Text style={styles.pointsIcon}>🏆</Text>
+                    <Text style={[styles.podiumPoints, { color: colors.text }]}>
+                      {leaderboardData[0].points} {t('points.short')}
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.crownContainer}>
-                  <Text style={styles.crown}>👑</Text>
-                </View>
-              </View>
-              <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[0].fullName}
-              </Text>
-              <View style={styles.pointsContainer}>
-                <Text style={styles.pointsIcon}>🏆</Text>
-                <Text style={[styles.podiumPoints, { color: colors.text }]}>
-                  {leaderboardData[0].points} pts
-                </Text>
-              </View>
-            </View>
 
             {/* Third Place */}
-            <View style={styles.podiumPosition}>
-              <View style={[styles.podiumAvatar, styles.thirdPlaceAvatar]}>
-                <Image
-                  source={leaderboardData[2].avatar}
-                  style={styles.avatarImage}
-                />
-                <View style={[styles.positionBadge, styles.thirdPlaceBadge]}>
-                  <Text style={styles.positionText}>3</Text>
+                <View style={styles.podiumPosition}>
+                  <View style={[styles.podiumAvatar, styles.thirdPlaceAvatar]}>
+                    <Image
+                      source={leaderboardData[2].avatar}
+                      style={styles.avatarImage}
+                    />
+                    <View style={[styles.positionBadge, styles.thirdPlaceBadge]}>
+                      <Text style={styles.positionText}>3</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.podiumName, { color: colors.text }]}>
+                    {leaderboardData[2].fullName}
+                  </Text>
+                  <View style={styles.pointsContainer}>
+                    <Text style={styles.pointsIcon}>🏆</Text>
+                    <Text style={[styles.podiumPoints, { color: colors.text }]}>
+                      {leaderboardData[2].points} {t('points.short')}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={[styles.podiumName, { color: colors.text }]}>
-                {leaderboardData[2].fullName}
-              </Text>
-              <View style={styles.pointsContainer}>
-                <Text style={styles.pointsIcon}>🏆</Text>
-                <Text style={[styles.podiumPoints, { color: colors.text }]}>
-                  {leaderboardData[2].points} pts
-                </Text>
-              </View>
-            </View>
           </View>
 
           {/* Positions 4-10 */}
@@ -935,7 +956,7 @@ export default function Dashboard() {
                     { color: user.isCurrentUser ? colors.black : colors.text },
                   ]}
                 >
-                  {user.points} pts
+                  {user.points} {t('points.short')}
                 </Text>
               </View>
             ))}
@@ -959,7 +980,7 @@ export default function Dashboard() {
                   ...(selectedTask.verificationStatus === 'not_reviewed' 
                     ? [
                         {
-                          label: "Angre",
+                          label: t('actions.undo'),
                           iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
                           variant: "danger" as const,
                           onPress: async () => {
@@ -979,7 +1000,7 @@ export default function Dashboard() {
                         ...(selectedTask.verificationStatus === 'not_reviewed'
                           ? [
                               {
-                                label: "Godkjenn",
+                                label: t('actions.verify'),
                                 iconName: "checkmark-done-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
                                 variant: "success" as const,
                                 onPress: async () => {
@@ -990,7 +1011,7 @@ export default function Dashboard() {
                                 },
                               },
                               {
-                                label: "Avvis",
+                                label: t('actions.reject'),
                                 iconName: "close-circle-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
                                 variant: "danger" as const,
                                 onPress: async () => {
@@ -1007,7 +1028,7 @@ export default function Dashboard() {
                         ...(selectedTask.verificationStatus === 'verified'
                           ? [
                               {
-                                label: "Angre godkjenning",
+                                label: t('actions.undoVerify'),
                                 iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
                                 variant: "secondary" as const,
                                 onPress: async () => {
@@ -1024,7 +1045,7 @@ export default function Dashboard() {
                         ...(selectedTask.verificationStatus === 'rejected'
                           ? [
                               {
-                                label: "Angre avvisning",
+                                label: t('actions.undoReject'),
                                 iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
                                 variant: "secondary" as const,
                                 onPress: async () => {
@@ -1043,7 +1064,7 @@ export default function Dashboard() {
                 ]
               : [
                   {
-                    label: "Fullfør",
+                    label: t('actions.complete'),
                     iconName: "checkmark-circle-outline",
                     variant: "success",
                     onPress: async () => {
@@ -1157,6 +1178,16 @@ const styles = StyleSheet.create({
   },
   leaderboardWrapper: {
     marginTop: 32,
+  },
+  leaderboardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  weekIndicator: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 
   // Hourly Calendar Styles
