@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { addDoc, collection, doc, getDocs, Timestamp, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from 'firebase/firestore';
 
 export interface TaskData {
     id: string;
@@ -51,61 +51,21 @@ export async function getTasksForUser(userId: string): Promise<TaskData[]> {
         // Iterate through all tasks and check if assignedTo matches the user
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            const assignedToField = data.assignedTo;
+            const assignedUserId = extractUserId(data.assignedTo);
             
-            // Handle different types of assignedTo field
-            let assignedUserId = '';
-            
-            if (!assignedToField) {
-                return; // Skip this task
-            }
-            
-            // Check if it's a DocumentReference
-            if (typeof assignedToField === 'object' && assignedToField.path) {
-                // DocumentReference - extract ID from path
-                const parts = assignedToField.path.split('/');
-                assignedUserId = parts[parts.length - 1];
-            } else if (typeof assignedToField === 'string') {
-                // String - could be "/users/userId" or just "userId"
-                if (assignedToField.includes('/')) {
-                    const parts = assignedToField.split('/');
-                    assignedUserId = parts[parts.length - 1];
-                } else {
-                    assignedUserId = assignedToField;
-                }
-            } else {
+            if (!assignedUserId) {
                 return; // Skip this task
             }
             
             // Check if this task is assigned to the current user
             if (assignedUserId === userId) {
-                
-                // Convert Firestore timestamps to Date objects
-                const timeStart = data.timeStart?.toDate ? data.timeStart.toDate() : new Date(data.timeStart);
-                const timeEnd = data.timeEnd?.toDate ? data.timeEnd.toDate() : new Date(data.timeEnd);
-                
-                tasks.push({
-                    id: docSnap.id,
-                    title: data.title || 'Untitled Task',
-                    description: data.description,
-                    timeStart,
-                    timeEnd,
-                    assignedTo: data.assignedTo || '',
-                    createdBy: data.createdBy || '',
-                    createdByName: data.createdByName || '',
-                    createdByAvatar: data.createdByAvatar || '',
-                    householdId: data.householdId || '',
-                    points: data.points || 0,
-                    done: data.done || false,
-                    imgEvidence: data.imgEvidence || '',
-                    verificationStatus: data.verificationStatus || 'not_reviewed',
-                });
+                tasks.push(parseTaskDocument(docSnap));
             }
         });
         
         return tasks;
     } catch (error) {
-        console.error('💥 Error fetching tasks for user:', error);
+        console.error('Error fetching tasks for user:', error);
         return [];
     }
 }
@@ -143,7 +103,7 @@ export async function getTodayTasksForUser(userId: string): Promise<TaskData[]> 
  */
 export async function markTaskAsComplete(taskId: string, imgEvidence: string): Promise<boolean> {
     if (!taskId || !imgEvidence) {
-        console.error('❌ Task ID and image evidence are required');
+        console.error('Task ID and image evidence are required');
         return false;
     }
     
@@ -157,7 +117,7 @@ export async function markTaskAsComplete(taskId: string, imgEvidence: string): P
         
         return true;
     } catch (error) {
-        console.error('💥 Error marking task as complete:', error);
+        console.error('Error marking task as complete:', error);
         return false;
     }
 }
@@ -180,7 +140,7 @@ export async function markTaskAsIncomplete(taskId: string): Promise<boolean> {
         
         return true;
     } catch (error) {
-        console.error('💥 Error marking task as incomplete:', error);
+        console.error('Error marking task as incomplete:', error);
         return false;
     }
 }
@@ -202,7 +162,7 @@ export async function verifyTask(taskId: string): Promise<boolean> {
         
         return true;
     } catch (error) {
-        console.error('💥 Error verifying task:', error);
+        console.error('Error verifying task:', error);
         return false;
     }
 }
@@ -225,7 +185,7 @@ export async function rejectTask(taskId: string): Promise<boolean> {
         
         return true;
     } catch (error) {
-        console.error('💥 Error rejecting task:', error);
+        console.error('Error rejecting task:', error);
         return false;
     }
 }
@@ -248,7 +208,7 @@ export async function resetVerification(taskId: string): Promise<boolean> {
         
         return true;
     } catch (error) {
-        console.error('💥 Error resetting verification:', error);
+        console.error('Error resetting verification:', error);
         return false;
     }
 }
@@ -284,7 +244,259 @@ export async function createTask(taskInput: CreateTaskInput): Promise<string | n
         
         return docRef.id;
     } catch (error) {
-        console.error('💥 Error creating task:', error);
+        console.error('Error creating task:', error);
         return null;
+    }
+}
+
+/**
+ * Weekly summary for history view
+ */
+export interface WeeklySummary {
+    weekNumber: number;
+    year: number;
+    startDate: Date;
+    endDate: Date;
+    totalTasks: number;
+    completedTasks: number;
+    totalPoints: number;
+    completedPoints: number;
+    allCompleted: boolean;
+    topContributor?: {
+        userId: string;
+        name: string;
+        points: number;
+    };
+    tasks: TaskData[];
+}
+
+/**
+ * Extract user ID from assignedTo field (handles DocumentReference and string formats)
+ */
+function extractUserId(assignedToField: any): string {
+    if (!assignedToField) return '';
+    
+    // DocumentReference with path property
+    if (typeof assignedToField === 'object' && assignedToField.path) {
+        const parts = assignedToField.path.split('/');
+        return parts[parts.length - 1];
+    }
+    
+    // String - could be "/users/userId" or just "userId"
+    if (typeof assignedToField === 'string') {
+        if (assignedToField.includes('/')) {
+            const parts = assignedToField.split('/');
+            return parts[parts.length - 1];
+        }
+        return assignedToField;
+    }
+    
+    return '';
+}
+
+/**
+ * Parse Firestore document snapshot into TaskData object
+ */
+function parseTaskDocument(docSnap: any): TaskData {
+    const data = docSnap.data();
+    const timeStart = data.timeStart?.toDate ? data.timeStart.toDate() : new Date(data.timeStart);
+    const timeEnd = data.timeEnd?.toDate ? data.timeEnd.toDate() : new Date(data.timeEnd);
+    
+    return {
+        id: docSnap.id,
+        title: data.title || 'Untitled Task',
+        description: data.description,
+        timeStart,
+        timeEnd,
+        assignedTo: data.assignedTo || '',
+        createdBy: data.createdBy || '',
+        createdByName: data.createdByName || '',
+        createdByAvatar: data.createdByAvatar || '',
+        householdId: data.householdId || '',
+        points: data.points || 0,
+        done: data.done || false,
+        imgEvidence: data.imgEvidence || '',
+        verificationStatus: data.verificationStatus || 'not_reviewed',
+    };
+}
+
+/**
+ * Get week number from a date (ISO 8601 week)
+ */
+function getWeekNumber(date: Date): { week: number; year: number } {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    return { week: weekNo, year: d.getUTCFullYear() };
+}
+
+/**
+ * Get start and end dates for a given week number and year
+ */
+function getWeekDates(weekNumber: number, year: number): { startDate: Date; endDate: Date } {
+    const simple = new Date(year, 0, 1 + (weekNumber - 1) * 7);
+    const dow = simple.getDay();
+    const ISOweekStart = simple;
+    
+    if (dow <= 4) {
+        ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+    } else {
+        ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+    }
+    
+    const startDate = new Date(ISOweekStart);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    endDate.setHours(23, 59, 59, 999);
+    
+    return { startDate, endDate };
+}
+
+/**
+ * Fetch all tasks for a household grouped by week
+ * @param householdId - The household's document ID
+ * @returns Array of weekly summaries
+ */
+export async function getWeeklySummariesForHousehold(householdId: string): Promise<WeeklySummary[]> {
+    if (!householdId) {
+        return [];
+    }
+    
+    try {
+        const tasksRef = collection(db, 'tasks');
+        const householdQuery = query(tasksRef, where('householdId', '==', householdId));
+        const querySnapshot = await getDocs(householdQuery);
+        
+        const tasks: TaskData[] = [];
+        
+        querySnapshot.forEach((docSnap) => {
+            tasks.push(parseTaskDocument(docSnap));
+        });
+        
+        // Group tasks by week
+        const weekMap = new Map<string, TaskData[]>();
+        
+        tasks.forEach(task => {
+            const { week, year } = getWeekNumber(task.timeStart);
+            const weekKey = `${year}-W${week}`;
+            
+            if (!weekMap.has(weekKey)) {
+                weekMap.set(weekKey, []);
+            }
+            weekMap.get(weekKey)?.push(task);
+        });
+        
+        // Collect all unique user IDs across all weeks for batch fetching
+        const allUserIds = new Set<string>();
+        for (const weekTasks of weekMap.values()) {
+            weekTasks.forEach(task => {
+                if (task.done) {
+                    const userId = extractUserId(task.assignedTo);
+                    if (userId) allUserIds.add(userId);
+                }
+            });
+        }
+        
+        // Fetch all user data once and cache it
+        const userDataCache = new Map<string, string>();
+        if (allUserIds.size > 0) {
+            const userDataPromises = Array.from(allUserIds).map(async (userId) => {
+                try {
+                    const userRef = doc(db, 'users', userId);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        return {
+                            userId,
+                            name: userData.username || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Ukjent bruker'
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error fetching user data for:', userId, error);
+                }
+                return { userId, name: 'Ukjent bruker' };
+            });
+            
+            const usersData = await Promise.all(userDataPromises);
+            usersData.forEach(u => userDataCache.set(u.userId, u.name));
+        }
+        
+        // Create weekly summaries
+        const weeklySummaries: WeeklySummary[] = [];
+        
+        for (const [weekKey, weekTasks] of weekMap.entries()) {
+            const [yearStr, weekStr] = weekKey.split('-W');
+            const year = parseInt(yearStr);
+            const weekNumber = parseInt(weekStr);
+            
+            const { startDate, endDate } = getWeekDates(weekNumber, year);
+            
+            const totalTasks = weekTasks.length;
+            const completedTasks = weekTasks.filter(t => t.done).length;
+            const totalPoints = weekTasks.reduce((sum, t) => sum + t.points, 0);
+            const completedPoints = weekTasks.filter(t => t.done).reduce((sum, t) => sum + t.points, 0);
+            const allCompleted = totalTasks > 0 && completedTasks === totalTasks;
+            
+            // Calculate top contributor (by completed task points)
+            const contributorMap = new Map<string, number>();
+            
+            weekTasks.forEach(task => {
+                if (task.done) {
+                    const userId = extractUserId(task.assignedTo);
+                    if (userId) {
+                        const existing = contributorMap.get(userId) || 0;
+                        contributorMap.set(userId, existing + task.points);
+                    }
+                }
+            });
+            
+            let topContributor: WeeklySummary['topContributor'] = undefined;
+            
+            // Calculate top contributor using cached user data
+            if (contributorMap.size > 0) {
+                let maxPoints = 0;
+                
+                contributorMap.forEach((points, userId) => {
+                    if (points > maxPoints) {
+                        maxPoints = points;
+                        const userName = userDataCache.get(userId) || 'Ukjent bruker';
+                        topContributor = {
+                            userId,
+                            name: userName,
+                            points: points
+                        };
+                    }
+                });
+            }
+            
+            weeklySummaries.push({
+                weekNumber,
+                year,
+                startDate,
+                endDate,
+                totalTasks,
+                completedTasks,
+                totalPoints,
+                completedPoints,
+                allCompleted,
+                topContributor,
+                tasks: weekTasks
+            });
+        }
+        
+        // Sort by week (newest first)
+        weeklySummaries.sort((a, b) => {
+            if (a.year !== b.year) return b.year - a.year;
+            return b.weekNumber - a.weekNumber;
+        });
+        
+        return weeklySummaries;
+    } catch (error) {
+        console.error('Error fetching weekly summaries:', error);
+        return [];
     }
 }
