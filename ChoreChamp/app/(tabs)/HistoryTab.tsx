@@ -1,6 +1,8 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import { getHouseholdsForUser, getUserHouseholds, Household } from "@/services/householdService";
+import { getWeeklySummariesForHousehold, WeeklySummary } from "@/services/taskService";
+import WeeklySummaryModal from "@/components/modals/WeeklySummaryModal";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,80 +21,108 @@ import commonStyles from "../commonStyles";
 export default function History() {
   const { userData } = useUser();
   const [household, setHousehold] = useState<string>("");
+  const [selectedHouseholdId, setSelectedHouseholdId] = useState<string>("");
   const [households, setHouseholds] = useState<Household[]>([]);
+  const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([]);
   const [loadingHouseholds, setLoadingHouseholds] = useState(true);
+  const [loadingSummaries, setLoadingSummaries] = useState(false);
   const [showHouseholdDropdown, setShowHouseholdDropdown] = useState(false);
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedSummary, setSelectedSummary] = useState<WeeklySummary | null>(null);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
   const { colors } = useTheme();
+
+  // Shared household fetching logic
+  const fetchHouseholds = async () => {
+    if (!userData?.id) {
+      console.log('No user ID available');
+      return [];
+    }
+
+    try {
+      console.log('Fetching households for user ID:', userData.id);
+      
+      let userHouseholds = await getHouseholdsForUser(userData.id);
+      
+      if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
+        console.log('No households found via query, trying user.household array:', userData.household);
+        userHouseholds = await getUserHouseholds(userData.household);
+      }
+      
+      console.log('Loaded households:', userHouseholds.map(h => h.familyName));
+      return userHouseholds;
+    } catch (error) {
+      console.error('Error loading households:', error);
+      return [];
+    }
+  };
 
   // Fetch user's households
   useEffect(() => {
-    const fetchHouseholds = async () => {
-      if (!userData?.id) {
-        console.log('⚠️ No user ID available');
-        setLoadingHouseholds(false);
+    const loadHouseholds = async () => {
+      setLoadingHouseholds(true);
+      
+      const userHouseholds = await fetchHouseholds();
+      setHouseholds(userHouseholds);
+      
+      if (userHouseholds.length > 0 && !household) {
+        setHousehold(userHouseholds[0].familyName);
+        setSelectedHouseholdId(userHouseholds[0].id);
+      }
+      
+      setLoadingHouseholds(false);
+    };
+
+    loadHouseholds();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.id]);
+
+  // Fetch weekly summaries when household changes
+  useEffect(() => {
+    const fetchWeeklySummaries = async () => {
+      if (!selectedHouseholdId) {
+        setWeeklySummaries([]);
         return;
       }
 
-      setLoadingHouseholds(true);
+      setLoadingSummaries(true);
       try {
-        console.log('🏠 Fetching households for user ID:', userData.id);
-        
-        // First, try to fetch households by querying familyMembers
-        let userHouseholds = await getHouseholdsForUser(userData.id);
-        
-        // If no households found via query and user has household array, fetch those
-        if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
-          console.log('🏠 No households found via query, trying user.household array:', userData.household);
-          userHouseholds = await getUserHouseholds(userData.household);
-        }
-        
-        setHouseholds(userHouseholds);
-        
-        // Set first household as default if available
-        if (userHouseholds.length > 0 && !household) {
-          setHousehold(userHouseholds[0].familyName);
-        }
-        
-        console.log('✅ Loaded households:', userHouseholds.map(h => h.familyName));
+        const summaries = await getWeeklySummariesForHousehold(selectedHouseholdId);
+        setWeeklySummaries(summaries);
+        console.log('Loaded weekly summaries:', summaries.length);
       } catch (error) {
-        console.error('❌ Error loading households:', error);
+        console.error('Error loading weekly summaries:', error);
       } finally {
-        setLoadingHouseholds(false);
+        setLoadingSummaries(false);
       }
     };
 
-    fetchHouseholds();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userData?.id]);
+    fetchWeeklySummaries();
+  }, [selectedHouseholdId]);
 
   // Handle pull-to-refresh
   const onRefresh = async () => {
     setRefreshing(true);
     
     try {
-      if (!userData?.id) {
-        setRefreshing(false);
-        return;
-      }
-
-      let userHouseholds = await getHouseholdsForUser(userData.id);
-      
-      if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
-        userHouseholds = await getUserHouseholds(userData.household);
-      }
-      
+      const userHouseholds = await fetchHouseholds();
       setHouseholds(userHouseholds);
       
       if (userHouseholds.length > 0 && !household) {
         setHousehold(userHouseholds[0].familyName);
+        setSelectedHouseholdId(userHouseholds[0].id);
+      }
+
+      if (selectedHouseholdId) {
+        const summaries = await getWeeklySummariesForHousehold(selectedHouseholdId);
+        setWeeklySummaries(summaries);
       }
     } catch (error) {
-      console.error('❌ Error refreshing households:', error);
+      console.error('Error refreshing:', error);
     } finally {
       setRefreshing(false);
     }
@@ -142,96 +172,14 @@ export default function History() {
     setSelectedFilters(newFilters);
   };
 
-  const historyData = [
-    {
-      week: "40",
-      title: "Oppsummering - Uke 40",
-      status: "Fullført",
-      count: 9,
-      finishedCount: 9,
-      startDate: "29 sep 2025",
-      endDate: "05 okt 2025",
-      statusColor: "green",
-      houseHold: "Remmen",
-    },
-    {
-      week: "39",
-      title: "Oppsummering - Uke 39",
-      status: "Ikke fullført",
-      count: 5,
-      finishedCount: 3,
-      startDate: "22 sep 2025",
-      endDate: "28 sep 2025",
-      statusColor: "red",
-      houseHold: "Hjemme",
-    },
-    {
-      week: "38",
-      title: "Oppsummering - Uke 38",
-      status: "Fullført",
-      count: 7,
-      finishedCount: 7,
-      startDate: "15 sep 2025",
-      endDate: "21 sep 2025",
-      statusColor: "green",
-      houseHold: "Hjemme",
-    },
-    {
-      week: "37",
-      title: "Oppsummering - Uke 37",
-      status: "Fullført",
-      count: 12,
-      finishedCount: 12,
-      startDate: "08 sep 2025",
-      endDate: "14 sep 2025",
-      statusColor: "green",
-      houseHold: "Kollektiv",
-    },
-    {
-      week: "36",
-      title: "Oppsummering - Uke 36",
-      status: "Ikke fullført",
-      count: 4,
-      finishedCount: 2,
-      startDate: "01 sep 2025",
-      endDate: "07 sep 2025",
-      statusColor: "red",
-      houseHold: "Familie",
-    },
-    {
-      week: "35",
-      title: "Oppsummering - Uke 35",
-      status: "Fullført",
-      count: 8,
-      finishedCount: 8,
-      startDate: "25 aug 2025",
-      endDate: "31 aug 2025",
-      statusColor: "green",
-      houseHold: "Remmen",
-    },
-    {
-      week: "41",
-      title: "Oppsummering - Uke 41",
-      status: "Fullført",
-      count: 11,
-      finishedCount: 11,
-      startDate: "06 okt 2025",
-      endDate: "12 okt 2025",
-      statusColor: "green",
-      houseHold: "Hjemme",
-    },
-    {
-      week: "34",
-      title: "Oppsummering - Uke 34",
-      status: "Ikke fullført",
-      count: 3,
-      finishedCount: 1,
-      startDate: "18 aug 2025",
-      endDate: "24 aug 2025",
-      statusColor: "red",
-      houseHold: "Kollektiv",
-    },
-  ];
+  // Format date for display
+  const formatDate = (date: Date): string => {
+    const months = ["jan", "feb", "mar", "apr", "mai", "jun", "jul", "aug", "sep", "okt", "nov", "des"];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
 
   // Helper function to get current month data
   const getCurrentMonth = () => {
@@ -244,50 +192,40 @@ export default function History() {
     return now.getMonth() - 1;
   };
 
-  const getItemMonth = (item: any) => {
-    // Parse the start date to get the month
-    const dateParts = item.startDate.split(' ');
-    const monthNames = ["jan", "feb", "mar", "apr", "mai", "jun", "jul", "aug", "sep", "okt", "nov", "des"];
-    return monthNames.indexOf(dateParts[1].toLowerCase());
-  };
-
-  // Filter history data based on selected household, filters, and search text
-  const filteredHistoryData = historyData.filter(item => {
-    // First filter by household
-    if (item.houseHold !== household) return false;
-
+  // Filter weekly summaries based on filters and search text
+  const filteredHistoryData = weeklySummaries.filter(summary => {
     // Apply search text filter if search is active
     if (searchText.trim() !== "") {
       const searchLower = searchText.toLowerCase().trim();
+      const status = summary.allCompleted ? "fullført" : "ikke fullført";
       const matchesSearch = 
-        item.title.toLowerCase().includes(searchLower) ||
-        item.status.toLowerCase().includes(searchLower) ||
-        item.week.toLowerCase().includes(searchLower) ||
-        item.startDate.toLowerCase().includes(searchLower) ||
-        item.endDate.toLowerCase().includes(searchLower) ||
-        item.count.toString().includes(searchLower);
+        summary.weekNumber.toString().includes(searchLower) ||
+        status.includes(searchLower) ||
+        formatDate(summary.startDate).toLowerCase().includes(searchLower) ||
+        formatDate(summary.endDate).toLowerCase().includes(searchLower) ||
+        summary.totalTasks.toString().includes(searchLower);
       
       if (!matchesSearch) return false;
     }
 
-    // If no filters selected, show all (for this household and search)
+    // If no filters selected, show all
     if (selectedFilters.length === 0) return true;
 
     // Apply selected filters
     return selectedFilters.every(filter => {
       switch (filter) {
         case "Fullført":
-          return item.status === "Fullført";
+          return summary.allCompleted;
         case "Ikke fullført":
-          return item.status === "Ikke fullført";
+          return !summary.allCompleted;
         case "Denne måneden":
-          return getItemMonth(item) === getCurrentMonth();
+          return summary.startDate.getMonth() === getCurrentMonth();
         case "Forrige måned":
-          return getItemMonth(item) === getPreviousMonth();
+          return summary.startDate.getMonth() === getPreviousMonth();
         case "Høy aktivitet":
-          return item.count >= 8; // Consider 8+ tasks as high activity
+          return summary.totalTasks >= 8;
         case "Lav aktivitet":
-          return item.count < 8; // Consider less than 8 tasks as low activity
+          return summary.totalTasks < 8;
         default:
           return true;
       }
@@ -338,7 +276,7 @@ export default function History() {
           {/* Household Dropdown - Active */}
           {showHouseholdDropdown && (
             <View style={[styles.dropdownMenu, { backgroundColor: colors.contextBackground }]}>
-              {households.map((householdOption, index) => (
+              {households.map((householdOption) => (
                 <TouchableOpacity
                   key={householdOption.id}
                   style={[
@@ -347,6 +285,7 @@ export default function History() {
                   ]}
                   onPress={() => {
                     setHousehold(householdOption.familyName);
+                    setSelectedHouseholdId(householdOption.id);
                     setShowHouseholdDropdown(false);
                   }}
                 >
@@ -453,52 +392,70 @@ export default function History() {
       </Modal>
 
       {/* History list */}
-      <ScrollView 
-        contentContainerStyle={{ paddingBottom: 20 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.tint}
-            colors={[colors.tint]}
-          />
-        }
-      >
-        {filteredHistoryData.map((item, index) => (
-          <View
-            key={index}
-            style={[styles.card, { backgroundColor: colors.contextBackground }]}
-          >
-            <View style={[styles.weekBadge, { backgroundColor: colors.tint }]}>
-              <Text style={[styles.weekText, { color: colors.darkText }]}>
-                Uke{"\n"}
-                {item.week}
-              </Text>
-            </View>
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {item.title}
-              </Text>
-              <View style={styles.statusContainer}>
-                <Text style={[styles.cardSubtitle, { color: colors.text }]}>
-                  Alle oppgaver ble:{" "}
+      {loadingSummaries ? (
+        <View style={styles.centerMessage}>
+          <Text style={[styles.messageText, { color: colors.text }]}>
+            Laster historikk...
+          </Text>
+        </View>
+      ) : filteredHistoryData.length === 0 ? (
+        <View style={styles.centerMessage}>
+          <Text style={[styles.messageText, { color: colors.text }]}>
+            Ingen historikk funnet.
+          </Text>
+        </View>
+      ) : (
+        <ScrollView 
+          contentContainerStyle={{ paddingBottom: 20 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.tint}
+              colors={[colors.tint]}
+            />
+          }
+        >
+          {filteredHistoryData.map((summary) => (
+            <TouchableOpacity
+              key={`${summary.year}-${summary.weekNumber}`}
+              style={[styles.card, { backgroundColor: colors.contextBackground }]}
+              onPress={() => {
+                setSelectedSummary(summary);
+                setShowSummaryModal(true);
+              }}
+            >
+              <View style={[styles.weekBadge, { backgroundColor: colors.tint }]}>
+                <Text style={[styles.weekText, { color: colors.darkText }]}>
+                  Uke{"\n"}
+                  {summary.weekNumber}
                 </Text>
-                <View style={[styles.statusText, { backgroundColor: item.statusColor === "green" ? colors.statusSuccessBackground : colors.statusFailedBackground }]}>
-                  <Text style={[styles.statusTextInner, { color: item.statusColor === "green" ? colors.statusSuccessText : colors.statusFailedText }]}>
-                    {item.status}
-                  </Text>
-                </View>
               </View>
-              <Text style={[styles.cardSubtitle, { color: colors.text }]}>
-                Antall oppgaver: {item.count}
-              </Text>
-              <Text style={[styles.dates, { color: colors.lightNonInteractiveText }]}>
-                {item.startDate} - {item.endDate}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>
+                  Oppsummering - Uke {summary.weekNumber}
+                </Text>
+                <View style={styles.statusContainer}>
+                  <Text style={[styles.cardSubtitle, { color: colors.text }]}>
+                    Alle oppgaver ble:{" "}
+                  </Text>
+                  <View style={[styles.statusText, { backgroundColor: summary.allCompleted ? colors.statusSuccessBackground : colors.statusFailedBackground }]}>
+                    <Text style={[styles.statusTextInner, { color: summary.allCompleted ? colors.statusSuccessText : colors.statusFailedText }]}>
+                      {summary.allCompleted ? "Fullført" : "Ikke fullført"}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={[styles.cardSubtitle, { color: colors.text }]}>
+                  Antall oppgaver fullført: {summary.completedTasks} / {summary.totalTasks}
+                </Text>
+                <Text style={[styles.dates, { color: colors.lightNonInteractiveText }]}>
+                  {formatDate(summary.startDate)} - {formatDate(summary.endDate)}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
 
       {/* Floating Action Buttons */}
       <View style={styles.floatingButtons}>
@@ -542,6 +499,16 @@ export default function History() {
           )}
         </TouchableOpacity>
       </View>
+
+      {/* Weekly Summary Modal */}
+      <WeeklySummaryModal
+        visible={showSummaryModal}
+        onClose={() => {
+          setShowSummaryModal(false);
+          setSelectedSummary(null);
+        }}
+        summary={selectedSummary}
+      />
         </>
       )}
     </View>
