@@ -11,4 +11,5 @@ export type Task = {
     timeStart: Date;
     title: string;
     imgEvidence?: string; // URL to image evidence when task is completed
+    verificationStatus?: 'not_reviewed' | 'verified' | 'rejected'; // Admin verification status
 }

@@ -75,51 +75,128 @@ export default function TaskDetailModal({
               <Text style={[styles.taskTitle, { color: colors.text }]}>
                 {task.title}
               </Text>
-              {task.finished ? (
-                <View
-                  style={[
-                    styles.statusBadge,
-                    { backgroundColor: colors.statusSuccessBackground },
-                  ]}
-                >
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={16}
-                    color={colors.statusSuccessText}
-                  />
-                  <Text
+              <View style={styles.statusContainer}>
+                {task.finished ? (
+                  <View
                     style={[
-                      styles.semiboldText,
-                      styles.statusText,
-                      { color: colors.statusSuccessText },
+                      styles.statusBadge,
+                      { backgroundColor: colors.statusSuccessBackground },
                     ]}
                   >
-                    Fullført
-                  </Text>
-                </View>
-              ) : (
-                <View
-                  style={[
-                    styles.statusBadge,
-                    { backgroundColor: colors.statusFailedBackground },
-                  ]}
-                >
-                  <Ionicons
-                    name="time-outline"
-                    size={16}
-                    color={colors.statusFailedText}
-                  />
-                  <Text
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={16}
+                      color={colors.statusSuccessText}
+                    />
+                    <Text
+                      style={[
+                        styles.semiboldText,
+                        styles.statusText,
+                        { color: colors.statusSuccessText },
+                      ]}
+                    >
+                      Fullført
+                    </Text>
+                  </View>
+                ) : (
+                  <View
                     style={[
-                      styles.semiboldText,
-                      styles.statusText,
-                      { color: colors.statusFailedText },
+                      styles.statusBadge,
+                      { backgroundColor: colors.statusFailedBackground },
                     ]}
                   >
-                    Ikke fullført
-                  </Text>
-                </View>
-              )}
+                    <Ionicons
+                      name="time-outline"
+                      size={16}
+                      color={colors.statusFailedText}
+                    />
+                    <Text
+                      style={[
+                        styles.semiboldText,
+                        styles.statusText,
+                        { color: colors.statusFailedText },
+                      ]}
+                    >
+                      Ikke fullført
+                    </Text>
+                  </View>
+                )}
+                
+                {/* Verification Status Badge */}
+                {task.finished && task.verificationStatus && (
+                  <>
+                    {task.verificationStatus === 'verified' && (
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          { backgroundColor: '#4CAF50' },
+                        ]}
+                      >
+                        <Ionicons
+                          name="shield-checkmark"
+                          size={16}
+                          color="#fff"
+                        />
+                        <Text
+                          style={[
+                            styles.semiboldText,
+                            styles.statusText,
+                            { color: '#fff' },
+                          ]}
+                        >
+                          Godkjent
+                        </Text>
+                      </View>
+                    )}
+                    {task.verificationStatus === 'not_reviewed' && (
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          { backgroundColor: '#FF9800' },
+                        ]}
+                      >
+                        <Ionicons
+                          name="hourglass-outline"
+                          size={16}
+                          color="#fff"
+                        />
+                        <Text
+                          style={[
+                            styles.semiboldText,
+                            styles.statusText,
+                            { color: '#fff' },
+                          ]}
+                        >
+                          Venter på godkjenning
+                        </Text>
+                      </View>
+                    )}
+                    {task.verificationStatus === 'rejected' && (
+                      <View
+                        style={[
+                          styles.statusBadge,
+                          { backgroundColor: '#F44336' },
+                        ]}
+                      >
+                        <Ionicons
+                          name="close-circle"
+                          size={16}
+                          color="#fff"
+                        />
+                        <Text
+                          style={[
+                            styles.semiboldText,
+                            styles.statusText,
+                            { color: '#fff' },
+                          ]}
+                        >
+                          Avvist
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                )}
+              </View>
             </View>
 
             {/* Task Details */}
@@ -468,6 +545,11 @@ const styles = StyleSheet.create({
   },
 
   // Badges & Icons
+  statusContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
