@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSegments } from 'expo-router';
 
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
 export default function TestUserLoader() {
     const { loadSpecificUser, userData, resetToAuthUser } = useUser();
     const { colors } = useTheme();
+    const { t } = useTranslation('app');
     const [userId, setUserId] = useState('');
     const [loading, setLoading] = useState(false);
     const segments = useSegments();
@@ -85,16 +87,17 @@ export default function TestUserLoader() {
 
     const handleLoadUser = async () => {
         if (!userId.trim()) {
-            Alert.alert('Error', 'Please enter a user ID');
+            Alert.alert(t('alerts.errorTitle'), t('profile.testUserLoader.enterId'));
             return;
         }
 
         setLoading(true);
         try {
             await loadSpecificUser(userId.trim());
-            Alert.alert('Success', `Loaded user: ${userId}`);
+            Alert.alert(t('alerts.successTitle'), t('profile.testUserLoader.loaded', { userId: userId.trim() }));
         } catch (error) {
-            Alert.alert('Error', `Failed to load user: ${error}`);
+            const errMsg = error && typeof error === 'object' && 'message' in error ? (error as any).message : String(error);
+            Alert.alert(t('alerts.errorTitle'), t('profile.testUserLoader.failed', { error: errMsg }));
         } finally {
             setLoading(false);
         }
@@ -113,14 +116,14 @@ export default function TestUserLoader() {
                 <View style={styles.header}>
                     <Ionicons name="flask" size={20} color={colors.tint} />
                     <Text style={[styles.title, { color: colors.text }]}> 
-                        🧪 Test User Loader
+                        {t('profile.testUserLoader.title')}
                     </Text>
                 </View>
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: colors.background, marginBottom: 8, borderWidth: 1, borderColor: colors.tint }]}
                     onPress={resetToAuthUser}
                 >
-                    <Text style={[styles.buttonText, { color: colors.tint }]}>Reset to Authenticated User</Text>
+                    <Text style={[styles.buttonText, { color: colors.tint }]}>{t('profile.testUserLoader.reset')}</Text>
                 </TouchableOpacity>
                 <TextInput
                     style={[styles.input, { 
@@ -128,7 +131,7 @@ export default function TestUserLoader() {
                         borderColor: colors.tint,
                         color: colors.text,
                     }]}
-                    placeholder="Enter user ID from Firestore"
+                    placeholder={t('profile.testUserLoader.placeholder')}
                     placeholderTextColor={colors.lightDarkText}
                     value={userId}
                     onChangeText={setUserId}
@@ -146,11 +149,11 @@ export default function TestUserLoader() {
                     disabled={loading}
                 >
                     <Text style={[styles.buttonText, { color: colors.darkText }]}> 
-                        {loading ? 'Loading...' : 'Load User'}
+                        {loading ? t('profile.testUserLoader.loading') : t('profile.testUserLoader.load')}
                     </Text>
                 </TouchableOpacity>
                 <Text style={[styles.hint, { color: colors.lightDarkText }]}> 
-                    💡 Find user IDs in Firebase Console → Firestore → users collection
+                    {t('profile.testUserLoader.hint')}
                 </Text>
             </View>
         </KeyboardAvoidingView>

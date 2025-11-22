@@ -6,6 +6,7 @@ import { createTask } from "@/services/taskService";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
     Alert,
     KeyboardAvoidingView,
@@ -26,6 +27,7 @@ import commonStyles from "../commonStyles";
 export default function AddTask() {
     const { colors } = useTheme();
     const { userData } = useUser();
+    const { t } = useTranslation('app');
 
     // Initialize selectedDate normalized to midnight
     const [selectedDate, setSelectedDate] = useState<Date>(() => {
@@ -164,7 +166,16 @@ export default function AddTask() {
     ];
 
     function getDayName(date: Date): string {
-        const days = ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"];
+        const days = [
+            t('weekdays.sun'),
+            t('weekdays.mon'),
+            t('weekdays.tue'),
+            t('weekdays.wed'),
+            t('weekdays.thu'),
+            t('weekdays.fri'),
+            t('weekdays.sat'),
+        ];
+
         return days[date.getDay()];
     }
 
@@ -240,14 +251,14 @@ export default function AddTask() {
             >
                 <View>
                     <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
-                        Opprett nytt {"\n"}gjøremål
+                        {t('addTask.title')}
                     </Text>
                 </View>
 
                 {/* Date Selection */}
                 <View style={styles.dateSection}>
                     <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-                        Velg dato
+                        {t('addTask.selectDate')}
                     </Text>
                     <View style={[styles.dateOptionsContainer, { backgroundColor: colors.contextBackground }]}>
                         {dateOptions.map((option, index) => (
@@ -301,8 +312,8 @@ export default function AddTask() {
                                 </>
                             ) : (
                                 <>
-                                    <Text style={[styles.anyDateText, { color: colors.lightDarkText }]}>Annen</Text>
-                                    <Text style={[styles.anyDateSubText, { color: colors.lightDarkText }]}>dato</Text>
+                                    <Text style={[styles.anyDateText, { color: colors.lightDarkText }]}>{t('addTask.otherDate')}</Text>
+                                    <Text style={[styles.anyDateSubText, { color: colors.lightDarkText }]}>{t('addTask.otherDateSub')}</Text>
                                 </>
                             )}
                         </TouchableOpacity>
@@ -312,14 +323,14 @@ export default function AddTask() {
                 {/* Time Selection */}
                 <View style={styles.timeSection}>
                     <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-                        Velg tid
+                        {t('addTask.selectTime')}
                     </Text>
 
                     {/* Time Range Display */}
                     <View style={[styles.timeRangeContainer, { backgroundColor: colors.contextBackground }]}>
                         <View style={styles.timeRangeHeader}>
-                            <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>Fra</Text>
-                            <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>Til</Text>
+                            <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>{t('addTask.fromLabel')}</Text>
+                            <Text style={[styles.timeRangeLabel, { color: colors.lightDarkText }]}>{t('addTask.toLabel')}</Text>
                         </View>
 
                         <View style={styles.timeRangeValues}>
@@ -346,7 +357,7 @@ export default function AddTask() {
                     {/* Title Field */}
                     <View style={styles.titleContainer}>
                         <Text style={[styles.titleLabel, { color: colors.lightDarkText }]}>
-                            Tittel
+                            {t('addTask.titleLabel')}
                         </Text>
                         <TextInput
                             style={[styles.titleInput, { 
@@ -354,7 +365,7 @@ export default function AddTask() {
                                 color: colors.text,
                                 borderColor: colors.nonInteractiveBackground
                             }]}
-                            placeholder="Legg til en tittel..."
+                            placeholder={t('addTask.titlePlaceholder')}
                             placeholderTextColor={colors.lightDarkText}
                             value={title}
                             onChangeText={setTitle}
@@ -364,7 +375,7 @@ export default function AddTask() {
                     {/* Description Field */}
                     <View style={styles.descriptionContainer}>
                         <Text style={[styles.descriptionLabel, { color: colors.lightDarkText }]}>
-                            Beskrivelse (valgfritt)
+                            {t('addTask.descriptionLabel')}
                         </Text>
                         <TextInput
                             style={[styles.descriptionInput, { 
@@ -372,7 +383,7 @@ export default function AddTask() {
                                 color: colors.text,
                                 borderColor: colors.nonInteractiveBackground
                             }]}
-                            placeholder="Legg til en beskrivelse..."
+                            placeholder={t('addTask.descriptionPlaceholder')}
                             placeholderTextColor={colors.lightDarkText}
                             value={description}
                             onChangeText={setDescription}
@@ -385,7 +396,7 @@ export default function AddTask() {
                     {/* Points Field */}
                     <View style={styles.pointsContainer}>
                         <Text style={[styles.pointsLabel, { color: colors.lightDarkText }]}>
-                            Poeng
+                            {t('addTask.pointsLabel')}
                         </Text>
                         <TextInput
                             style={[styles.pointsInput, { 
@@ -410,18 +421,18 @@ export default function AddTask() {
                 {/* Person Assignment Section */}
                 <View style={styles.personSection}>
                     <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-                        Tilordne
+                        {t('addTask.assignTitle')}
                     </Text>
                     {loadingMembers ? (
                         <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
                             <Text style={[styles.loadingText, { color: colors.text }]}>
-                                Laster medlemmer...
+                                {t('addTask.loadingMembers')}
                             </Text>
                         </View>
                     ) : householdMembers.length === 0 ? (
                         <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
                             <Text style={[styles.loadingText, { color: colors.text }]}>
-                                Ingen medlemmer i husstanden
+                                {t('addTask.noMembers')}
                             </Text>
                         </View>
                     ) : (
@@ -475,10 +486,10 @@ export default function AddTask() {
                 {(!userData?.household || userData.household.length === 0) && (
                     <View style={[styles.noHouseholdContainer, { backgroundColor: colors.contextBackground }]}>
                         <Text style={[styles.noHouseholdTitle, { color: colors.text }]}>
-                            Du er ikke medlem av en husstand
+                            {t('addTask.noHouseholdTitle')}
                         </Text>
                         <Text style={[styles.noHouseholdMessage, { color: colors.lightDarkText }]}>
-                            Du må være medlem av en husstand for å opprette oppgaver. Gå til profilsiden for å opprette eller bli med i en husstand.
+                            {t('addTask.noHouseholdBody')}
                         </Text>
                     </View>
                 )}
@@ -500,20 +511,20 @@ export default function AddTask() {
                             // Check if user is in a household
                             if (!userData?.household || userData.household.length === 0) {
                                 Alert.alert(
-                                    'Ikke medlem av husstand', 
-                                    'Du må være medlem av en husstand for å opprette oppgaver. Gå til profilsiden for å opprette eller bli med i en husstand.'
+                                    t('addTask.notMemberTitle'),
+                                    t('addTask.notMemberMessage')
                                 );
                                 return;
                             }
                             
                             // Validate required fields
                             if (!selectedPerson) {
-                                Alert.alert('Feil', 'Vennligst velg hvem som skal utføre oppgaven');
+                                Alert.alert(t('addTask.errorTitle'), t('addTask.selectPerson'));
                                 return;
                             }
 
                             if (!userData?.id) {
-                                Alert.alert('Feil', 'Kunne ikke identifisere brukeren');
+                                Alert.alert(t('addTask.errorTitle'), t('addTask.couldNotIdentifyUser'));
                                 return;
                             }
 
@@ -529,7 +540,7 @@ export default function AddTask() {
                             }
 
                             if (!householdId) {
-                                Alert.alert('Feil', 'Kunne ikke finne husstand-ID');
+                                Alert.alert(t('addTask.errorTitle'), t('addTask.couldNotFindHousehold'));
                                 return;
                             }
 
@@ -566,11 +577,11 @@ export default function AddTask() {
 
                                 if (taskId) {
                                     Alert.alert(
-                                        'Suksess!',
-                                        'Oppgaven ble opprettet',
+                                        t('addTask.successTitle'),
+                                        t('addTask.successMessage'),
                                         [
                                             {
-                                                text: 'OK',
+                                                text: t('alerts.ok'),
                                                 onPress: () => {
                                                     // Reset form
                                                     setTitle('');
@@ -587,11 +598,11 @@ export default function AddTask() {
                                         ]
                                     );
                                 } else {
-                                    Alert.alert('Feil', 'Kunne ikke opprette oppgaven. Prøv igjen.');
+                                    Alert.alert(t('addTask.errorTitle'), t('addTask.createFailed'));
                                 }
                             } catch (error) {
                                 console.error('Error creating task:', error);
-                                Alert.alert('Feil', 'En feil oppstod ved oppretting av oppgaven');
+                                Alert.alert(t('addTask.errorTitle'), t('addTask.createError'));
                             } finally {
                                 setIsSaving(false);
                             }
@@ -602,7 +613,7 @@ export default function AddTask() {
                             commonStyles.saveButtonText, 
                             { color: (title.trim() && !isSaving && userData?.household && userData.household.length > 0) ? colors.darkText : colors.lightDarkText }
                         ]}>
-                            {isSaving ? 'Lagrer...' : 'Lagre'}
+                            {isSaving ? t('addTask.saving') : t('addTask.saveButton')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -621,13 +632,13 @@ export default function AddTask() {
                             <View style={styles.iosPickerContainer}>
                                 <View style={[styles.iosPickerHeader, { backgroundColor: colors.contextBackground }]}>
                                     <TouchableOpacity onPress={() => setShowTimePicker(false)}>
-                                        <Text style={[styles.iosPickerButton, { color: colors.text }]}>Avbryt</Text>
+                                        <Text style={[styles.iosPickerButton, { color: colors.text }]}>{t('addTask.cancel')}</Text>
                                     </TouchableOpacity>
-                                    <Text style={[styles.iosPickerTitle, { color: colors.text }]}>
-                                        Velg {timePickerMode === 'start' ? 'starttid' : 'sluttid'}
+                                    <Text style={[styles.iosPickerTitle, { color: colors.text }]}> 
+                                        {timePickerMode === 'start' ? t('addTask.selectStartTime') : t('addTask.selectEndTime')}
                                     </Text>
                                     <TouchableOpacity onPress={confirmIOSTime}>
-                                        <Text style={[styles.iosPickerButton, { color: colors.tint }]}>Ferdig</Text>
+                                        <Text style={[styles.iosPickerButton, { color: colors.tint }]}>{t('addTask.done')}</Text>
                                     </TouchableOpacity>
                                 </View>
                                 <View style={[styles.iosPickerContent, { backgroundColor: colors.contextBackground }]}>

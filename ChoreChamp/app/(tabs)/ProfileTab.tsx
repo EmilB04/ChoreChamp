@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from 'expo-router';
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
     Image,
     Linking,
@@ -32,6 +33,7 @@ import commonStyles from "../commonStyles";
 export default function Profile() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
+    const { t } = useTranslation('app');
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [showMyAccount, setShowMyAccount] = useState(false);
     const [showMyHouseholds, setShowMyHouseholds] = useState(false);
@@ -110,7 +112,7 @@ export default function Profile() {
             <View style={[styles.header, { backgroundColor: colors.tint }]}>
                 {/* Adjust marginTop to keep title level with rest */}
                 <Text style={[styles.headerTitle, commonStyles.headerTitle]}>
-                    Profil & {"\n"}Innstillinger
+                    {t('profile.title')}
                 </Text>
                 {!userData.imageUri ? (
                 <View style={[styles.avatar, styles.avatarPlaceholder]}>
@@ -133,7 +135,7 @@ export default function Profile() {
                     style={{ flexDirection: "row", alignItems: "flex-end", alignContent: "center", paddingVertical: 8, gap: 4 }}
                     onPress={() => setIsEditModalVisible(true)}
                 >
-                    <Text style={styles.editProfile}>Rediger profil</Text>
+                    <Text style={styles.editProfile}>{t('profile.editProfile')}</Text>
                     <Ionicons name="create-outline" size={20} color={colors.darkText} />
                 </TouchableOpacity>
             </View>
@@ -153,36 +155,36 @@ export default function Profile() {
             >
                 <MenuItem
                     icon="person-circle"
-                    title="Min konto"
-                    description="Administrer konto informasjon og personlige innstillinger"
+                    title={t('profile.account.title')}
+                    description={t('profile.account.description')}
                     onPress={() => setShowMyAccount(true)}
                 />
 
                 <MenuItem
                     icon="people"
-                    title="Mine husstander"
-                    description="Se og administrer dine tilknyttede husstander"
+                    title={t('profile.households.title')}
+                    description={t('profile.households.description')}
                     onPress={() => setShowMyHouseholds(true)}
                 />
 
                 <MenuItem
                     icon="cog"
-                    title="App innstillinger"
-                    description="Tilpass appens funksjonalitet og utseende"
+                    title={t('profile.appSettings.title')}
+                    description={t('profile.appSettings.description')}
                     onPress={() => setShowAppSettings(true)}
                 />
 
                 <MenuItem
                     icon="log-out"
-                    title="Logg ut"
-                    description="Logg ut av din konto"
+                    title={t('profile.logout.title')}
+                    description={t('profile.logout.description')}
                     onPress={() => {
                         // Navigate to WelcomeScreen
                         router.push('/WelcomeScreen');
                     }}
                 />
 
-                <Text style={[styles.more, { color: colors.lightDarkText }]}>Mer</Text>
+                <Text style={[styles.more, { color: colors.lightDarkText }]}>{t('profile.more')}</Text>
 
                 <TouchableOpacity 
                     style={[
@@ -196,10 +198,10 @@ export default function Profile() {
                         <Ionicons name="help-circle-outline" size={24} color={colors.tint} />
                         <View style={styles.actionButtonText}>
                             <Text style={[styles.actionButtonTitle, { color: colors.text }]}>
-                                Hjelp og støtte
+                                {t('profile.help.title')}
                             </Text>
-                            <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}>
-                                Kontaktinformasjon og support
+                            <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}> 
+                                {t('profile.help.description')}
                             </Text>
                         </View>
                     </View>
@@ -213,17 +215,17 @@ export default function Profile() {
                 {/* Help and Support dropdown content */}
                 {showHelpSupport && (
                     <View style={[styles.dropdownContent, { backgroundColor: colors.contextBackground }]}>
-                        <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}>
-                            E-post: 
-                            <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('mailto:support@chorechamp.com')}>
-                                support@chorechamp.com
+                            <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}>
+                                {t('profile.contact.emailLabel')} 
+                                <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('mailto:support@chorechamp.com')}>
+                                    support@chorechamp.com
+                                </Text>
+                                {'\n\n'}
+                                {t('profile.contact.phoneLabel')}
+                                <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('tel:+4712345678')}>
+                                    +47 123 45 678
+                                </Text>
                             </Text>
-                            {'\n\n'}
-                            Telefon: 
-                            <Text style={[styles.linkText, { color: colors.tint }]} onPress={() => Linking.openURL('tel:+4712345678')}>
-                                +47 123 45 678
-                            </Text>
-                        </Text>
                     </View>
                 )}
 
@@ -239,10 +241,10 @@ export default function Profile() {
                         <Ionicons name="information-circle-outline" size={24} color={colors.tint} />
                         <View style={styles.actionButtonText}>
                             <Text style={[styles.actionButtonTitle, { color: colors.text }]}>
-                                Om Appen
+                                {t('profile.about.title')}
                             </Text>
-                            <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}>
-                                Informasjon om ChoreChamp og utviklerne
+                            <Text style={[styles.actionButtonDescription, { color: colors.lightDarkText }]}> 
+                                {t('profile.about.description')}
                             </Text>
                         </View>
                     </View>
@@ -256,16 +258,8 @@ export default function Profile() {
                 {/* About App dropdown content */}
                 {showAboutApp && (
                     <View style={[styles.dropdownContent, { backgroundColor: colors.contextBackground }]}>
-                        <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}>
-                            ChoreChamp er en app for å organisere og administrere oppgaver i hjemmet. 
-                            Man kan opprette husstander, tildele oppgaver, og følge med på fremdriften i leaderboards med et poengsystem. 
-                            Appen er utviklet for å gjøre vanlige husoppgaver til en morsom og engasjerende konkurranse for hele familien.{'\n\n'}
-                            Appen er utviklet av:{'\n'}
-                            - Emil Berglund{'\n'}
-                            - Andreas B. O. Skaarberg{'\n'}
-                            - Sebastian W. Thomsen{'\n'}
-                            - Ida Tollaksen{'\n'}
-                            - Khalid H. Osman
+                        <Text style={[styles.dropdownText, { color: colors.lightDarkText }]}> 
+                            {t('profile.about.body')}
                         </Text>
                     </View>
                 )}

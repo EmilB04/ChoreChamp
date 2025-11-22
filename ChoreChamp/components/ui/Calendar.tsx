@@ -1,5 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Modal,
     Platform,
@@ -27,6 +28,7 @@ export default function Calendar({
     minDate,
 }: CalendarProps) {
     const { colors } = useTheme();
+    const { t } = useTranslation('app');
     const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
 
     const getDaysInMonth = (date: Date) => {
@@ -146,21 +148,29 @@ export default function Calendar({
     };
 
     const monthNames = [
-        'Januar',
-        'Februar',
-        'Mars',
-        'April',
-        'Mai',
-        'Juni',
-        'Juli',
-        'August',
-        'September',
-        'Oktober',
-        'November',
-        'Desember',
+        t('months.january'),
+        t('months.february'),
+        t('months.march'),
+        t('months.april'),
+        t('months.may'),
+        t('months.june'),
+        t('months.july'),
+        t('months.august'),
+        t('months.september'),
+        t('months.october'),
+        t('months.november'),
+        t('months.december'),
     ];
 
-    const weekDays = ['Ma', 'Ti', 'On', 'To', 'Fr', 'Lø', 'Sø'];
+    const weekDays = [
+        t('weekdays.mon'),
+        t('weekdays.tue'),
+        t('weekdays.wed'),
+        t('weekdays.thu'),
+        t('weekdays.fri'),
+        t('weekdays.sat'),
+        t('weekdays.sun'),
+    ];
 
     return (
         <Modal
@@ -240,7 +250,7 @@ export default function Calendar({
                                 ]}
                             >
                                 <Text style={[styles.footerButtonText, { color: colors.darkText }]}>
-                                    I dag
+                                    {t('calendar.today')}
                                 </Text>
                             </TouchableOpacity>
 
@@ -252,7 +262,7 @@ export default function Calendar({
                                 ]}
                             >
                                 <Text style={[styles.footerButtonText, { color: colors.darkText }]}>
-                                    Avbryt
+                                    {t('calendar.cancel')}
                                 </Text>
                             </TouchableOpacity>
                         </View>
