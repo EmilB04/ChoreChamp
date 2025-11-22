@@ -1,5 +1,6 @@
 import { db } from '@/lib/firebase';
 import { addDoc, collection, doc, getDocs, Timestamp, updateDoc } from 'firebase/firestore';
+import { getWeekInfo } from '@/utils/weekUtils';
 
 export interface TaskData {
     id: string;
@@ -14,8 +15,14 @@ export interface TaskData {
     householdId: string;
     points: number;
     done: boolean;
+    // Image evidence and verification (from main)
     imgEvidence?: string; // URL to image evidence when task is completed
     verificationStatus?: 'not_reviewed' | 'verified' | 'rejected'; // Admin verification status
+    // Weekly leaderboard tracking (from leaderboard)
+    completedAt?: Date;     // When was the task completed?
+    completedBy?: string;   // User ID who completed it
+    weekNumber?: number;    // ISO week number (1-53)
+    year?: number;          // Year when completed
 }
 
 export interface CreateTaskInput {
@@ -139,21 +146,35 @@ export async function getTodayTasksForUser(userId: string): Promise<TaskData[]> 
 /**
  * Mark a task as complete
  * @param taskId - The task's document ID
+ * @param userId - The user ID who is completing the task
  * @param imgEvidence - URL to the uploaded image evidence
  */
-export async function markTaskAsComplete(taskId: string, imgEvidence: string): Promise<boolean> {
-    if (!taskId || !imgEvidence) {
-        console.error('❌ Task ID and image evidence are required');
+export async function markTaskAsComplete(taskId: string, userId: string, imgEvidence: string): Promise<boolean> {
+    if (!taskId || !userId || !imgEvidence) {
+        console.error('❌ Task ID, user ID, and image evidence are required');
         return false;
     }
     
     try {
         const taskRef = doc(db, 'tasks', taskId);
+        
+        // Get current timestamp and week info
+        const now = new Date();
+        const { weekNumber, year } = getWeekInfo(now);
+        
         await updateDoc(taskRef, {
             done: true,
+            // Leaderboard tracking
+            completedAt: Timestamp.fromDate(now),
+            completedBy: userId,
+            weekNumber: weekNumber,
+            year: year,
+            // Image evidence and verification
             imgEvidence: imgEvidence,
             verificationStatus: 'not_reviewed'
         });
+        
+        console.log(`✅ Task ${taskId} completed in week ${weekNumber} of ${year}`);
         
         return true;
     } catch (error) {
@@ -175,8 +196,16 @@ export async function markTaskAsIncomplete(taskId: string): Promise<boolean> {
         const taskRef = doc(db, 'tasks', taskId);
         await updateDoc(taskRef, {
             done: false,
+            // Remove completion tracking
+            completedAt: null,
+            completedBy: null,
+            weekNumber: null,
+            year: null,
+            // Reset verification
             verificationStatus: 'not_reviewed'
         });
+        
+        console.log(`↩️ Task ${taskId} marked as incomplete`);
         
         return true;
     } catch (error) {
