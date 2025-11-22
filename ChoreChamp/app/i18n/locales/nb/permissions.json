@@ -1,0 +1,17 @@
+{
+  "camera": {
+    "title": "Kameratillatelse kreves",
+    "message": "Du har nektet tilgang til kameraet. For å bruke kameraet, må du aktivere tillatelsen i appinnstillingene.",
+    "usageDescription": "Denne appen trenger tilgang til kameraet ditt for å ta profilbilder."
+  },
+  "mediaLibrary": {
+    "title": "Bildebibliotek-tillatelse kreves",
+    "message": "Du har nektet tilgang til bildebiblioteket. For å velge bilder, må du aktivere tillatelsen i appinnstillingene.",
+    "usageDescription": "Denne appen trenger tilgang til bildebiblioteket ditt for å velge profilbilder."
+  },
+  "openSettings": "Åpne innstillinger",
+  "cancel": "Avbryt",
+  "error": "Feil",
+  "couldNotOpenSettings": "Kunne ikke åpne innstillinger",
+  "couldNotRequestPermission": "Kunne ikke be om tillatelse"
+}

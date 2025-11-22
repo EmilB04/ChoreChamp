@@ -1,6 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
-import { getHouseholdsForUser, getUserHouseholds } from '@/services/householdService';
+import { createHousehold, getHouseholdMembers, getHouseholdsForUser, getUserHouseholds, joinHousehold, leaveHousehold } from '@/services/householdService';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
@@ -36,11 +36,23 @@ interface Household {
 
 export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) {
     const { colors } = useTheme();
-    const { userData } = useUser();
+    const { userData, refreshUserData } = useUser();
     
     // Fetch households from database
     const [households, setHouseholds] = useState<Household[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Modal states
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newHouseholdName, setNewHouseholdName] = useState('');
+    const [showMembersModal, setShowMembersModal] = useState(false);
+    const [selectedHousehold, setSelectedHousehold] = useState<Household | null>(null);
+    const [householdMembers, setHouseholdMembers] = useState<Member[]>([]);
+    const [loadingMembers, setLoadingMembers] = useState(false);
+    const [showJoinModal, setShowJoinModal] = useState(false);
+    const [joinCode, setJoinCode] = useState('');
+    const [isJoining, setIsJoining] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     // Fetch user's households on mount
     useEffect(() => {
@@ -84,30 +96,120 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
         fetchHouseholds();
     }, [userData?.id, userData?.household]);
 
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [newHouseholdName, setNewHouseholdName] = useState('');
-    const [showMembersModal, setShowMembersModal] = useState(false);
-    const [selectedHousehold, setSelectedHousehold] = useState<Household | null>(null);
+    // Fetch household data
+    const fetchHouseholds = async () => {
+        if (!userData?.id) {
+            console.log('⚠️ No user ID available');
+            setLoading(false);
+            return;
+        }
 
-    const handleCreateHousehold = () => {
+        setLoading(true);
+        try {
+            console.log('🏠 Fetching households for user:', userData.id);
+            
+            // First, try to fetch households by querying familyMembers
+            let userHouseholds = await getHouseholdsForUser(userData.id);
+            
+            // If no households found via query and user has household array, fetch those
+            if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
+                console.log('🏠 No households found via query, trying user.household array');
+                userHouseholds = await getUserHouseholds(userData.household);
+            }
+
+            // Transform to match the component's Household interface
+            const transformedHouseholds: Household[] = userHouseholds.map(h => ({
+                id: h.id,
+                name: h.familyName,
+                role: 'member', // Default to member, you can enhance this later
+                members: [] // Will be loaded on demand
+            }));
+
+            setHouseholds(transformedHouseholds);
+            console.log('✅ Loaded households:', transformedHouseholds.map(h => h.name));
+        } catch (error) {
+            console.error('❌ Error loading households:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCreateHousehold = async () => {
         if (newHouseholdName.trim() === '') {
             Alert.alert('Feil', 'Husstandsnavnet kan ikke være tomt');
             return;
         }
 
-        const newHousehold: Household = {
-            id: Date.now().toString(),
-            name: newHouseholdName.trim(),
-            role: 'admin',
-            members: [
-                { id: '1', name: 'Emil Berglund', role: 'admin', avatar: 'https://i.pravatar.cc/150?u=1' }
-            ]
-        };
+        if (!userData?.id) {
+            Alert.alert('Feil', 'Kunne ikke identifisere brukeren');
+            return;
+        }
 
-        setHouseholds([...households, newHousehold]);
-        setNewHouseholdName('');
-        setShowCreateModal(false);
-        Alert.alert('Suksess', `Husstand "${newHousehold.name}" er opprettet!`);
+        setIsCreating(true);
+        try {
+            const householdId = await createHousehold(newHouseholdName.trim(), userData.id);
+            
+            if (householdId) {
+                // Refresh user data to get updated household array
+                await refreshUserData();
+                
+                // Refresh households list
+                await fetchHouseholds();
+                
+                setNewHouseholdName('');
+                setShowCreateModal(false);
+                Alert.alert('Suksess', `Husstand "${newHouseholdName.trim()}" er opprettet!`);
+            } else {
+                Alert.alert('Feil', 'Kunne ikke opprette husstanden. Vennligst prøv igjen.');
+            }
+        } catch (error) {
+            console.error('Error creating household:', error);
+            Alert.alert('Feil', 'En feil oppstod ved oppretting av husstanden.');
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const handleJoinHousehold = async () => {
+        if (joinCode.trim() === '') {
+            Alert.alert('Feil', 'Vennligst skriv inn en husstandskode');
+            return;
+        }
+
+        if (!userData?.id) {
+            Alert.alert('Feil', 'Kunne ikke identifisere brukeren');
+            return;
+        }
+
+        setIsJoining(true);
+        try {
+            // Extract just the code if user pasted full path
+            let code = joinCode.trim();
+            if (code.includes('/')) {
+                code = code.split('/').pop() || code;
+            }
+
+            const result = await joinHousehold(code, userData.id);
+            
+            if (result.success) {
+                // Refresh user data to get updated household array
+                await refreshUserData();
+                
+                // Refresh households list
+                await fetchHouseholds();
+                
+                setJoinCode('');
+                setShowJoinModal(false);
+                Alert.alert('Suksess', `Du er nå medlem av "${result.householdName}"!`);
+            } else {
+                Alert.alert('Feil', result.error || 'Kunne ikke bli med i husstanden.');
+            }
+        } catch (error) {
+            console.error('Error joining household:', error);
+            Alert.alert('Feil', 'En feil oppstod. Vennligst prøv igjen.');
+        } finally {
+            setIsJoining(false);
+        }
     };
 
     const handleLeaveHousehold = (household: Household) => {
@@ -119,20 +221,75 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 {
                     text: 'Forlat',
                     style: 'destructive',
-                    onPress: () => {
-                        setHouseholds(households.filter(h => h.id !== household.id));
-                        Alert.alert('Vellykket', `Du har forlatt "${household.name}"`);
+                    onPress: async () => {
+                        if (!userData?.id) return;
+                        
+                        try {
+                            const result = await leaveHousehold(household.id, userData.id);
+                            
+                            if (result.success) {
+                                // Refresh user data
+                                await refreshUserData();
+                                
+                                // Refresh households list
+                                await fetchHouseholds();
+                                
+                                Alert.alert('Vellykket', `Du har forlatt "${household.name}"`);
+                            } else {
+                                Alert.alert('Feil', result.error || 'Kunne ikke forlate husstanden.');
+                            }
+                        } catch (error) {
+                            console.error('Error leaving household:', error);
+                            Alert.alert('Feil', 'En feil oppstod. Vennligst prøv igjen.');
+                        }
                     }
                 }
             ]
         );
     };
 
-    const handleShowMembers = (household: Household) => {
+    const handleShowMembers = async (household: Household) => {
         setSelectedHousehold(household);
         setShowMembersModal(true);
+        setLoadingMembers(true);
+        
+        try {
+            const members = await getHouseholdMembers(household.id);
+            const transformedMembers: Member[] = members.map(m => ({
+                id: m.id,
+                name: m.username,
+                role: 'member', // Can be enhanced later
+                avatar: m.imageUri
+            }));
+            setHouseholdMembers(transformedMembers);
+        } catch (error) {
+            console.error('Error loading members:', error);
+            Alert.alert('Feil', 'Kunne ikke laste medlemmer');
+        } finally {
+            setLoadingMembers(false);
+        }
     };
-    
+
+    const handleShareHousehold = (household: Household) => {
+        const code = household.id;
+        const message = `Bli med i vår husstand "${household.name}"!\n\nBruk denne koden: ${code}\n\nEller kopier hele denne linken: households/${code}`;
+        
+        Alert.alert(
+            'Del husstandskode',
+            message,
+            [
+                {
+                    text: 'Kopier kode',
+                    onPress: () => {
+                        // In a real app, you'd use Clipboard API
+                        Alert.alert('Kopiert', `Koden "${code}" er kopiert!`);
+                    }
+                },
+                { text: 'Lukk', style: 'cancel' }
+            ]
+        );
+    };
+
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Header 
@@ -161,6 +318,32 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                         <Text style={[styles.emptySubtext, { color: colors.lightDarkText }]}>
                             Opprett en ny husstand eller bli med i en eksisterende
                         </Text>
+                        
+                        {/* Action Buttons */}
+                        <View style={styles.emptyActions}>
+                            <TouchableOpacity 
+                                style={[styles.primaryButton, { backgroundColor: colors.tint }]}
+                                onPress={() => setShowCreateModal(true)}
+                            >
+                                <Ionicons name="add" size={24} color={colors.darkText} />
+                                <Text style={[styles.primaryButtonText, { color: colors.darkText }]}>
+                                    Opprett husstand
+                                </Text>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity 
+                                style={[styles.secondaryButton, { 
+                                    backgroundColor: colors.contextBackground,
+                                    borderColor: colors.tint 
+                                }]}
+                                onPress={() => setShowJoinModal(true)}
+                            >
+                                <Ionicons name="enter-outline" size={24} color={colors.tint} />
+                                <Text style={[styles.secondaryButtonText, { color: colors.tint }]}>
+                                    Bli med med kode
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 ) : (
                     <>
@@ -241,7 +424,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                     <>
                                         <TouchableOpacity 
                                             style={[styles.actionButton, { borderColor: colors.tint }]}
-                                            onPress={() => Alert.alert('Del husstand', 'Invitasjonskode eller link kan genereres her')}
+                                            onPress={() => handleShareHousehold(household)}
                                         >
                                             <Ionicons name="share-outline" size={16} color={colors.tint} />
                                             <Text style={[styles.actionButtonText, { color: colors.tint }]}>
@@ -264,15 +447,46 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                         ))}
                     </View>
 
-                    {/* Join Household Section */}
+                    {/* Action Buttons Section */}
                     <View style={styles.section}>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                            Handlinger
+                        </Text>
+                        
                         <TouchableOpacity 
-                            style={[styles.joinButton, { backgroundColor: colors.contextBackground, borderColor: colors.tint }]}
+                            style={[styles.actionCardButton, { backgroundColor: colors.contextBackground }]}
+                            onPress={() => setShowCreateModal(true)}
                         >
-                            <Ionicons name="add-circle-outline" size={24} color={colors.tint} />
-                            <Text style={[styles.joinButtonText, { color: colors.tint }]}>
-                                Bli med i eksisterende husstand
-                            </Text>
+                            <View style={[styles.actionCardIcon, { backgroundColor: colors.tint }]}>
+                                <Ionicons name="add" size={24} color={colors.darkText} />
+                            </View>
+                            <View style={styles.actionCardContent}>
+                                <Text style={[styles.actionCardTitle, { color: colors.text }]}>
+                                    Opprett ny husstand
+                                </Text>
+                                <Text style={[styles.actionCardDescription, { color: colors.lightDarkText }]}>
+                                    Start en ny husstand og inviter medlemmer
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={colors.lightDarkText} />
+                        </TouchableOpacity>
+                        
+                        <TouchableOpacity 
+                            style={[styles.actionCardButton, { backgroundColor: colors.contextBackground }]}
+                            onPress={() => setShowJoinModal(true)}
+                        >
+                            <View style={[styles.actionCardIcon, { backgroundColor: colors.tint }]}>
+                                <Ionicons name="enter-outline" size={24} color={colors.darkText} />
+                            </View>
+                            <View style={styles.actionCardContent}>
+                                <Text style={[styles.actionCardTitle, { color: colors.text }]}>
+                                    Bli med i husstand
+                                </Text>
+                                <Text style={[styles.actionCardDescription, { color: colors.lightDarkText }]}>
+                                    Bruk en invitasjonskode for å bli med
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={colors.lightDarkText} />
                         </TouchableOpacity>
                     </View>
                     </>
@@ -290,8 +504,13 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
                         </TouchableOpacity>
                         <Text style={[styles.modalTitle, { color: colors.text }]}>Ny husstand</Text>
-                        <TouchableOpacity onPress={handleCreateHousehold}>
-                            <Text style={[styles.saveText, { color: colors.tint }]}>Opprett</Text>
+                        <TouchableOpacity 
+                            onPress={handleCreateHousehold}
+                            disabled={isCreating}
+                        >
+                            <Text style={[styles.saveText, { color: isCreating ? colors.lightDarkText : colors.tint }]}>
+                                {isCreating ? 'Oppretter...' : 'Opprett'}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                     
@@ -335,11 +554,19 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                     </View>
                     
                     <ScrollView style={styles.modalContent}>
-                        <Text style={[styles.memberCountText, { color: colors.lightDarkText }]}>
-                            {selectedHousehold?.members.length} medlemmer totalt
-                        </Text>
-                        
-                        {selectedHousehold?.members.map((member) => (
+                        {loadingMembers ? (
+                            <View style={styles.loadingContainer}>
+                                <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
+                                    Laster medlemmer...
+                                </Text>
+                            </View>
+                        ) : (
+                            <>
+                                <Text style={[styles.memberCountText, { color: colors.lightDarkText }]}>
+                                    {householdMembers.length} medlemmer totalt
+                                </Text>
+                                
+                                {householdMembers.map((member) => (
                             <View key={member.id} style={[styles.memberCard, { backgroundColor: colors.contextBackground }]}>
                                 <View style={styles.memberInfo}>
                                     <View style={styles.memberAvatar}>
@@ -377,7 +604,55 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                 </View>
                             </View>
                         ))}
+                            </>
+                        )}
                     </ScrollView>
+                </View>
+            </Modal>
+
+            {/* Join Household Modal */}
+            <Modal
+                visible={showJoinModal}
+                animationType="slide"
+                presentationStyle="pageSheet"
+                onRequestClose={() => setShowJoinModal(false)}
+            >
+                <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+                    <View style={[styles.modalHeader, { borderBottomColor: colors.contextBackground }]}>
+                        <TouchableOpacity onPress={() => setShowJoinModal(false)}>
+                            <Text style={[styles.cancelText, { color: colors.text }]}>Avbryt</Text>
+                        </TouchableOpacity>
+                        <Text style={[styles.modalTitle, { color: colors.text }]}>Bli med i husstand</Text>
+                        <TouchableOpacity 
+                            onPress={handleJoinHousehold}
+                            disabled={isJoining}
+                        >
+                            <Text style={[styles.saveText, { color: isJoining ? colors.lightDarkText : colors.tint }]}>
+                                {isJoining ? 'Bli med...' : 'Bli med'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    
+                    <View style={styles.modalContent}>
+                        <Text style={[styles.inputLabel, { color: colors.text }]}>Husstandskode</Text>
+                        <TextInput
+                            style={[styles.textInput, { 
+                                backgroundColor: colors.contextBackground,
+                                color: colors.text,
+                                borderColor: colors.lightDarkText 
+                            }]}
+                            value={joinCode}
+                            onChangeText={setJoinCode}
+                            placeholder="Skriv inn husstandskode"
+                            placeholderTextColor={colors.lightDarkText}
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                        />
+                        <Text style={[styles.inputHint, { color: colors.lightDarkText }]}>
+                            Koden er på formatet: NMogPiBLWF4nmwsHBTlP{'\n'}
+                            Eller du kan lime inn: households/NMogPiBLWF4nmwsHBTlP
+                        </Text>
+                    </View>
                 </View>
             </Modal>
         </View>
@@ -428,6 +703,38 @@ const styles = StyleSheet.create({
     emptySubtext: {
         fontSize: 14,
         textAlign: 'center',
+    },
+    emptyActions: {
+        width: '100%',
+        marginTop: 32,
+        gap: 12,
+    },
+    primaryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderRadius: 12,
+        gap: 8,
+    },
+    primaryButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    secondaryButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        gap: 8,
+    },
+    secondaryButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
     },
     householdCard: {
         borderRadius: 12,
@@ -500,6 +807,33 @@ const styles = StyleSheet.create({
     actionButtonText: {
         fontSize: 14,
         fontWeight: '500',
+    },
+    actionCardButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        gap: 12,
+    },
+    actionCardIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    actionCardContent: {
+        flex: 1,
+    },
+    actionCardTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    actionCardDescription: {
+        fontSize: 14,
+        lineHeight: 18,
     },
     joinButton: {
         flexDirection: 'row',

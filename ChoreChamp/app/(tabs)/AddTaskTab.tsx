@@ -471,19 +471,40 @@ export default function AddTask() {
                 </View>
 
 
+                {/* Info message when user is not in a household */}
+                {(!userData?.household || userData.household.length === 0) && (
+                    <View style={[styles.noHouseholdContainer, { backgroundColor: colors.contextBackground }]}>
+                        <Text style={[styles.noHouseholdTitle, { color: colors.text }]}>
+                            Du er ikke medlem av en husstand
+                        </Text>
+                        <Text style={[styles.noHouseholdMessage, { color: colors.lightDarkText }]}>
+                            Du må være medlem av en husstand for å opprette oppgaver. Gå til profilsiden for å opprette eller bli med i en husstand.
+                        </Text>
+                    </View>
+                )}
+
                 {/* Save button */}
                 <View>
                     <TouchableOpacity
                         style={[
                             commonStyles.saveButton,
                             { 
-                                backgroundColor: (title.trim() && !isSaving) ? colors.tint : colors.nonInteractiveBackground, 
+                                backgroundColor: (title.trim() && !isSaving && userData?.household && userData.household.length > 0) ? colors.tint : colors.nonInteractiveBackground, 
                                 marginTop: 30, 
                                 marginBottom: 40 
                             }
                         ]}
                         onPress={async () => {
                             if (!title.trim() || isSaving) return;
+                            
+                            // Check if user is in a household
+                            if (!userData?.household || userData.household.length === 0) {
+                                Alert.alert(
+                                    'Ikke medlem av husstand', 
+                                    'Du må være medlem av en husstand for å opprette oppgaver. Gå til profilsiden for å opprette eller bli med i en husstand.'
+                                );
+                                return;
+                            }
                             
                             // Validate required fields
                             if (!selectedPerson) {
@@ -575,11 +596,11 @@ export default function AddTask() {
                                 setIsSaving(false);
                             }
                         }}
-                        disabled={!title.trim() || isSaving}
+                        disabled={!title.trim() || isSaving || !userData?.household || userData.household.length === 0}
                     >
                         <Text style={[
                             commonStyles.saveButtonText, 
-                            { color: (title.trim() && !isSaving) ? colors.darkText : colors.lightDarkText }
+                            { color: (title.trim() && !isSaving && userData?.household && userData.household.length > 0) ? colors.darkText : colors.lightDarkText }
                         ]}>
                             {isSaving ? 'Lagrer...' : 'Lagre'}
                         </Text>
@@ -829,6 +850,25 @@ const styles = StyleSheet.create({
         fontSize: 14,
         textAlign: 'center',
         padding: 20,
+    },
+
+    // No Household Message Styles
+    noHouseholdContainer: {
+        borderRadius: 12,
+        padding: 20,
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    noHouseholdTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    noHouseholdMessage: {
+        fontSize: 14,
+        lineHeight: 20,
+        textAlign: 'center',
     },
 
     // iOS Time Picker Styles

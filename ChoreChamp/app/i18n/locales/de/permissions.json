@@ -1,0 +1,17 @@
+{
+  "camera": {
+    "title": "Kameraberechtigung erforderlich",
+    "message": "Sie haben den Kamerazugriff verweigert. Um die Kamera zu verwenden, müssen Sie die Berechtigung in den App-Einstellungen aktivieren.",
+    "usageDescription": "Diese App benötigt Zugriff auf Ihre Kamera, um Profilbilder aufzunehmen."
+  },
+  "mediaLibrary": {
+    "title": "Fotobibliothek-Berechtigung erforderlich",
+    "message": "Sie haben den Zugriff auf die Fotobibliothek verweigert. Um Fotos auszuwählen, müssen Sie die Berechtigung in den App-Einstellungen aktivieren.",
+    "usageDescription": "Diese App benötigt Zugriff auf Ihre Fotobibliothek, um Profilbilder auszuwählen."
+  },
+  "openSettings": "Einstellungen öffnen",
+  "cancel": "Abbrechen",
+  "error": "Fehler",
+  "couldNotOpenSettings": "Einstellungen konnten nicht geöffnet werden",
+  "couldNotRequestPermission": "Berechtigung konnte nicht angefordert werden"
+}

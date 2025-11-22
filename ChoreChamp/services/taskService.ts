@@ -15,7 +15,10 @@ export interface TaskData {
     householdId: string;
     points: number;
     done: boolean;
-    // Weekly leaderboard tracking
+    // Image evidence and verification (from main)
+    imgEvidence?: string; // URL to image evidence when task is completed
+    verificationStatus?: 'not_reviewed' | 'verified' | 'rejected'; // Admin verification status
+    // Weekly leaderboard tracking (from leaderboard)
     completedAt?: Date;     // When was the task completed?
     completedBy?: string;   // User ID who completed it
     weekNumber?: number;    // ISO week number (1-53)
@@ -101,6 +104,8 @@ export async function getTasksForUser(userId: string): Promise<TaskData[]> {
                     householdId: data.householdId || '',
                     points: data.points || 0,
                     done: data.done || false,
+                    imgEvidence: data.imgEvidence || '',
+                    verificationStatus: data.verificationStatus || 'not_reviewed',
                 });
             }
         });
@@ -142,9 +147,11 @@ export async function getTodayTasksForUser(userId: string): Promise<TaskData[]> 
  * Mark a task as complete
  * @param taskId - The task's document ID
  * @param userId - The user ID who is completing the task
+ * @param imgEvidence - URL to the uploaded image evidence
  */
-export async function markTaskAsComplete(taskId: string, userId: string): Promise<boolean> {
-    if (!taskId || !userId) {
+export async function markTaskAsComplete(taskId: string, userId: string, imgEvidence: string): Promise<boolean> {
+    if (!taskId || !userId || !imgEvidence) {
+        console.error('❌ Task ID, user ID, and image evidence are required');
         return false;
     }
     
@@ -157,10 +164,14 @@ export async function markTaskAsComplete(taskId: string, userId: string): Promis
         
         await updateDoc(taskRef, {
             done: true,
+            // Leaderboard tracking
             completedAt: Timestamp.fromDate(now),
             completedBy: userId,
             weekNumber: weekNumber,
-            year: year
+            year: year,
+            // Image evidence and verification
+            imgEvidence: imgEvidence,
+            verificationStatus: 'not_reviewed'
         });
         
         console.log(`✅ Task ${taskId} completed in week ${weekNumber} of ${year}`);
@@ -189,7 +200,9 @@ export async function markTaskAsIncomplete(taskId: string): Promise<boolean> {
             completedAt: null,
             completedBy: null,
             weekNumber: null,
-            year: null
+            year: null,
+            // Reset verification
+            verificationStatus: 'not_reviewed'
         });
         
         console.log(`↩️ Task ${taskId} marked as incomplete`);
@@ -197,6 +210,74 @@ export async function markTaskAsIncomplete(taskId: string): Promise<boolean> {
         return true;
     } catch (error) {
         console.error('💥 Error marking task as incomplete:', error);
+        return false;
+    }
+}
+
+/**
+ * Verify a completed task (admin action)
+ * @param taskId - The task's document ID
+ */
+export async function verifyTask(taskId: string): Promise<boolean> {
+    if (!taskId) {
+        return false;
+    }
+    
+    try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await updateDoc(taskRef, {
+            verificationStatus: 'verified'
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('💥 Error verifying task:', error);
+        return false;
+    }
+}
+
+/**
+ * Reject a completed task (admin action)
+ * @param taskId - The task's document ID
+ */
+export async function rejectTask(taskId: string): Promise<boolean> {
+    if (!taskId) {
+        return false;
+    }
+    
+    try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await updateDoc(taskRef, {
+            verificationStatus: 'rejected',
+            done: false
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('💥 Error rejecting task:', error);
+        return false;
+    }
+}
+
+/**
+ * Reset verification status back to not_reviewed (admin undo action)
+ * @param taskId - The task's document ID
+ */
+export async function resetVerification(taskId: string): Promise<boolean> {
+    if (!taskId) {
+        return false;
+    }
+    
+    try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await updateDoc(taskRef, {
+            verificationStatus: 'not_reviewed',
+            done: true
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('💥 Error resetting verification:', error);
         return false;
     }
 }
@@ -224,6 +305,8 @@ export async function createTask(taskInput: CreateTaskInput): Promise<string | n
             points: taskInput.points || 0,
             done: false,
             status: 'not done' as const,
+            imgEvidence: '',
+            verificationStatus: 'not_reviewed' as const,
         };
         
         const docRef = await addDoc(tasksRef, taskData);

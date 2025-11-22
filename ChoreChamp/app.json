@@ -13,7 +13,15 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chorechamp.app"
+      "bundleIdentifier": "com.chorechamp.app",
+      "associatedDomains": [
+        "applinks:auth.expo.io"
+      ],
+      "infoPlist": {
+        "NSCameraUsageDescription": "Denne appen trenger tilgang til kameraet ditt for å ta profilbilder.",
+        "NSPhotoLibraryUsageDescription": "Denne appen trenger tilgang til bildebiblioteket ditt for å velge profilbilder.",
+        "NSPhotoLibraryAddUsageDescription": "Denne appen trenger tilgang til å lagre bilder i bildebiblioteket ditt."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +32,26 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.chorechamp.app"
+      "package": "com.chorechamp.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ],
+      "intentFilters": [ 
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "auth.expo.io",
+              "pathPrefix": "/@andolaus/ChoreChamp"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "output": "static",
@@ -32,6 +59,20 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Denne appen trenger tilgang til kameraet ditt for å ta profilbilder."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Denne appen trenger tilgang til bildebiblioteket ditt for å velge profilbilder.",
+          "savePhotosPermission": "Denne appen trenger tilgang til å lagre bilder i bildebiblioteket ditt.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
       [
         "expo-splash-screen",
         {

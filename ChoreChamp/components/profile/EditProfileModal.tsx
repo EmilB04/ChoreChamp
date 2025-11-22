@@ -1,28 +1,29 @@
+import AvatarCreatorModal from "@/components/modals/AvatarCreatorModal";
+import { useTheme } from "@/contexts/ThemeContext";
+import {
+  AvatarData,
+  createDicebearUri,
+  generateAvatarSvg,
+  isDicebearAvatar,
+  parseDicebearUri,
+} from "@/lib/avatarUtils";
+import { requestPermissionWithCheck } from "@/lib/permissionUtils";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from 'react';
 import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
   Modal,
-  View,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Image,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@/contexts/ThemeContext";
-import * as ImagePicker from "expo-image-picker";
-import AvatarCreatorModal from "@/components/modals/AvatarCreatorModal";
-import {
-  createDicebearUri,
-  AvatarData,
-  isDicebearAvatar,
-  parseDicebearUri,
-  generateAvatarSvg,
-} from "@/lib/avatarUtils";
 import { SvgXml } from "react-native-svg";
 
 interface EditProfileModalProps {
@@ -68,7 +69,7 @@ export default function EditProfileModal({
             console.error('Error saving profile:', error);
             Alert.alert('Feil', 'Kunne ikke lagre profilen. Vennligst prøv igjen.');
         } finally {
-            setIsLoading(false);
+            setIsLoading(false); 
         }
     };
 
@@ -81,21 +82,16 @@ export default function EditProfileModal({
 
   const pickImage = async () => {
     try {
-      // Request permission
-      const permissionResult =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      // Request permission using native MediaLibrary API with better UX
+      const hasPermission = await requestPermissionWithCheck('mediaLibrary');
 
-      if (permissionResult.granted === false) {
-        Alert.alert(
-          "Tillatelse kreves",
-          "Du må gi tillatelse til å få tilgang til bildegalleri"
-        );
+      if (!hasPermission) {
         return;
       }
 
       // Launch image picker
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
@@ -112,15 +108,10 @@ export default function EditProfileModal({
 
   const takePhoto = async () => {
     try {
-      // Request permission
-      const permissionResult =
-        await ImagePicker.requestCameraPermissionsAsync();
+      // Request permission using native Camera API with better UX
+      const hasPermission = await requestPermissionWithCheck('camera');
 
-      if (permissionResult.granted === false) {
-        Alert.alert(
-          "Tillatelse kreves",
-          "Du må gi tillatelse til å bruke kameraet"
-        );
+      if (!hasPermission) {
         return;
       }
 
@@ -166,6 +157,7 @@ export default function EditProfileModal({
             <KeyboardAvoidingView
                 style={[styles.container, { backgroundColor: colors.background }]}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
                 importantForAccessibility="yes"
             >
                 {/* Header */}
@@ -190,7 +182,12 @@ export default function EditProfileModal({
                     </TouchableOpacity>
                 </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.scrollContent}
+        >
           {/* Profile Image Section */}
           <View style={styles.imageSection}>
             <TouchableOpacity
@@ -312,6 +309,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   imageSection: {
     alignItems: "center",

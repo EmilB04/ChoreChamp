@@ -14,15 +14,74 @@
  * ⚠️ IMPORTANT: Remove this component before production deployment!
  */
 
+import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSegments } from 'expo-router';
+
+import React, { useEffect, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+
+const styles = StyleSheet.create({
+    container: {
+        borderWidth: 2,
+        borderRadius: 12,
+        padding: 16,
+        marginTop: 16,
+        marginBottom: 20,
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 12,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    input: {
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 14,
+        marginBottom: 12,
+    },
+    button: {
+        borderRadius: 8,
+        padding: 12,
+        alignItems: 'center',
+    },
+    buttonDisabled: {
+        opacity: 0.5,
+    },
+    buttonText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    hint: {
+        fontSize: 12,
+        marginTop: 8,
+        fontStyle: 'italic',
+    },
+});
 
 export default function TestUserLoader() {
-    const { loadSpecificUser } = useUser();
+    const { loadSpecificUser, userData, resetToAuthUser } = useUser();
+    const { colors } = useTheme();
     const [userId, setUserId] = useState('');
     const [loading, setLoading] = useState(false);
+    const segments = useSegments();
+
+    // Clear input if logged out or on onboarding
+    useEffect(() => {
+        // If user logs out or route is onboarding, clear
+        const isOnboarding = segments.some(seg => typeof seg === 'string' && seg.includes('onboarding'));
+        if (!userData || isOnboarding) {
+            setUserId('');
+        }
+    }, [userData, segments]);
 
     const handleLoadUser = async () => {
         if (!userId.trim()) {
@@ -42,85 +101,58 @@ export default function TestUserLoader() {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Ionicons name="flask" size={20} color="#ff9500" />
-                <Text style={styles.title}>🧪 Test User Loader</Text>
-            </View>
-            
-            <TextInput
-                style={styles.input}
-                placeholder="Enter user ID from Firestore"
-                value={userId}
-                onChangeText={setUserId}
-                autoCapitalize="none"
-                autoCorrect={false}
-            />
-            
-            <TouchableOpacity 
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={handleLoadUser}
-                disabled={loading}
-            >
-                <Text style={styles.buttonText}>
-                    {loading ? 'Loading...' : 'Load User'}
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+            keyboardVerticalOffset={64}
+        >
+            <View style={[styles.container, { 
+                backgroundColor: colors.contextBackground,
+                borderColor: colors.tint,
+            }]}> 
+                <View style={styles.header}>
+                    <Ionicons name="flask" size={20} color={colors.tint} />
+                    <Text style={[styles.title, { color: colors.text }]}> 
+                        🧪 Test User Loader
+                    </Text>
+                </View>
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: colors.background, marginBottom: 8, borderWidth: 1, borderColor: colors.tint }]}
+                    onPress={resetToAuthUser}
+                >
+                    <Text style={[styles.buttonText, { color: colors.tint }]}>Reset to Authenticated User</Text>
+                </TouchableOpacity>
+                <TextInput
+                    style={[styles.input, { 
+                        backgroundColor: colors.background,
+                        borderColor: colors.tint,
+                        color: colors.text,
+                    }]}
+                    placeholder="Enter user ID from Firestore"
+                    placeholderTextColor={colors.lightDarkText}
+                    value={userId}
+                    onChangeText={setUserId}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="default"
+                />
+                <TouchableOpacity 
+                    style={[
+                        styles.button,
+                        { backgroundColor: colors.tint },
+                        loading && styles.buttonDisabled
+                    ]}
+                    onPress={handleLoadUser}
+                    disabled={loading}
+                >
+                    <Text style={[styles.buttonText, { color: colors.darkText }]}> 
+                        {loading ? 'Loading...' : 'Load User'}
+                    </Text>
+                </TouchableOpacity>
+                <Text style={[styles.hint, { color: colors.lightDarkText }]}> 
+                    💡 Find user IDs in Firebase Console → Firestore → users collection
                 </Text>
-            </TouchableOpacity>
-
-            <Text style={styles.hint}>
-                💡 Find user IDs in Firebase Console → Firestore → users collection
-            </Text>
-        </View>
+            </View>
+        </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#fff3cd',
-        borderWidth: 2,
-        borderColor: '#ff9500',
-        borderRadius: 12,
-        padding: 16,
-        margin: 16,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 12,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#856404',
-    },
-    input: {
-        backgroundColor: '#ffffff',
-        borderWidth: 1,
-        borderColor: '#ff9500',
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
-        marginBottom: 12,
-    },
-    button: {
-        backgroundColor: '#ff9500',
-        borderRadius: 8,
-        padding: 12,
-        alignItems: 'center',
-    },
-    buttonDisabled: {
-        opacity: 0.5,
-    },
-    buttonText: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    hint: {
-        fontSize: 12,
-        color: '#856404',
-        marginTop: 8,
-        fontStyle: 'italic',
-    },
-});

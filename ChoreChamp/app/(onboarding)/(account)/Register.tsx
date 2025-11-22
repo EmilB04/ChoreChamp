@@ -23,6 +23,9 @@ import { Animated, Image, Keyboard, KeyboardAvoidingView, Platform, ScrollView, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OnboardingDots from '../../../components/onBoarding/OnboardingDots';
 import i18n from '../../i18n/i18n';
+import { useAuth } from "@/contexts/AuthContext";
+import { usePhoneField } from '@/hooks/usePhoneField';
+import { COUNTRY_CODES } from '@/constants/countryCodes';
 
 // Use native driver only on iOS and Android, not on web
 const USE_NATIVE_DRIVER = Platform.OS !== 'web';
@@ -32,6 +35,7 @@ export default function Register() {
   const { colors } = useTheme();
   const { t } = useTranslation('onboarding');
 
+  const { signUpWithPhoneProfile } = useAuth();
   const params = useLocalSearchParams();
   const langParam = typeof params.lang === 'string' ? params.lang : undefined;
   const scrollViewRef = useRef<ScrollView>(null);
@@ -42,9 +46,20 @@ export default function Register() {
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('+47');
-  const [showCountryPicker, setShowCountryPicker] = useState(false);
+
+  const {
+      phone,
+      countryCode,
+      showCountryPicker, 
+      setShowCountryPicker,
+      phoneError, 
+      setPhoneError, 
+      handlePhoneChange: baseHandlePhoneChange,
+      handlePhoneBlur,
+      isPhoneValid,
+      setCountryCode,
+  } = usePhoneField("+47");
+  
   const [birth, setBirth] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -53,12 +68,12 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const [firstNameError, setFirstNameError] = useState<string | null>(null);
   const [lastNameError, setLastNameError] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [birthError, setBirthError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeField, setActiveField] = useState<'firstName' | 'lastName' | 'phone' | 'birth' | 'password' | 'confirmPassword' | null>(null);
+  
 
   // Use entrance animation hook for initial page load
   const { fadeAnim, slideAnim } = useEntranceAnimation();
@@ -69,11 +84,25 @@ export default function Register() {
     hasError: !!error,
     fieldErrors: [firstNameError, lastNameError, phoneError, birthError, passwordError, confirmPasswordError],
   });
-  const [firstNameErrorAnim, lastNameErrorAnim, phoneErrorAnim, birthErrorAnim, passwordErrorAnim, confirmPasswordErrorAnim] = fieldErrorAnims;
+  const [
+     firstNameErrorAnim,
+     lastNameErrorAnim,
+     phoneErrorAnim,
+     birthErrorAnim,
+     passwordErrorAnim,
+     confirmPasswordErrorAnim
+    ] = fieldErrorAnims;
 
   // Use border animations hook
   const { borderAnims, animateBorder } = useBorderAnimations({ fieldCount: 6 });
-  const [firstNameBorderAnim, lastNameBorderAnim, phoneBorderAnim, birthBorderAnim, passwordBorderAnim, confirmPasswordBorderAnim] = borderAnims;
+  const [
+    firstNameBorderAnim, 
+    lastNameBorderAnim, 
+    phoneBorderAnim, 
+    birthBorderAnim, 
+    passwordBorderAnim, 
+    confirmPasswordBorderAnim
+  ] = borderAnims;
 
   // Use picker animations hook for country picker
   const { pickerAnim: countryPickerAnim, chevronAnim: countryChevronAnim, animatePicker: animateCountryPicker } = usePickerAnimations();
@@ -81,14 +110,6 @@ export default function Register() {
   // Separate animations for date picker (not using the hook because it has different behavior)
   const datePickerAnim = useRef(new Animated.Value(0)).current;
   const chevronRotateAnim = useRef(new Animated.Value(0)).current;
-
-  // Common country codes
-  const countryCodes = [
-    { code: '+47', country: 'Norge', flag: '🇳🇴' },
-    { code: '+44', country: 'Storbritannia', flag: '🇬🇧' },
-    { code: '+34', country: 'Spania', flag: '🇪🇸' },
-    { code: '+49', country: 'Tyskland', flag: '🇩🇪' },
-  ];
 
   // Memoize form validity to avoid expensive validation on every render
   const isFormValidMemoized = useMemo(() => {
@@ -100,7 +121,9 @@ export default function Register() {
       birth,
       password,
     };
-    return isFormComplete(formData) && validateRegistrationForm(formData).isValid && password === confirmPassword && confirmPassword.length > 0;
+    return isFormComplete(formData) && 
+    validateRegistrationForm(formData).isValid &&
+     password === confirmPassword && confirmPassword.length > 0;
   }, [firstName, lastName, phone, countryCode, birth, password, confirmPassword]);
 
   // Animate button opacity when form validity changes
@@ -160,17 +183,24 @@ export default function Register() {
     return null;
   }
 
-  // TODO: Implement actual registration logic
   async function handleNext() {
     const v = validate();
     if (v) return setError(v);
     setError(null);
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 700));
-      // TODO: Save user data
+      await signUpWithPhoneProfile({
+        firstName,
+        lastName,
+        phone,
+        countryCode,
+        birthDate: birth,
+        password,
+      });
+
       router.replace('/(tabs)');
-    } catch {
+    } catch (e: any) {
+      console.error(e);
       setError(t('register.error') ?? 'Noe gikk galt. Prøv igjen.');
     } finally {
       setLoading(false);
@@ -201,7 +231,7 @@ export default function Register() {
   const handlePhoneChange = (text: string) => {
     const prevLength = phone.length;
     // Just store the raw input while typing
-    setPhone(text);
+    baseHandlePhoneChange(text);
     setError(null);
     setPhoneError(null); // Clear phone error while typing
     
@@ -213,28 +243,6 @@ export default function Register() {
         Keyboard.dismiss();
         openField('birth');
       }, 100);
-    }
-  };
-
-  const handlePhoneBlur = () => {
-    // Strip country code and clean the input
-    const cleaned = stripCountryCode(phone);
-
-    // Format with spacing when user leaves the field
-    const formatted = formatPhoneNumber(cleaned, countryCode);
-
-    setPhone(formatted);
-
-    // Validate phone number
-    if (formatted.trim()) {
-      const validation = validatePhone(formatted, countryCode);
-      if (!validation.isValid) {
-        setPhoneError(validation.error || t('register.error'));
-      } else {
-        setPhoneError(null);
-      }
-    } else {
-      setPhoneError(null);
     }
   };
 
@@ -592,7 +600,7 @@ export default function Register() {
                         activeOpacity={0.7}
                       >
                         <Text style={[styles.countryCodeText, { color: colors.text }]}>
-                          {countryCodes.find(c => c.code === countryCode)?.flag} {countryCode}
+                          {COUNTRY_CODES.find(c => c.code === countryCode)?.flag} {countryCode}
                         </Text>
                         <Animated.View style={{
                           transform: [{
@@ -658,7 +666,7 @@ export default function Register() {
                         nestedScrollEnabled={true}
                         importantForAccessibility="no-hide-descendants"
                       >
-                        {countryCodes.map((item) => (
+                        {COUNTRY_CODES.map((item) => (
                           <TouchableOpacity
                             key={item.code}
                             onPress={() => selectCountryCode(item.code)}
