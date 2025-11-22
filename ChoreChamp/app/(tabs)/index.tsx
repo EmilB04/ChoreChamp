@@ -5,7 +5,6 @@ import {
   isDicebearAvatar,
   parseDicebearUri,
 } from "@/lib/avatarUtils";
-import { getHouseholdMembers } from "@/services/householdService";
 import { getTasksForUser, markTaskAsComplete, markTaskAsIncomplete, rejectTask, resetVerification, verifyTask } from "@/services/taskService";
 import type { Task } from "@/types/task";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,6 +26,8 @@ import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import commonStyles from "../commonStyles";
+import { getWeeklyLeaderboard } from "@/services/leaderboardService";
+import { getCurrentWeek } from "@/utils/weekUtils";
 
 // TODO:
 // 1. Fetch user data dynamically
@@ -36,6 +37,7 @@ import commonStyles from "../commonStyles";
 export default function Dashboard() {
   const { colors } = useTheme();
   const { userData } = useUser();
+  const { weekNumber, year } = getCurrentWeek();
 
   // State for current time that updates live
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -92,20 +94,22 @@ export default function Dashboard() {
           return;
         }
 
-        const members = await getHouseholdMembers(householdId);
+        // Get weekly leaderboard (already sorted by points)
+        const leaderboard = await getWeeklyLeaderboard(householdId);
 
-        // Sort by points and add position
-        const sortedMembers = members
-          .sort((a, b) => b.points - a.points)
-          .map((member, index) => ({
-            ...member,
-            fullName: `${member.firstName} ${member.lastName}`.trim(),
-            avatar: member.imageUri ? { uri: member.imageUri } : require("@/assets/images/icon.png"),
-            position: index + 1,
-            isCurrentUser: member.id === userData.id,
-          }));
+        // Transform to match UI format
+        const transformedLeaderboard = leaderboard.map((entry, index) => ({
+          id: entry.userId,
+          firstName: entry.firstName,
+          lastName: entry.lastName,
+          fullName: `${entry.firstName} ${entry.lastName}`.trim(),
+          points: entry.points,
+          avatar: entry.imageUri ? { uri: entry.imageUri } : require("@/assets/images/icon.png"),
+          position: index + 1,
+          isCurrentUser: entry.userId === userData.id,
+        }));
 
-        setLeaderboardData(sortedMembers);
+        setLeaderboardData(transformedLeaderboard);
       } catch (error) {
         console.error('❌ Error loading leaderboard:', error);
         setLeaderboardData([]);
@@ -183,6 +187,11 @@ export default function Dashboard() {
 
   // Handle marking task as complete
   const handleCompleteTask = async (taskId: number, firebaseTaskId: string) => {
+    if (!userData?.id) {
+      console.error('❌ No user ID available');
+      return;
+    }
+
     try {
       // Request camera permission
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -229,8 +238,8 @@ export default function Dashboard() {
       const base64Image = await base64Promise;
       console.log('🔄 Image converted to base64, size:', base64Image.length);
 
-      // Mark task as complete with image evidence (base64 data URI)
-      const success = await markTaskAsComplete(firebaseTaskId, base64Image);
+      // Mark task as complete with image evidence (base64 data URI) and user tracking
+      const success = await markTaskAsComplete(firebaseTaskId, userData.id, base64Image);
       
       if (success) {
         // Update the local state to reflect the change
@@ -349,17 +358,21 @@ export default function Dashboard() {
           }
 
           if (householdId) {
-            const members = await getHouseholdMembers(householdId);
-            const sortedMembers = members
-              .sort((a, b) => b.points - a.points)
-              .map((member, index) => ({
-                ...member,
-                fullName: `${member.firstName} ${member.lastName}`.trim(),
-                avatar: member.imageUri ? { uri: member.imageUri } : require("@/assets/images/icon.png"),
-                position: index + 1,
-                isCurrentUser: member.id === userData.id,
-              }));
-            setLeaderboardData(sortedMembers);
+            // Get weekly leaderboard (already sorted by points)
+            const leaderboard = await getWeeklyLeaderboard(householdId);
+            
+            // Transform to match UI format
+            const transformedLeaderboard = leaderboard.map((entry, index) => ({
+              id: entry.userId,
+              firstName: entry.firstName,
+              lastName: entry.lastName,
+              fullName: `${entry.firstName} ${entry.lastName}`.trim(),
+              points: entry.points,
+              avatar: entry.imageUri ? { uri: entry.imageUri } : require("@/assets/images/icon.png"),
+              position: index + 1,
+              isCurrentUser: entry.userId === userData.id,
+            }));
+            setLeaderboardData(transformedLeaderboard);
           }
         })();
         promises.push(leaderboardPromise);
@@ -792,9 +805,14 @@ export default function Dashboard() {
 
         {/* Leaderboard */}
         <View style={styles.leaderboardWrapper}>
-          <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-            Ledertavle:
-          </Text>
+          <View style={styles.leaderboardHeader}>
+            <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+              Ledertavle:
+            </Text>
+            <Text style={[styles.weekIndicator, { color: colors.lightText }]}>
+              Uke {weekNumber}, {year}
+            </Text>
+          </View>
 
           {loadingLeaderboard ? (
             <View style={styles.loadingContainer}>
@@ -1157,6 +1175,16 @@ const styles = StyleSheet.create({
   },
   leaderboardWrapper: {
     marginTop: 32,
+  },
+  leaderboardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  weekIndicator: {
+    fontSize: 14,
+    fontWeight: '500',
   },
 
   // Hourly Calendar Styles
