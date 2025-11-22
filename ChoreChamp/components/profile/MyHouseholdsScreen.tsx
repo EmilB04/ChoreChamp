@@ -440,7 +440,6 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                         </View>
                         ))}
                     </View>
-
                     {/* Action Buttons Section */}
                     <View style={styles.section}>
                         <Text style={[styles.sectionTitle, { color: colors.text }]}> 
@@ -485,7 +484,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                     </View>
                     </>
                 )}
-            </ScrollView>            {/* Create Household Modal */}
+            </ScrollView>
+            {/* Create Household Modal */}
             <Modal
                 visible={showCreateModal}
                 animationType="slide"
@@ -561,7 +561,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                 </Text>
                                 
                                 {householdMembers.map((member) => (
-                            <View key={member.id} style={[styles.memberCard, { backgroundColor: colors.contextBackground }]}>
+                                    <View key={member.id} style={[styles.memberCard, { backgroundColor: colors.contextBackground }]}>
                                 <View style={styles.memberInfo}>
                                     <View style={styles.memberAvatar}>
                                         {member.avatar ? (
@@ -596,8 +596,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         </View>
                                     </View>
                                 </View>
-                            </View>
-                        ))}
+                                    </View>
+                                ))}
                             </>
                         )}
                     </ScrollView>
