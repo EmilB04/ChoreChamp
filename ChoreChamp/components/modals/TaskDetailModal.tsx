@@ -290,6 +290,26 @@ export default function TaskDetailModal({
                 {task.description || "Ingen beskrivelse."}
               </Text>
             </View>
+
+            {/* Image Evidence */}
+            {task.finished && task.imgEvidence && (
+              <View style={styles.section}>
+                <Text
+                  style={[
+                    styles.labelBase,
+                    styles.sectionTitle,
+                    { color: colors.lightDarkText },
+                  ]}
+                >
+                  Bildebevis
+                </Text>
+                <Image
+                  source={{ uri: task.imgEvidence }}
+                  style={styles.evidenceImage}
+                  contentFit="cover"
+                />
+              </View>
+            )}
           </ScrollView>
 
           {/* Action Buttons */}
@@ -439,6 +459,12 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  evidenceImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginTop: 8,
   },
 
   // Badges & Icons

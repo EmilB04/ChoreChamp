@@ -14,6 +14,7 @@ export interface TaskData {
     householdId: string;
     points: number;
     done: boolean;
+    imgEvidence?: string; // URL to image evidence when task is completed
 }
 
 export interface CreateTaskInput {
@@ -95,6 +96,7 @@ export async function getTasksForUser(userId: string): Promise<TaskData[]> {
                     householdId: data.householdId || '',
                     points: data.points || 0,
                     done: data.done || false,
+                    imgEvidence: data.imgEvidence || '',
                 });
             }
         });
@@ -135,16 +137,19 @@ export async function getTodayTasksForUser(userId: string): Promise<TaskData[]> 
 /**
  * Mark a task as complete
  * @param taskId - The task's document ID
+ * @param imgEvidence - URL to the uploaded image evidence
  */
-export async function markTaskAsComplete(taskId: string): Promise<boolean> {
-    if (!taskId) {
+export async function markTaskAsComplete(taskId: string, imgEvidence: string): Promise<boolean> {
+    if (!taskId || !imgEvidence) {
+        console.error('❌ Task ID and image evidence are required');
         return false;
     }
     
     try {
         const taskRef = doc(db, 'tasks', taskId);
         await updateDoc(taskRef, {
-            done: true
+            done: true,
+            imgEvidence: imgEvidence
         });
         
         return true;
@@ -199,6 +204,7 @@ export async function createTask(taskInput: CreateTaskInput): Promise<string | n
             points: taskInput.points || 0,
             done: false,
             status: 'not done' as const,
+            imgEvidence: '',
         };
         
         const docRef = await addDoc(tasksRef, taskData);
