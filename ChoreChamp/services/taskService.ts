@@ -14,6 +14,8 @@ export interface TaskData {
     householdId: string;
     points: number;
     done: boolean;
+    imgEvidence?: string; // URL to image evidence when task is completed
+    verificationStatus?: 'not_reviewed' | 'verified' | 'rejected'; // Admin verification status
 }
 
 export interface CreateTaskInput {
@@ -95,6 +97,8 @@ export async function getTasksForUser(userId: string): Promise<TaskData[]> {
                     householdId: data.householdId || '',
                     points: data.points || 0,
                     done: data.done || false,
+                    imgEvidence: data.imgEvidence || '',
+                    verificationStatus: data.verificationStatus || 'not_reviewed',
                 });
             }
         });
@@ -135,16 +139,20 @@ export async function getTodayTasksForUser(userId: string): Promise<TaskData[]> 
 /**
  * Mark a task as complete
  * @param taskId - The task's document ID
+ * @param imgEvidence - URL to the uploaded image evidence
  */
-export async function markTaskAsComplete(taskId: string): Promise<boolean> {
-    if (!taskId) {
+export async function markTaskAsComplete(taskId: string, imgEvidence: string): Promise<boolean> {
+    if (!taskId || !imgEvidence) {
+        console.error('❌ Task ID and image evidence are required');
         return false;
     }
     
     try {
         const taskRef = doc(db, 'tasks', taskId);
         await updateDoc(taskRef, {
-            done: true
+            done: true,
+            imgEvidence: imgEvidence,
+            verificationStatus: 'not_reviewed'
         });
         
         return true;
@@ -166,12 +174,81 @@ export async function markTaskAsIncomplete(taskId: string): Promise<boolean> {
     try {
         const taskRef = doc(db, 'tasks', taskId);
         await updateDoc(taskRef, {
-            done: false
+            done: false,
+            verificationStatus: 'not_reviewed'
         });
         
         return true;
     } catch (error) {
         console.error('💥 Error marking task as incomplete:', error);
+        return false;
+    }
+}
+
+/**
+ * Verify a completed task (admin action)
+ * @param taskId - The task's document ID
+ */
+export async function verifyTask(taskId: string): Promise<boolean> {
+    if (!taskId) {
+        return false;
+    }
+    
+    try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await updateDoc(taskRef, {
+            verificationStatus: 'verified'
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('💥 Error verifying task:', error);
+        return false;
+    }
+}
+
+/**
+ * Reject a completed task (admin action)
+ * @param taskId - The task's document ID
+ */
+export async function rejectTask(taskId: string): Promise<boolean> {
+    if (!taskId) {
+        return false;
+    }
+    
+    try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await updateDoc(taskRef, {
+            verificationStatus: 'rejected',
+            done: false
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('💥 Error rejecting task:', error);
+        return false;
+    }
+}
+
+/**
+ * Reset verification status back to not_reviewed (admin undo action)
+ * @param taskId - The task's document ID
+ */
+export async function resetVerification(taskId: string): Promise<boolean> {
+    if (!taskId) {
+        return false;
+    }
+    
+    try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await updateDoc(taskRef, {
+            verificationStatus: 'not_reviewed',
+            done: true
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('💥 Error resetting verification:', error);
         return false;
     }
 }
@@ -199,6 +276,8 @@ export async function createTask(taskInput: CreateTaskInput): Promise<string | n
             points: taskInput.points || 0,
             done: false,
             status: 'not done' as const,
+            imgEvidence: '',
+            verificationStatus: 'not_reviewed' as const,
         };
         
         const docRef = await addDoc(tasksRef, taskData);

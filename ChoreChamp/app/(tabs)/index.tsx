@@ -1,11 +1,19 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
+import {
+  generateAvatarSvg,
+  isDicebearAvatar,
+  parseDicebearUri,
+} from "@/lib/avatarUtils";
 import { getHouseholdMembers } from "@/services/householdService";
-import { getTasksForUser, markTaskAsComplete, markTaskAsIncomplete } from "@/services/taskService";
+import { getTasksForUser, markTaskAsComplete, markTaskAsIncomplete, rejectTask, resetVerification, verifyTask } from "@/services/taskService";
 import type { Task } from "@/types/task";
+import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -13,18 +21,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SvgXml } from "react-native-svg";
 import UserLoadingState from "../../components/UserLoadingState";
 import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import commonStyles from "../commonStyles";
-import {
-  isDicebearAvatar,
-  parseDicebearUri,
-  generateAvatarSvg,
-} from "@/lib/avatarUtils";
-import { SvgXml } from "react-native-svg";
-import { Ionicons } from "@expo/vector-icons";
 
 // TODO:
 // 1. Fetch user data dynamically
@@ -148,6 +150,8 @@ export default function Dashboard() {
             timeStart, // Keep the full Date object
             timeEnd, // Keep the full Date object
             firebaseId: task.id, // Store Firebase document ID
+            imgEvidence: task.imgEvidence, // Include image evidence
+            verificationStatus: task.verificationStatus || 'not_reviewed', // Include verification status
           };
         });
 
@@ -180,18 +184,69 @@ export default function Dashboard() {
   // Handle marking task as complete
   const handleCompleteTask = async (taskId: number, firebaseTaskId: string) => {
     try {
-      const success = await markTaskAsComplete(firebaseTaskId);
+      // Request camera permission
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Tillatelse nødvendig',
+          'Vi trenger tilgang til kameraet for å ta bilde som bevis.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      // Launch camera to take photo
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.7,
+      });
+
+      if (result.canceled) {
+        return; // User cancelled, don't complete the task
+      }
+
+      const imageUri = result.assets[0].uri;
+      console.log('📸 Image captured:', imageUri);
+
+      // Convert image to base64 to store in Firestore
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      
+      // Convert blob to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          resolve(base64data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      
+      const base64Image = await base64Promise;
+      console.log('🔄 Image converted to base64, size:', base64Image.length);
+
+      // Mark task as complete with image evidence (base64 data URI)
+      const success = await markTaskAsComplete(firebaseTaskId, base64Image);
+      
       if (success) {
         // Update the local state to reflect the change
         setAllTasks(prevTasks => 
           prevTasks.map(task => 
-            task.id === taskId ? { ...task, finished: true } : task
+            task.id === taskId ? { ...task, finished: true, imgEvidence: base64Image } : task
           )
         );
-        console.log('✅ Task marked as complete locally');
+        console.log('✅ Task marked as complete with evidence');
+        Alert.alert('Suksess!', 'Oppgaven er fullført med bildebevis');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error completing task:', error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error code:', error.code);
+      Alert.alert('Feil', `Kunne ikke fullføre oppgaven: ${error.message || 'Ukjent feil'}`);
     }
   };
 
@@ -203,13 +258,73 @@ export default function Dashboard() {
         // Update the local state to reflect the change
         setAllTasks(prevTasks => 
           prevTasks.map(task => 
-            task.id === taskId ? { ...task, finished: false } : task
+            task.id === taskId ? { ...task, finished: false, verificationStatus: 'not_reviewed' } : task
           )
         );
         console.log('↩️ Task marked as incomplete locally');
       }
     } catch (error) {
       console.error('❌ Error undoing task:', error);
+    }
+  };
+
+  // Handle verifying a task (admin action)
+  const handleVerifyTask = async (taskId: number, firebaseTaskId: string) => {
+    try {
+      const success = await verifyTask(firebaseTaskId);
+      if (success) {
+        setAllTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === taskId ? { ...task, verificationStatus: 'verified' } : task
+          )
+        );
+        console.log('✅ Task verified by admin');
+        Alert.alert('Godkjent', 'Oppgaven har blitt godkjent');
+        setIsModalVisible(false);
+      }
+    } catch (error) {
+      console.error('❌ Error verifying task:', error);
+      Alert.alert('Feil', 'Kunne ikke godkjenne oppgaven');
+    }
+  };
+
+  // Handle rejecting a task (admin action)
+  const handleRejectTask = async (taskId: number, firebaseTaskId: string) => {
+    try {
+      const success = await rejectTask(firebaseTaskId);
+      if (success) {
+        setAllTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === taskId ? { ...task, verificationStatus: 'rejected' } : task
+          )
+        );
+        console.log('❌ Task rejected by admin');
+        Alert.alert('Avvist', 'Oppgaven har blitt avvist');
+        setIsModalVisible(false);
+      }
+    } catch (error) {
+      console.error('❌ Error rejecting task:', error);
+      Alert.alert('Feil', 'Kunne ikke avvise oppgaven');
+    }
+  };
+
+  // Handle resetting verification status (undo admin action)
+  const handleResetVerification = async (taskId: number, firebaseTaskId: string) => {
+    try {
+      const success = await resetVerification(firebaseTaskId);
+      if (success) {
+        setAllTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === taskId ? { ...task, verificationStatus: 'not_reviewed', finished: true } : task
+          )
+        );
+        console.log('🔄 Verification status reset');
+        Alert.alert('Tilbakestilt', 'Godkjenningen har blitt angret');
+        setIsModalVisible(false);
+      }
+    } catch (error) {
+      console.error('❌ Error resetting verification:', error);
+      Alert.alert('Feil', 'Kunne ikke angre godkjenningen');
     }
   };
 
@@ -840,17 +955,91 @@ export default function Dashboard() {
           selectedTask && selectedTask.firebaseId
             ? selectedTask.finished
               ? [
-                  {
-                    label: "Angre",
-                    iconName: "arrow-undo-outline",
-                    variant: "danger",
-                    onPress: async () => {
-                      if (selectedTask.firebaseId) {
-                        await handleUndoTask(selectedTask.id, selectedTask.firebaseId);
-                        setIsModalVisible(false);
-                      }
-                    },
-                  },
+                  // Undo button for finished tasks (only show if not verified/rejected)
+                  ...(selectedTask.verificationStatus === 'not_reviewed' 
+                    ? [
+                        {
+                          label: "Angre",
+                          iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                          variant: "danger" as const,
+                          onPress: async () => {
+                            if (selectedTask.firebaseId) {
+                              await handleUndoTask(selectedTask.id, selectedTask.firebaseId);
+                              setIsModalVisible(false);
+                            }
+                          },
+                        },
+                      ]
+                    : []
+                  ),
+                  // Admin-only buttons
+                  ...((userData?.role?.admin === true)
+                    ? [
+                        // Admin verification buttons (only show for tasks not yet verified)
+                        ...(selectedTask.verificationStatus === 'not_reviewed'
+                          ? [
+                              {
+                                label: "Godkjenn",
+                                iconName: "checkmark-done-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "success" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleVerifyTask(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                              {
+                                label: "Avvis",
+                                iconName: "close-circle-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "danger" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleRejectTask(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                            ]
+                          : []
+                        ),
+                        // Undo verification button (only show for verified tasks)
+                        ...(selectedTask.verificationStatus === 'verified'
+                          ? [
+                              {
+                                label: "Angre godkjenning",
+                                iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "secondary" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleResetVerification(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                            ]
+                          : []
+                        ),
+                        // Undo rejection button (only show for rejected tasks)
+                        ...(selectedTask.verificationStatus === 'rejected'
+                          ? [
+                              {
+                                label: "Angre avvisning",
+                                iconName: "arrow-undo-outline" as keyof typeof import("@expo/vector-icons").Ionicons.glyphMap,
+                                variant: "secondary" as const,
+                                onPress: async () => {
+                                  if (selectedTask.firebaseId) {
+                                    await handleResetVerification(selectedTask.id, selectedTask.firebaseId);
+                                    setIsModalVisible(false);
+                                  }
+                                },
+                              },
+                            ]
+                          : []
+                        ),
+                      ]
+                    : []
+                  ),
                 ]
               : [
                   {
