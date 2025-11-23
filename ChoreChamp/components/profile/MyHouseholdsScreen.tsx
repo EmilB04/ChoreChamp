@@ -210,11 +210,14 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
         setLoadingMembers(true);
         try {
             const members = await getHouseholdMembers(household.id);
-            const transformedMembers: Member[] = members.map(m => ({
-                id: m.id,
-                name: m.username,
-                avatar: m.imageUri
-            }));
+            const transformedMembers: Member[] = members.map(m => {
+                const realName = `${m.firstName || ''} ${m.lastName || ''}`.trim();
+                return {
+                    id: m.id,
+                    name: realName !== '' ? realName : (m.username || ''),
+                    avatar: m.imageUri
+                };
+            });
             setHouseholdMembers(transformedMembers);
         } catch (error) {
             console.error('Error loading members:', error);
@@ -525,9 +528,14 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                                 style={styles.avatarImage}
                                             />
                                         ) : (
-                                            <View style={[styles.avatarPlaceholder, { backgroundColor: colors.tint }]}>
-                                                <Text style={[styles.avatarText, { color: colors.darkText }]}>
-                                                    {member.name.charAt(0)}
+                                            <View style={[styles.avatarPlaceholder, { backgroundColor: colors.tint }]}> 
+                                                <Text style={[styles.avatarText, { color: colors.darkText }]}> 
+                                                    {(() => {
+                                                        const names = member.name.split(' ');
+                                                        const first = names[0]?.charAt(0) || '';
+                                                        const last = names[1]?.charAt(0) || '';
+                                                        return `${first}${last}`;
+                                                    })()}
                                                 </Text>
                                             </View>
                                         )}

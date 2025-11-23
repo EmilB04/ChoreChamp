@@ -440,41 +440,43 @@ export default function AddTask() {
                             style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}
                             contentContainerStyle={styles.personContainer}
                         >
-                            {householdMembers.map((member) => (
-                                <TouchableOpacity
-                                    key={member.id}
-                                    style={styles.personItem}
-                                    onPress={() => setSelectedPerson(member.id)}
-                                >
-                                    <View style={[
-                                        styles.personAvatar,
-                                        { backgroundColor: selectedPerson === member.id ? colors.tint : colors.nonInteractiveBackground },
-                                        selectedPerson === member.id && styles.personAvatarSelected
-                                    ]}>
-                                        {member.imageUri ? (
-                                            <Image
-                                                source={{ uri: member.imageUri }}
-                                                style={styles.personAvatarImage
-                                                }
-                                            />
-                                        ) : (
-                                            <Text style={[
-                                                styles.personInitial,
-                                                { color: selectedPerson === member.id ? colors.darkText : colors.text }
-                                            ]}>
-                                                {member.firstName.charAt(0)}
-                                            </Text>
-                                        )}
-                                    </View>
-                                    <Text style={[
-                                        styles.personName,
-                                        { color: colors.text },
-                                        selectedPerson === member.id && { fontWeight: '600' }
-                                    ]}>
-                                        {member.firstName}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                            {householdMembers.map((member) => {
+                                const initials = `${member.firstName?.charAt(0) || ''}${member.lastName?.charAt(0) || ''}`;
+                                return (
+                                    <TouchableOpacity
+                                        key={member.id}
+                                        style={styles.personItem}
+                                        onPress={() => setSelectedPerson(member.id)}
+                                    >
+                                        <View style={[
+                                            styles.personAvatar,
+                                            { backgroundColor: selectedPerson === member.id ? colors.tint : colors.nonInteractiveBackground },
+                                            selectedPerson === member.id && styles.personAvatarSelected
+                                        ]}>
+                                            {member.imageUri ? (
+                                                <Image
+                                                    source={{ uri: member.imageUri }}
+                                                    style={styles.personAvatarImage}
+                                                />
+                                            ) : (
+                                                <Text style={[
+                                                    styles.personInitial,
+                                                    { color: selectedPerson === member.id ? colors.darkText : colors.text }
+                                                ]}>
+                                                    {initials}
+                                                </Text>
+                                            )}
+                                        </View>
+                                        <Text style={[
+                                            styles.personName,
+                                            { color: colors.text },
+                                            selectedPerson === member.id && { fontWeight: '600' }
+                                        ]}>
+                                            {member.firstName}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </ScrollView>
                     )}
                 </View>
