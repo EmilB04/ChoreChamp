@@ -204,7 +204,7 @@
       "emptyBody": "Opprett en ny husstand eller bli med i en eksisterende",
       "createHousehold": "Opprett husstand",
       "joinWithCode": "Bli med med kode",
-      "youAreMemberOf": "Du er medlem av {{count}} husstand{{count, plural, one{} other{s}}}",
+      "youAreMemberOf": "Du er medlem av {{count}} husstand",
       "yourHouseholdsTitle": "Dine husstander",
       "roleAdmin": "Administrator",
       "roleMember": "Medlem",
