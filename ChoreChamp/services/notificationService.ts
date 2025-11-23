@@ -12,6 +12,7 @@ export interface NotificationData {
     points?: number | null;
     householdId: string;
     userId: string; // Who should see this notification
+    taskId?: string; // Link to the related task
 }
 
 export async function createNotification(notification: NotificationData): Promise<string | null> {

@@ -590,6 +590,7 @@ export default function AddTask() {
                                             points: parseInt(points) || 10,
                                             householdId: householdId,
                                             userId: selectedPerson,
+                                            taskId: taskId,
                                         });
                                     }
                                     Alert.alert(
