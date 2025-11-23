@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { getCurrentWeek, getWeekKey } from '@/utils/weekUtils';
+import { getCurrentWeek, getWeekKey, WeekInfo } from '@/utils/weekUtils';
 import { getHouseholdMembers } from './householdService';
 
 /**
@@ -120,4 +120,44 @@ export async function getLeaderboardHistory(
     
     console.log(`📅 Fetched ${numberOfWeeks} weeks of history`);
     return history;
+}
+
+/**
+ * Get aggregated leaderboard for multiple weeks
+ * @param householdId - The household ID
+ * @param weeks - Array of WeekInfo objects to aggregate
+ * @returns Sorted array of leaderboard entries with aggregated points
+ */
+export async function getAggregatedLeaderboard(
+    householdId: string,
+    weeks: WeekInfo[]
+): Promise<LeaderboardEntry[]> {
+    const aggregatedPoints: Record<string, number> = {};
+    
+    for (const week of weeks) {
+        const weeklyPoints = await calculateWeeklyPoints(householdId, week.weekKey);
+        
+        for (const [userId, points] of Object.entries(weeklyPoints)) {
+            if (aggregatedPoints[userId]) {
+                aggregatedPoints[userId] += points;
+            } else {
+                aggregatedPoints[userId] = points;
+            }
+        }
+    }
+    
+    const householdMembers = await getHouseholdMembers(householdId);
+    
+    const leaderboard: LeaderboardEntry[] = householdMembers.map(member => ({
+        userId: member.id,
+        firstName: member.firstName,
+        lastName: member.lastName,
+        username: member.username,
+        imageUri: member.imageUri,
+        points: aggregatedPoints[member.id] || 0
+    }));
+    
+    leaderboard.sort((a, b) => b.points - a.points);
+    
+    return leaderboard;
 }
