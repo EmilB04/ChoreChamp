@@ -1,32 +1,32 @@
-import Ionicons from "@expo/vector-icons/build/Ionicons";
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    Image,
-} from "react-native";
 import { useTheme } from '@/contexts/ThemeContext';
+import Ionicons from "@expo/vector-icons/build/Ionicons";
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
 import Header from '../profile/Header';
 
-interface Notification {
-    id: number;
+interface NotificationType {
+    id: string;
     title: string;
-    subtitle: string | null;
+        subtitle?: string | null;
     message: string;
-    timestamp: string;
-    read: boolean
+    timestamp: any;
+    read: boolean;
     type: "task_completed" | "task_assigned";
     avatar: string;
-    points: number | null;
+        points?: number | null;
 }
 
 interface NotificationProps {
-    notification: Notification;
+    notification: NotificationType;
     onBack: () => void;
-    onToggleReadStatus: (notificationId: number, readStatus: boolean) => void;
+    onToggleReadStatus: (notificationId: string, readStatus: boolean) => void;
     rightElement?: React.ReactNode;
 }
 
@@ -34,8 +34,8 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
     const { colors } = useTheme();
     const { t } = useTranslation('app');
 
-    const formatTimestamp = (timestamp: string): string => {
-        const date = new Date(timestamp);
+    const formatTimestamp = (timestamp: any): string => {
+        const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const year = date.getFullYear();
@@ -63,13 +63,12 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                         <View style={styles.avatarContainer}>
                             <Text style={[styles.avatarText, { color: colors.text }]}>{notification.avatar}</Text>
                         </View>
-                        
                         <View style={styles.messageContainer}>
                             <Text style={[styles.messageTitle, { color: colors.text }]}>{notification.title}</Text>
                             <Text style={[styles.messageText, { color: colors.text }]}>
-                                {notification.subtitle && `${notification.subtitle}, `}
-                                {notification.message.toLowerCase()}
+                                {notification.subtitle ? `${notification.subtitle}, ` : ''}{notification.message ? notification.message.toLowerCase() : ''}
                             </Text>
+                        </View>
                         </View>
 
                         <View style={styles.infoRow}>
@@ -81,7 +80,7 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                             </Text>
                         </View>
 
-                        {notification.points !== null && (
+                        {typeof notification.points === 'number' && !isNaN(notification.points) && (
                             <View style={styles.infoRow}>
                                 <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>
                                     {t('notifications.pointsLabel')}
@@ -101,7 +100,6 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                             </Text>
                         </View>
                     </View>
-                </View>
 
                 {/* Actions Section */}
                 {!notification.read ? (

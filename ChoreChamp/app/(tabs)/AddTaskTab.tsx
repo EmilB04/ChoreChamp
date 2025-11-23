@@ -2,6 +2,7 @@ import Calendar from "@/components/ui/Calendar";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import { getHouseholdMembers } from "@/services/householdService";
+import { createNotification } from "@/services/notificationService";
 import { createTask } from "@/services/taskService";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from "expo-image";
@@ -576,6 +577,21 @@ export default function AddTask() {
                                 });
 
                                 if (taskId) {
+                                    // Create notification for assigned user
+                                    if (selectedPerson && userData) {
+                                        await createNotification({
+                                            title: `${userData.username} tildelte deg en oppgave:`,
+                                            subtitle: title.trim(),
+                                            message: description.trim() || '',
+                                            timestamp: new Date(),
+                                            read: false,
+                                            type: 'task_assigned',
+                                            avatar: userData.username?.[0]?.toUpperCase() || '',
+                                            points: parseInt(points) || 10,
+                                            householdId: householdId,
+                                            userId: selectedPerson,
+                                        });
+                                    }
                                     Alert.alert(
                                         t('addTask.successTitle'),
                                         t('addTask.successMessage'),

@@ -1,7 +1,10 @@
 import Notification from "@/components/notifications/notification";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useUser } from "@/contexts/UserContext";
+import { db } from "@/lib/firebase";
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useState } from "react";
+import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import commonStyles from "../commonStyles";
@@ -9,8 +12,10 @@ import commonStyles from "../commonStyles";
 export default function Notifications() {
     const { colors } = useTheme();
     const { t } = useTranslation('app');
+
+    const { userData } = useUser();
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
-    const [selectedNotification, setSelectedNotification] = useState<typeof notifications[0] | null>(null);
+    const [selectedNotification, setSelectedNotification] = useState<any>(null);
     const [refreshing, setRefreshing] = useState(false);
 
     // Reset to main view when tab is focused
@@ -20,53 +25,29 @@ export default function Notifications() {
         }, [])
     );
 
-    // Simulated notification data - Replace with real data from DB or API
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            title: "Mamma laget oppgaven",
-            subtitle: "Rydde rom",
-            message: "Gjentagende annenhver dag",
-            timestamp: "2025-10-08T09:30:00Z",
-            read: false,
-            type: "task_assigned" as const,
-            avatar: "M",
-            points: null,
-        },
-        {
-            id: 2,
-            title: "Ida T. fullførte Gå med søpla",
-            subtitle: null,
-            message: "Mottok 10 poeng",
-            timestamp: "2025-10-07T15:30:00Z",
-            read: false,
-            type: "task_completed" as const,
-            avatar: "I",
-            points: 10,
-        },
-        {
-            id: 3,
-            title: "Pappa fullførte Støvsuge",
-            subtitle: null,
-            message: "Mottok 15 poeng",
-            timestamp: "2025-10-05T10:00:00Z",
-            read: true,
-            type: "task_completed" as const,
-            avatar: "P",
-            points: 15,
-        },
-        {
-            id: 4,
-            title: "Emil fullførte Vaske opp",
-            subtitle: null,
-            message: "Mottok 8 poeng",
-            timestamp: "2025-09-30T14:20:00Z",
-            read: true,
-            type: "task_completed" as const,
-            avatar: "E",
-            points: 8,
-        },
-    ]);
+    // Fetch notifications from Firestore for the current user
+    const [notifications, setNotifications] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (!userData?.id) return;
+        const q = query(
+            collection(db, "notifications"),
+            where("userId", "==", userData.id),
+            orderBy("timestamp", "desc")
+        );
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            console.log('Fetched notifications:', notifs);
+            if (notifs.length > 0) {
+                const readNotifs = notifs.filter(n => (n as any).read === true);
+                const unreadNotifs = notifs.filter(n => (n as any).read !== true);
+                console.log('Read notifications:', readNotifs);
+                console.log('Unread notifications:', unreadNotifs);
+            }
+            setNotifications(notifs);
+        });
+        return () => unsubscribe();
+    }, [userData?.id]);
 
     // Group notifications by time periods
     const groupNotificationsByTime = () => {
@@ -75,13 +56,13 @@ export default function Notifications() {
         const thisWeek = new Date(today.getTime() - (today.getDay() * 24 * 60 * 60 * 1000));
 
         const groups = {
-            today: [] as typeof notifications,
-            thisWeek: [] as typeof notifications,
-            earlier: [] as typeof notifications,
+            today: [] as any[],
+            thisWeek: [] as any[],
+            earlier: [] as any[],
         };
 
         notifications.forEach(notification => {
-            const notificationDate = new Date(notification.timestamp);
+            const notificationDate = notification.timestamp?.toDate ? notification.timestamp.toDate() : new Date(notification.timestamp);
             const notificationDay = new Date(notificationDate.getFullYear(), notificationDate.getMonth(), notificationDate.getDate());
 
             if (notificationDay >= today) {
@@ -100,14 +81,13 @@ export default function Notifications() {
     const unreadNotifications = notifications.filter(n => !n.read);
 
     // Function to toggle notification read status
-    const toggleReadStatus = (notificationId: number, readStatus: boolean) => {
-        setNotifications(prevNotifications =>
-            prevNotifications.map(notification =>
-                notification.id === notificationId
-                    ? { ...notification, read: readStatus }
-                    : notification
-            )
-        );
+    const toggleReadStatus = async (notificationId: string, readStatus: boolean) => {
+        try {
+            const notifRef = doc(db, "notifications", notificationId);
+            await updateDoc(notifRef, { read: readStatus });
+        } catch (error) {
+            console.error("Failed to update notification read status", error);
+        }
         setSelectedNotification(null);
     };
 
@@ -122,9 +102,9 @@ export default function Notifications() {
     };
 
     // Function to get relative time
-    const getRelativeTime = (timestamp: string) => {
+    const getRelativeTime = (timestamp: any) => {
         const now = new Date();
-        const notificationTime = new Date(timestamp);
+        const notificationTime = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
         const diffInMinutes = Math.floor((now.getTime() - notificationTime.getTime()) / (1000 * 60));
 
         if (diffInMinutes < 60) return t('notifications.minutesAgo', { count: diffInMinutes });
@@ -322,38 +302,38 @@ export default function Notifications() {
                             }
                         >
                             {/* This week's read notifications */}
-                            {groupedNotifications.thisWeek.filter(n => n.read).length > 0 && (
+                            {groupedNotifications.thisWeek.filter(n => n.read === true).length > 0 && (
                                 <>
-                                    <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
+                                    <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}> 
                                         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('notifications.thisWeek')}</Text>
                                     </View>
-                                    {groupedNotifications.thisWeek.filter(n => n.read).map((notification) => (
+                                    {groupedNotifications.thisWeek.filter(n => n.read === true).map((notification) => (
                                         <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground, opacity: 0.7 }]}
                                             onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
-                                                <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}>
+                                                <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}> 
                                                     <Text style={styles.avatarText}>
                                                         {notification.avatar}
                                                     </Text>
                                                 </View>
                                                 <View style={styles.notificationText}>
-                                                    <Text style={[styles.notificationTitle, { color: colors.lightDarkText }]}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.lightDarkText }]}> 
                                                         {notification.title}
                                                     </Text>
                                                     {notification.subtitle && (
-                                                        <Text style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}>
+                                                        <Text style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}> 
                                                             {notification.subtitle}
                                                         </Text>
                                                     )}
                                                     {notification.points && (
-                                                        <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}>
+                                                        <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}> 
                                                             Mottok {notification.points} poeng
                                                         </Text>
                                                     )}
-                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}> 
                                                         {getRelativeTime(notification.timestamp)}
                                                     </Text>
                                                 </View>
@@ -364,29 +344,29 @@ export default function Notifications() {
                             )}
 
                             {/* Earlier read notifications */}
-                            {groupedNotifications.earlier.filter(n => n.read).length > 0 && (
+                            {groupedNotifications.earlier.filter(n => n.read === true).length > 0 && (
                                 <>
-                                    <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}>
+                                    <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}> 
                                         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('notifications.earlier')}</Text>
                                     </View>
-                                    {groupedNotifications.earlier.filter(n => n.read).map((notification) => (
+                                    {groupedNotifications.earlier.filter(n => n.read === true).map((notification) => (
                                         <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground, opacity: 0.7 }]}
                                             onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
-                                                <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}>
+                                                <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}> 
                                                     <Text style={styles.avatarText}>
                                                         {notification.avatar}
                                                     </Text>
                                                 </View>
                                                 <View style={styles.notificationText}>
-                                                    <Text style={[styles.notificationTitle, { color: colors.lightDarkText }]}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.lightDarkText }]}> 
                                                         {notification.title}
                                                     </Text>
                                                     {notification.subtitle && (
-                                                        <Text style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}>
+                                                        <Text style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}> 
                                                             {notification.subtitle}
                                                         </Text>
                                                     )}
@@ -395,7 +375,7 @@ export default function Notifications() {
                                                             {t('notifications.receivedPoints', { count: notification.points })}
                                                         </Text>
                                                     )}
-                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}> 
                                                         {getRelativeTime(notification.timestamp)}
                                                     </Text>
                                                 </View>
@@ -406,7 +386,7 @@ export default function Notifications() {
                             )}
 
                             {/* Show message if no read notifications */}
-                            {notifications.filter(n => n.read).length === 0 && (
+                            {notifications.filter(n => n.read === true).length === 0 && (
                                 <View style={styles.emptyState}>
                                     <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>💬</Text>
                                     <Text style={[styles.emptyStateText, { color: colors.lightDarkText }]}>{t('notifications.youAreUpToDate')}</Text>
