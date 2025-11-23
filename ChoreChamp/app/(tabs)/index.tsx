@@ -63,6 +63,7 @@ export default function Dashboard() {
     lastName: string;
     fullName: string;
     points: number;
+    imageUri: string;
     avatar: any;
     position: number;
     isCurrentUser: boolean;
@@ -126,6 +127,7 @@ export default function Dashboard() {
           lastName: entry.lastName,
           fullName: `${entry.firstName} ${entry.lastName}`.trim(),
           points: entry.points,
+          imageUri: entry.imageUri || '',
           avatar: entry.imageUri ? { uri: entry.imageUri } : require("@/assets/images/icon.png"),
           position: index + 1,
           isCurrentUser: entry.userId === userData.id,
@@ -390,6 +392,7 @@ export default function Dashboard() {
               lastName: entry.lastName,
               fullName: `${entry.firstName} ${entry.lastName}`.trim(),
               points: entry.points,
+              imageUri: entry.imageUri || '',
               avatar: entry.imageUri ? { uri: entry.imageUri } : require("@/assets/images/icon.png"),
               position: index + 1,
               isCurrentUser: entry.userId === userData.id,
@@ -877,10 +880,18 @@ export default function Dashboard() {
             {/* Second Place */}
                 <View style={styles.podiumPosition}>
                   <View style={[styles.podiumAvatar, styles.secondPlaceAvatar]}>
-                    <Image
-                      source={leaderboardData[1].avatar}
-                      style={styles.avatarImage}
-                    />
+                    {leaderboardData[1].imageUri ? (
+                      <Image
+                        source={{ uri: leaderboardData[1].imageUri }}
+                        style={styles.avatarImage}
+                      />
+                    ) : (
+                      <View style={[styles.avatarImage, { backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }]}> 
+                        <Text style={{ color: colors.darkText, fontWeight: '700', fontSize: 20 }}>
+                          {`${leaderboardData[1].firstName?.charAt(0) || ''}${leaderboardData[1].lastName?.charAt(0) || ''}`}
+                        </Text>
+                      </View>
+                    )}
                     <View style={[styles.positionBadge, styles.secondPlaceBadge]}>
                       <Text style={styles.positionText}>2</Text>
                     </View>
@@ -899,10 +910,18 @@ export default function Dashboard() {
             {/* First Place */}
                 <View style={styles.firstPlacePosition}>
                   <View style={[styles.podiumAvatar, styles.firstPlaceAvatar]}>
-                    <Image
-                      source={leaderboardData[0].avatar}
-                      style={styles.avatarImage}
-                    />
+                    {leaderboardData[0].imageUri ? (
+                      <Image
+                        source={{ uri: leaderboardData[0].imageUri }}
+                        style={styles.avatarImage}
+                      />
+                    ) : (
+                      <View style={[styles.avatarImage, { backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }]}> 
+                        <Text style={{ color: colors.darkText, fontWeight: '700', fontSize: 20 }}>
+                          {`${leaderboardData[0].firstName?.charAt(0) || ''}${leaderboardData[0].lastName?.charAt(0) || ''}`}
+                        </Text>
+                      </View>
+                    )}
                     <View style={[styles.positionBadge, styles.firstPlaceBadge]}>
                       <Text style={styles.positionText}>1</Text>
                     </View>
@@ -924,10 +943,18 @@ export default function Dashboard() {
             {/* Third Place */}
                 <View style={styles.podiumPosition}>
                   <View style={[styles.podiumAvatar, styles.thirdPlaceAvatar]}>
-                    <Image
-                      source={leaderboardData[2].avatar}
-                      style={styles.avatarImage}
-                    />
+                    {leaderboardData[2].imageUri ? (
+                      <Image
+                        source={{ uri: leaderboardData[2].imageUri }}
+                        style={styles.avatarImage}
+                      />
+                    ) : (
+                      <View style={[styles.avatarImage, { backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }]}> 
+                        <Text style={{ color: colors.darkText, fontWeight: '700', fontSize: 20 }}>
+                          {`${leaderboardData[2].firstName?.charAt(0) || ''}${leaderboardData[2].lastName?.charAt(0) || ''}`}
+                        </Text>
+                      </View>
+                    )}
                     <View style={[styles.positionBadge, styles.thirdPlaceBadge]}>
                       <Text style={styles.positionText}>3</Text>
                     </View>
@@ -970,10 +997,18 @@ export default function Dashboard() {
                   >
                     {user.position}
                   </Text>
-                  <Image
-                    source={user.avatar}
-                    style={styles.leaderboardAvatar}
-                  />
+                  {user.imageUri ? (
+                    <Image
+                      source={{ uri: user.imageUri }}
+                      style={styles.leaderboardAvatar}
+                    />
+                  ) : (
+                    <View style={[styles.leaderboardAvatar, { backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }]}> 
+                      <Text style={{ color: colors.darkText, fontWeight: '700', fontSize: 16 }}>
+                        {`${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`}
+                      </Text>
+                    </View>
+                  )}
                   <Text
                     style={[
                       styles.leaderboardName,
