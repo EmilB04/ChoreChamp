@@ -91,3 +91,62 @@ export function getWeekStartEnd(weekKey: string): { start: Date; end: Date } {
   
   return { start: monday, end: sunday };
 }
+
+/**
+ * Get previous week information
+ */
+export function getPreviousWeek(): WeekInfo {
+  const today = new Date();
+  const lastWeek = new Date(today);
+  lastWeek.setDate(today.getDate() - 7);
+  return getWeekInfo(lastWeek);
+}
+
+/**
+ * Get all weeks in the current month
+ */
+export function getWeeksInCurrentMonth(): WeekInfo[] {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  
+  const weeks: WeekInfo[] = [];
+  const weekKeys = new Set<string>();
+  
+  for (let day = new Date(firstDay); day <= lastDay; day.setDate(day.getDate() + 1)) {
+    const weekInfo = getWeekInfo(day);
+    if (!weekKeys.has(weekInfo.weekKey)) {
+      weekKeys.add(weekInfo.weekKey);
+      weeks.push(weekInfo);
+    }
+  }
+  
+  return weeks;
+}
+
+/**
+ * Get all weeks in the current year
+ */
+export function getWeeksInCurrentYear(): WeekInfo[] {
+  const now = new Date();
+  const year = now.getFullYear();
+  
+  const firstDay = new Date(year, 0, 1);
+  const lastDay = new Date(year, 11, 31);
+  
+  const weeks: WeekInfo[] = [];
+  const weekKeys = new Set<string>();
+  
+  for (let day = new Date(firstDay); day <= lastDay; day.setDate(day.getDate() + 7)) {
+    const weekInfo = getWeekInfo(day);
+    if (!weekKeys.has(weekInfo.weekKey)) {
+      weekKeys.add(weekInfo.weekKey);
+      weeks.push(weekInfo);
+    }
+  }
+  
+  return weeks;
+}

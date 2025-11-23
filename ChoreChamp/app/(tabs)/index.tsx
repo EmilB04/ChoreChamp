@@ -6,10 +6,10 @@ import {
   isDicebearAvatar,
   parseDicebearUri,
 } from "@/lib/avatarUtils";
-import { getWeeklyLeaderboard } from "@/services/leaderboardService";
+import { getWeeklyLeaderboard, getAggregatedLeaderboard } from "@/services/leaderboardService";
 import { getTasksForUser, markTaskAsComplete, markTaskAsIncomplete, rejectTask, resetVerification, verifyTask } from "@/services/taskService";
 import type { Task } from "@/types/task";
-import { getCurrentWeek } from "@/utils/weekUtils";
+import { getCurrentWeek, getPreviousWeek, getWeeksInCurrentMonth, getWeeksInCurrentYear } from "@/utils/weekUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from 'expo-image-picker';
@@ -17,6 +17,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
+  Modal,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -71,6 +72,11 @@ export default function Dashboard() {
   // State for pull-to-refresh
   const [refreshing, setRefreshing] = useState(false);
 
+  // State for leaderboard filter
+  type LeaderboardFilter = 'thisWeek' | 'lastWeek' | 'thisMonth' | 'thisYear';
+  const [leaderboardFilter, setLeaderboardFilter] = useState<LeaderboardFilter>('thisWeek');
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
   const { t } = useTranslation('app');
 
   // Fetch leaderboard data from household members
@@ -98,11 +104,23 @@ export default function Dashboard() {
           return;
         }
 
-        // Get weekly leaderboard (already sorted by points)
-        const leaderboard = await getWeeklyLeaderboard(householdId);
+        // Get leaderboard based on selected filter
+        let leaderboard;
+        if (leaderboardFilter === 'thisWeek') {
+          leaderboard = await getWeeklyLeaderboard(householdId);
+        } else if (leaderboardFilter === 'lastWeek') {
+          const prevWeek = getPreviousWeek();
+          leaderboard = await getWeeklyLeaderboard(householdId, prevWeek.weekKey);
+        } else if (leaderboardFilter === 'thisMonth') {
+          const weeks = getWeeksInCurrentMonth();
+          leaderboard = await getAggregatedLeaderboard(householdId, weeks);
+        } else if (leaderboardFilter === 'thisYear') {
+          const weeks = getWeeksInCurrentYear();
+          leaderboard = await getAggregatedLeaderboard(householdId, weeks);
+        }
 
         // Transform to match UI format
-        const transformedLeaderboard = leaderboard.map((entry, index) => ({
+        const transformedLeaderboard = leaderboard?.map((entry, index) => ({
           id: entry.userId,
           firstName: entry.firstName,
           lastName: entry.lastName,
@@ -111,7 +129,7 @@ export default function Dashboard() {
           avatar: entry.imageUri ? { uri: entry.imageUri } : require("@/assets/images/icon.png"),
           position: index + 1,
           isCurrentUser: entry.userId === userData.id,
-        }));
+        })) || [];
 
         setLeaderboardData(transformedLeaderboard);
       } catch (error) {
@@ -123,7 +141,7 @@ export default function Dashboard() {
     };
 
     fetchLeaderboard();
-  }, [userData?.id, userData?.household]);
+  }, [userData?.id, userData?.household, leaderboardFilter]);
 
   // Fetch tasks for the current user
   useEffect(() => {
@@ -815,12 +833,23 @@ export default function Dashboard() {
         {/* Leaderboard */}
         <View style={styles.leaderboardWrapper}>
           <View style={styles.leaderboardHeader}>
-            <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
-            {t('leaderboard.title')}
-          </Text>
-            <Text style={[styles.weekIndicator, { color: colors.lightText }]}>
-              Uke {weekNumber}, {year}
+            <View>
+              <Text style={[commonStyles.sectionTitle, { color: colors.text }]}>
+              {t('leaderboard.title')}
             </Text>
+              <Text style={[styles.weekIndicator, { color: colors.lightText }]}>
+                {leaderboardFilter === 'thisWeek' && `Uke ${weekNumber}, ${year}`}
+                {leaderboardFilter === 'lastWeek' && 'Forrige uke'}
+                {leaderboardFilter === 'thisMonth' && 'Denne måneden'}
+                {leaderboardFilter === 'thisYear' && `${year}`}
+              </Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.filterButton}
+              onPress={() => setShowFilterModal(true)}
+            >
+              <Ionicons name="funnel-outline" size={20} color={colors.text} />
+            </TouchableOpacity>
           </View>
 
           {loadingLeaderboard ? (
@@ -1084,6 +1113,106 @@ export default function Dashboard() {
             : undefined
         }
       />
+
+      {/* Leaderboard Filter Modal */}
+      <Modal
+        visible={showFilterModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowFilterModal(false)}
+        >
+          <View style={[styles.filterModalContent, { backgroundColor: colors.background }]}>
+            <Text style={[styles.filterModalTitle, { color: colors.text }]}>
+              Velg tidsperiode
+            </Text>
+            
+            <TouchableOpacity
+              style={[
+                styles.filterOption,
+                leaderboardFilter === 'thisWeek' && { backgroundColor: colors.tint + '20' }
+              ]}
+              onPress={() => {
+                setLeaderboardFilter('thisWeek');
+                setShowFilterModal(false);
+              }}
+            >
+              <Ionicons 
+                name={leaderboardFilter === 'thisWeek' ? 'radio-button-on' : 'radio-button-off'} 
+                size={24} 
+                color={leaderboardFilter === 'thisWeek' ? colors.tint : colors.lightText} 
+              />
+              <Text style={[styles.filterOptionText, { color: colors.text }]}>
+                Denne uka
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterOption,
+                leaderboardFilter === 'lastWeek' && { backgroundColor: colors.tint + '20' }
+              ]}
+              onPress={() => {
+                setLeaderboardFilter('lastWeek');
+                setShowFilterModal(false);
+              }}
+            >
+              <Ionicons 
+                name={leaderboardFilter === 'lastWeek' ? 'radio-button-on' : 'radio-button-off'} 
+                size={24} 
+                color={leaderboardFilter === 'lastWeek' ? colors.tint : colors.lightText} 
+              />
+              <Text style={[styles.filterOptionText, { color: colors.text }]}>
+                Forrige uke
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterOption,
+                leaderboardFilter === 'thisMonth' && { backgroundColor: colors.tint + '20' }
+              ]}
+              onPress={() => {
+                setLeaderboardFilter('thisMonth');
+                setShowFilterModal(false);
+              }}
+            >
+              <Ionicons 
+                name={leaderboardFilter === 'thisMonth' ? 'radio-button-on' : 'radio-button-off'} 
+                size={24} 
+                color={leaderboardFilter === 'thisMonth' ? colors.tint : colors.lightText} 
+              />
+              <Text style={[styles.filterOptionText, { color: colors.text }]}>
+                Denne måneden
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.filterOption,
+                leaderboardFilter === 'thisYear' && { backgroundColor: colors.tint + '20' }
+              ]}
+              onPress={() => {
+                setLeaderboardFilter('thisYear');
+                setShowFilterModal(false);
+              }}
+            >
+              <Ionicons 
+                name={leaderboardFilter === 'thisYear' ? 'radio-button-on' : 'radio-button-off'} 
+                size={24} 
+                color={leaderboardFilter === 'thisYear' ? colors.tint : colors.lightText} 
+              />
+              <Text style={[styles.filterOptionText, { color: colors.text }]}>
+                Dette året
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -1442,6 +1571,46 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
+    fontWeight: '500',
+  },
+  filterButton: {
+    padding: 8,
+    borderRadius: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  filterModalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  filterModalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  filterOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  filterOptionText: {
+    fontSize: 16,
+    marginLeft: 12,
     fontWeight: '500',
   },
 });
