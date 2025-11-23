@@ -17,10 +17,10 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useSegments } from 'expo-router';
 
-import React, { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 const styles = StyleSheet.create({
@@ -40,13 +40,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: '600',
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
-        marginBottom: 12,
     },
     button: {
         borderRadius: 8,
@@ -68,33 +61,37 @@ const styles = StyleSheet.create({
 });
 
 export default function TestUserLoader() {
-    const { loadSpecificUser, userData, resetToAuthUser } = useUser();
+    const { loadSpecificUser, resetToAuthUser } = useUser();
     const { colors } = useTheme();
-    const [userId, setUserId] = useState('');
+    const { t } = useTranslation('app');
     const [loading, setLoading] = useState(false);
-    const segments = useSegments();
 
-    // Clear input if logged out or on onboarding
-    useEffect(() => {
-        // If user logs out or route is onboarding, clear
-        const isOnboarding = segments.some(seg => typeof seg === 'string' && seg.includes('onboarding'));
-        if (!userData || isOnboarding) {
-            setUserId('');
-        }
-    }, [userData, segments]);
-
-    const handleLoadUser = async () => {
-        if (!userId.trim()) {
-            Alert.alert('Error', 'Please enter a user ID');
-            return;
-        }
-
+    // Remove userId state and input, always load Emil's user
+    const handleLoadAdminUser = async () => {
+        const adminUserId = 'mRExgH1pI1e6TpGkj76Cn7Me9od2';
+        
         setLoading(true);
         try {
-            await loadSpecificUser(userId.trim());
-            Alert.alert('Success', `Loaded user: ${userId}`);
+            await loadSpecificUser(adminUserId);
+            Alert.alert(t('alerts.successTitle'), 'Loaded admin user: ' + adminUserId);
         } catch (error) {
-            Alert.alert('Error', `Failed to load user: ${error}`);
+            const errMsg = error && typeof error === 'object' && 'message' in error ? (error as any).message : String(error);
+            Alert.alert(t('alerts.errorTitle'), t('profile.testUserLoader.failed', { error: errMsg }));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 🧪 TEST FUNCTION: Load regular test user
+    const handleLoadRegularUser = async () => {
+        const regularUserId = 'test_lars_1762445448147_hqxoc67vl';
+        setLoading(true);
+        try {
+            await loadSpecificUser(regularUserId);
+            Alert.alert(t('alerts.successTitle'), 'Loaded regular user: ' + regularUserId);
+        } catch (error) {
+            const errMsg = error && typeof error === 'object' && 'message' in error ? (error as any).message : String(error);
+            Alert.alert(t('alerts.errorTitle'), t('profile.testUserLoader.failed', { error: errMsg }));
         } finally {
             setLoading(false);
         }
@@ -113,44 +110,43 @@ export default function TestUserLoader() {
                 <View style={styles.header}>
                     <Ionicons name="flask" size={20} color={colors.tint} />
                     <Text style={[styles.title, { color: colors.text }]}> 
-                        🧪 Test User Loader
+                        {t('profile.testUserLoader.title')}
                     </Text>
                 </View>
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: colors.background, marginBottom: 8, borderWidth: 1, borderColor: colors.tint }]}
                     onPress={resetToAuthUser}
                 >
-                    <Text style={[styles.buttonText, { color: colors.tint }]}>Reset to Authenticated User</Text>
+                    <Text style={[styles.buttonText, { color: colors.tint }]}>{t('profile.testUserLoader.reset')}</Text>
                 </TouchableOpacity>
-                <TextInput
-                    style={[styles.input, { 
-                        backgroundColor: colors.background,
-                        borderColor: colors.tint,
-                        color: colors.text,
-                    }]}
-                    placeholder="Enter user ID from Firestore"
-                    placeholderTextColor={colors.lightDarkText}
-                    value={userId}
-                    onChangeText={setUserId}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    keyboardType="default"
-                />
                 <TouchableOpacity 
                     style={[
                         styles.button,
                         { backgroundColor: colors.tint },
                         loading && styles.buttonDisabled
                     ]}
-                    onPress={handleLoadUser}
+                    onPress={handleLoadAdminUser}
                     disabled={loading}
                 >
                     <Text style={[styles.buttonText, { color: colors.darkText }]}> 
-                        {loading ? 'Loading...' : 'Load User'}
+                        {loading ? t('profile.testUserLoader.loading') : 'Load Admin User'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[
+                        styles.button,
+                        { backgroundColor: colors.tint, marginTop: 12 },
+                        loading && styles.buttonDisabled
+                    ]}
+                    onPress={handleLoadRegularUser}
+                    disabled={loading}
+                >
+                    <Text style={[styles.buttonText, { color: colors.darkText }]}> 
+                        {loading ? t('profile.testUserLoader.loading') : 'Load Regular User'}
                     </Text>
                 </TouchableOpacity>
                 <Text style={[styles.hint, { color: colors.lightDarkText }]}> 
-                    💡 Find user IDs in Firebase Console → Firestore → users collection
+                    Loads admin (mRExgH1pI1e6TpGkj76Cn7Me9od2) or regular (test_lars_1762445448147_hqxoc67vl) user for testing
                 </Text>
             </View>
         </KeyboardAvoidingView>
