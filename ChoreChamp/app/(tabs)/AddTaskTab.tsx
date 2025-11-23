@@ -1,3 +1,4 @@
+import FullScreenLoader from "@/components/FullScreenLoader";
 import Calendar from "@/components/ui/Calendar";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
@@ -425,11 +426,7 @@ export default function AddTask() {
                         {t('addTask.assignTitle')}
                     </Text>
                     {loadingMembers ? (
-                        <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
-                            <Text style={[styles.loadingText, { color: colors.text }]}>
-                                {t('addTask.loadingMembers')}
-                            </Text>
-                        </View>
+                        <FullScreenLoader text={t('addTask.loadingMembers')} />
                     ) : householdMembers.length === 0 ? (
                         <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
                             <Text style={[styles.loadingText, { color: colors.text }]}>

@@ -1,8 +1,9 @@
+import FullScreenLoader from "@/components/FullScreenLoader";
+import WeeklySummaryModal from "@/components/modals/WeeklySummaryModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import { getHouseholdsForUser, getUserHouseholds, Household } from "@/services/householdService";
 import { getWeeklySummariesForHousehold, WeeklySummary } from "@/services/taskService";
-import WeeklySummaryModal from "@/components/modals/WeeklySummaryModal";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
@@ -244,11 +245,7 @@ export default function History() {
       </Text>
 
       {loadingHouseholds ? (
-        <View style={styles.centerMessage}>
-          <Text style={[styles.messageText, { color: colors.text }]}>
-            {t('history.loadingHouseholds')}
-          </Text>
-        </View>
+        <FullScreenLoader text={t('history.loadingHouseholds')} />
       ) : households.length === 0 ? (
         <View style={styles.centerMessage}>
           <Text style={[styles.messageText, { color: colors.text }]}>
@@ -395,11 +392,7 @@ export default function History() {
 
       {/* History list */}
       {loadingSummaries ? (
-        <View style={styles.centerMessage}>
-          <Text style={[styles.messageText, { color: colors.text }]}>
-            Laster historikk...
-          </Text>
-        </View>
+        <FullScreenLoader text="Laster historikk..." />
       ) : filteredHistoryData.length === 0 ? (
         <View style={styles.centerMessage}>
           <Text style={[styles.messageText, { color: colors.text }]}>
