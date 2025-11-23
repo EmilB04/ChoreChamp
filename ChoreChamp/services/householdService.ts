@@ -49,6 +49,7 @@ export async function getHouseholdsForUser(userId: string): Promise<Household[]>
                         id: docSnap.id,
                         familyName: data.familyName || 'Ukjent husstand',
                         familyMembers: data.familyMembers || [],
+                        adminUsers: data.adminUsers || [],
                         points: data.points || {},
                     });
                     foundIds.add(docSnap.id);
@@ -101,6 +102,7 @@ export async function getUserHouseholds(householdRefs: (DocumentReference | stri
                     id: householdDoc.id,
                     familyName: data.familyName || 'Ukjent husstand',
                     familyMembers: data.familyMembers || [],
+                    adminUsers: data.adminUsers || [],
                     points: data.points || {},
                 });
                 console.log('✅ Fetched household:', data.familyName);
@@ -132,6 +134,7 @@ export async function getHouseholdById(householdId: string): Promise<Household |
                 id: householdDoc.id,
                 familyName: data.familyName || 'Ukjent husstand',
                 familyMembers: data.familyMembers || [],
+                adminUsers: data.adminUsers || [],
                 points: data.points || {},
             };
         }
@@ -204,9 +207,11 @@ export async function createHousehold(familyName: string, creatorId: string): Pr
     try {
         // Create the household document
         const householdsRef = collection(db, 'households');
+        const userPath = `/users/${creatorId}`;
         const newHousehold = {
             familyName: familyName.trim(),
-            familyMembers: [`/users/${creatorId}`],
+            familyMembers: [userPath],
+            adminUsers: [userPath],
             points: {},
             createdAt: new Date(),
             createdBy: creatorId,

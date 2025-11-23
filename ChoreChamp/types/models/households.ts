@@ -1,5 +1,6 @@
 export type Household = {
-    familyName: string; 
+    familyName: string;
     familyMembers: string[];
+    adminUsers: string[];
     points: Record<string, number>;
 }

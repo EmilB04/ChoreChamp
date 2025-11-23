@@ -2,6 +2,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { UserProvider } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
+import { StandardHouseholdProvider } from '@/contexts/StandardHouseholdContext';
 import * as Font from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -80,11 +81,13 @@ function RootLayoutInner() {
   return (
     <UserProvider>
       <ThemeProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-        </Stack>
-        <StatusBar style="auto" />
+        <StandardHouseholdProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </StandardHouseholdProvider>
       </ThemeProvider>
     </UserProvider>
   );

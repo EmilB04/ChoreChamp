@@ -16,6 +16,7 @@ import {
     View,
 } from 'react-native';
 import Header from './Header';
+import { useStandardHousehold } from '@/contexts/StandardHouseholdContext';
 
 interface MyHouseholdsScreenProps {
     onBack: () => void;
@@ -24,25 +25,31 @@ interface MyHouseholdsScreenProps {
 interface Member {
     id: string;
     name: string;
-    role: 'admin' | 'member';
     avatar?: string;
 }
 
 interface Household {
     id: string;
-    name: string;
-    role: 'admin' | 'member';
-    members: Member[];
+    familyName: string;
+    familyMembers: string[];
+    adminUsers: string[];
+    createdAt?: any;
+    createdBy?: string;
+    points?: Record<string, number>;
 }
 
 export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) {
     const { colors } = useTheme();
     const { userData, refreshUserData } = useUser();
     const { t } = useTranslation('app');
+    const { standardHouseholdId, setStandardHouseholdId } = useStandardHousehold();
     
     // Fetch households from database
     const [households, setHouseholds] = useState<Household[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Default household selection
+    // Remove local defaultHouseholdId state and AsyncStorage logic
 
     // Modal states
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -58,77 +65,30 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 
     // Fetch user's households on mount
     useEffect(() => {
-        const fetchHouseholds = async () => {
-            if (!userData?.id) {
-                console.log('⚠️ No user ID available');
-                setLoading(false);
-                return;
-            }
-
-            setLoading(true);
-            try {
-                console.log('🏠 Fetching households for user:', userData.id);
-                
-                // First, try to fetch households by querying familyMembers
-                let userHouseholds = await getHouseholdsForUser(userData.id);
-                
-                // If no households found via query and user has household array, fetch those
-                if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
-                    console.log('🏠 No households found via query, trying user.household array');
-                    userHouseholds = await getUserHouseholds(userData.household);
-                }
-
-                // Transform to match the component's Household interface
-                const transformedHouseholds: Household[] = userHouseholds.map(h => ({
-                    id: h.id,
-                    name: h.familyName,
-                    role: 'member', // Default to member, you can enhance this later
-                    members: [] // Empty for now, can be populated if needed
-                }));
-
-                setHouseholds(transformedHouseholds);
-                console.log('✅ Loaded households:', transformedHouseholds.map(h => h.name));
-            } catch (error) {
-                console.error('❌ Error loading households:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchHouseholds();
     }, [userData?.id, userData?.household]);
 
     // Fetch household data
-    const fetchHouseholds = async () => {
+    async function fetchHouseholds() {
         if (!userData?.id) {
-            console.log('⚠️ No user ID available');
             setLoading(false);
             return;
         }
-
         setLoading(true);
         try {
-            console.log('🏠 Fetching households for user:', userData.id);
-            
-            // First, try to fetch households by querying familyMembers
             let userHouseholds = await getHouseholdsForUser(userData.id);
-            
-            // If no households found via query and user has household array, fetch those
             if (userHouseholds.length === 0 && userData.household && userData.household.length > 0) {
-                console.log('🏠 No households found via query, trying user.household array');
                 userHouseholds = await getUserHouseholds(userData.household);
             }
-
-            // Transform to match the component's Household interface
             const transformedHouseholds: Household[] = userHouseholds.map(h => ({
                 id: h.id,
-                name: h.familyName,
-                role: 'member', // Default to member, you can enhance this later
-                members: [] // Will be loaded on demand
+                familyName: h.familyName,
+                familyMembers: h.familyMembers || [],
+                adminUsers: (h as any).adminUsers || [],
+                points: h.points || {},
             }));
-
             setHouseholds(transformedHouseholds);
-            console.log('✅ Loaded households:', transformedHouseholds.map(h => h.name));
+            console.log('✅ Loaded households:', transformedHouseholds.map(h => h.familyName));
         } catch (error) {
             console.error('❌ Error loading households:', error);
         } finally {
@@ -217,7 +177,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
     const handleLeaveHousehold = (household: Household) => {
         Alert.alert(
             t('profile.households.leaveConfirmTitle'),
-            t('profile.households.leaveConfirmMessage', { name: household.name }),
+            t('profile.households.leaveConfirmMessage', { name: household.familyName }),
             [
                 { text: t('profile.cancel'), style: 'cancel' },
                 {
@@ -225,18 +185,12 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                     style: 'destructive',
                     onPress: async () => {
                         if (!userData?.id) return;
-                        
                         try {
                             const result = await leaveHousehold(household.id, userData.id);
-                            
                             if (result.success) {
-                                // Refresh user data
                                 await refreshUserData();
-                                
-                                // Refresh households list
                                 await fetchHouseholds();
-                                
-                                Alert.alert(t('alerts.successTitle'), t('profile.households.leaveSuccessMessage', { name: household.name }));
+                                Alert.alert(t('alerts.successTitle'), t('profile.households.leaveSuccessMessage', { name: household.familyName }));
                             } else {
                                 Alert.alert(t('alerts.errorTitle'), result.error || t('profile.households.leaveFailedMessage'));
                             }
@@ -254,13 +208,11 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
         setSelectedHousehold(household);
         setShowMembersModal(true);
         setLoadingMembers(true);
-        
         try {
             const members = await getHouseholdMembers(household.id);
             const transformedMembers: Member[] = members.map(m => ({
                 id: m.id,
                 name: m.username,
-                role: 'member', // Can be enhanced later
                 avatar: m.imageUri
             }));
             setHouseholdMembers(transformedMembers);
@@ -274,8 +226,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 
     const handleShareHousehold = (household: Household) => {
         const code = household.id;
-        const message = t('profile.households.shareMessage', { name: household.name, code });
-        
+        const message = t('profile.households.shareMessage', { name: household.familyName, code });
         Alert.alert(
             t('profile.households.shareTitle'),
             message,
@@ -283,7 +234,6 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 {
                     text: t('profile.households.copyCodeLabel'),
                     onPress: () => {
-                        // In a real app, you'd use Clipboard API
                         Alert.alert(t('alerts.successTitle'), t('profile.households.copiedMessage', { code }));
                     }
                 },
@@ -350,11 +300,11 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                 ) : (
                     <>
                         {/* Info Section */}
-                        <View style={styles.section}>
-                            <Text style={[styles.infoText, { color: colors.lightDarkText }]}> 
-                                {t('profile.households.youAreMemberOf', { count: households.length })}
-                            </Text>
-                        </View>
+                                <View style={styles.section}>
+                                    <Text style={[styles.infoText, { color: colors.lightDarkText }]}>
+                                        {t('profile.households.youAreMemberOf', { count: households.length })}
+                                    </Text>
+                                </View>
 
                         {/* Households List */}
                         <View style={styles.section}>
@@ -363,79 +313,84 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             </Text>
                             
                             {households.map((household) => (
-                        <View key={household.id} style={[styles.householdCard, { backgroundColor: colors.contextBackground }]}>
+                        <View key={household.id} style={[styles.householdCard, { backgroundColor: colors.contextBackground, borderWidth: standardHouseholdId === household.id ? 2 : 0, borderColor: standardHouseholdId === household.id ? colors.tint : 'transparent' }]}> 
                             <View style={styles.householdContent}>
+                                {households.length > 1 && (
+                                    <TouchableOpacity
+                                        style={{
+                                            position: 'absolute', top: 8, right: 8, zIndex: 2,
+                                            backgroundColor: standardHouseholdId === household.id ? colors.tint : colors.contextBackground,
+                                            borderRadius: 20, paddingVertical: 6, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center',
+                                            shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 2, elevation: 2
+                                        }}
+                                        onPress={() => setStandardHouseholdId(household.id)}
+                                        activeOpacity={0.85}
+                                    >
+                                        <Ionicons name={standardHouseholdId === household.id ? 'star' : 'star-outline'} size={18} color={standardHouseholdId === household.id ? colors.darkText : colors.tint} style={{ marginRight: 6 }} />
+                                        <Text style={{
+                                            color: standardHouseholdId === household.id ? colors.darkText : colors.tint,
+                                            fontWeight: '700', fontSize: 15
+                                        }}>
+                                            {standardHouseholdId === household.id ? 'Standard' : 'Sett standard'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
                                 <View style={styles.householdHeader}>
                                     <View style={styles.householdInfo}>
                                         <Text style={[styles.householdName, { color: colors.text }]}>
-                                            {household.name}
+                                            {household.familyName}
                                         </Text>
                                         <View style={styles.roleContainer}>
-                                            <View style={[
-                                                styles.roleBadge, 
-                                                { backgroundColor: household.role === 'admin' ? colors.tint : 'rgba(108, 117, 125, 0.2)' }
-                                            ]}>
-                                                <Text style={[
-                                                    styles.roleText,
-                                                    { color: household.role === 'admin' ? colors.darkText : colors.lightDarkText }
-                                                ]}>
-                                                    {household.role === 'admin' ? t('profile.households.roleAdmin') : t('profile.households.roleMember')}
-                                                </Text>
-                                            </View>
+                                            {(() => {
+                                                const isAdmin = userData?.id && household.adminUsers && household.adminUsers.includes(`/users/${userData.id}`);
+                                                return (
+                                                    <View style={[
+                                                        styles.roleBadge,
+                                                        { backgroundColor: isAdmin ? colors.tint : 'rgba(108, 117, 125, 0.2)' }
+                                                    ]}>
+                                                        <Text style={[
+                                                            styles.roleText,
+                                                            { color: isAdmin ? colors.darkText : colors.lightDarkText }
+                                                        ]}>
+                                                            {isAdmin
+                                                                ? t('profile.households.roleAdmin')
+                                                                : t('profile.households.roleMember')}
+                                                        </Text>
+                                                    </View>
+                                                );
+                                            })()}
                                         </View>
                                     </View>
                                 </View>
                                 
-                                {household.members && household.members.length > 0 && (
-                                    <View style={styles.householdStats}>
-                                        <View style={styles.statItem}>
-                                            <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
-                                            <Text style={[styles.statText, { color: colors.lightDarkText }]}>
-                                                {household.members.length} {t('profile.households.members')}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                )}
+                                {/* Fjernet household.members visning, da dette ikke finnes i Household-modellen */}
                             </View>
                             
                             {/* Actions */}
                             <View style={styles.householdActions}>
-                                {/* Se medlemmer button - only show if we have member data */}
-                                {household.members && household.members.length > 0 && (
+                                <View style={styles.actionRow}>
                                     <TouchableOpacity 
-                                        style={[styles.actionButton, { borderColor: colors.lightDarkText }]}
+                                        style={[styles.actionButton, { borderColor: colors.lightDarkText, flex: 1 }]}
                                         onPress={() => handleShowMembers(household)}
                                     >
                                         <Ionicons name="people-outline" size={16} color={colors.lightDarkText} />
                                         <Text style={[styles.actionButtonText, { color: colors.lightDarkText }]}> {t('profile.households.viewMembers')}</Text>
                                     </TouchableOpacity>
-                                )}
-                                
-                                {household.role === 'admin' ? (
                                     <TouchableOpacity 
-                                        style={[styles.actionButton, { borderColor: colors.tint }]}
+                                        style={[styles.actionButton, { borderColor: colors.tint, marginLeft: 8, flex: 1 }]}
+                                        onPress={() => handleShareHousehold(household)}
                                     >
-                                        <Ionicons name="settings-outline" size={16} color={colors.tint} />
-                                        <Text style={[styles.actionButtonText, { color: colors.tint }]}> {t('profile.households.manage')}</Text>
+                                        <Ionicons name="share-outline" size={16} color={colors.tint} />
+                                        <Text style={[styles.actionButtonText, { color: colors.tint }]}> {t('profile.households.share')}</Text>
                                     </TouchableOpacity>
-                                ) : (
-                                    <>
-                                        <TouchableOpacity 
-                                            style={[styles.actionButton, { borderColor: colors.tint }]}
-                                            onPress={() => handleShareHousehold(household)}
-                                        >
-                                            <Ionicons name="share-outline" size={16} color={colors.tint} />
-                                            <Text style={[styles.actionButtonText, { color: colors.tint }]}> {t('profile.households.share')}</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity 
-                                            style={[styles.actionButton, styles.leaveButton]}
-                                            onPress={() => handleLeaveHousehold(household)}
-                                        >
-                                            <Ionicons name="exit-outline" size={16} color="#ef4444" />
-                                            <Text style={[styles.actionButtonText, { color: '#ef4444' }]}>{t('profile.households.leave')}</Text>
-                                        </TouchableOpacity>
-                                    </>
-                                )}
+                                </View>
+                                <TouchableOpacity 
+                                    style={[styles.actionButton, styles.leaveButton, { marginTop: 12, width: '100%' }]}
+                                    onPress={() => handleLeaveHousehold(household)}
+                                >
+                                    <Ionicons name="exit-outline" size={16} color="#ef4444" />
+                                    <Text style={[styles.actionButtonText, { color: '#ef4444' }]}>{t('profile.households.leave')}</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                         ))}
@@ -542,7 +497,7 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                             <Text style={[styles.cancelText, { color: colors.text }]}>{t('profile.cancel')}</Text>
                         </TouchableOpacity>
                         <Text style={[styles.modalTitle, { color: colors.text }]}> 
-                            {selectedHousehold?.name} - {t('profile.households.membersTitle')}
+                            {selectedHousehold?.familyName} - {t('profile.households.membersTitle')}
                         </Text>
                         <View style={{ width: 40 }} />
                     </View>
@@ -578,19 +533,21 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                         )}
                                     </View>
                                     <View style={styles.memberDetails}>
-                                        <Text style={[styles.memberName, { color: colors.text }]}>
+                                        <Text style={[styles.memberName, { color: colors.text }]}> 
                                             {member.name}
                                         </Text>
                                         <View style={styles.memberMeta}>
                                             <View style={[
                                                 styles.memberRoleBadge,
-                                                { backgroundColor: member.role === 'admin' ? colors.tint : 'rgba(108, 117, 125, 0.2)' }
+                                                { backgroundColor: selectedHousehold?.adminUsers.includes(`/users/${member.id}`) ? colors.tint : 'rgba(108, 117, 125, 0.2)' }
                                             ]}>
                                                 <Text style={[
                                                     styles.memberRoleText,
-                                                    { color: member.role === 'admin' ? colors.darkText : colors.lightDarkText }
+                                                    { color: selectedHousehold?.adminUsers.includes(`/users/${member.id}`) ? colors.darkText : colors.lightDarkText }
                                                 ]}>
-                                                    {member.role === 'admin' ? t('profile.households.memberRoleAdmin') : t('profile.households.memberRoleMember')}
+                                                    {selectedHousehold?.adminUsers.includes(`/users/${member.id}`)
+                                                        ? t('profile.households.memberRoleAdmin')
+                                                        : t('profile.households.memberRoleMember')}
                                                 </Text>
                                             </View>
                                         </View>
@@ -653,45 +610,45 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 }
 
 const styles = StyleSheet.create({
+        section: {
+            marginBottom: 24,
+        },
+        sectionTitle: {
+            fontSize: 18,
+            fontWeight: '600',
+            marginBottom: 16,
+        },
+        infoText: {
+            fontSize: 14,
+            textAlign: 'center',
+            marginTop: 8,
+        },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 60,
+        },
+        emptyContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 60,
+            paddingHorizontal: 40,
+        },
+        emptyText: {
+            fontSize: 18,
+            fontWeight: '600',
+            textAlign: 'center',
+            marginTop: 16,
+            marginBottom: 8,
+        },
     container: {
         flex: 1,
     },
     content: {
         flex: 1,
         paddingHorizontal: 20,
-    },
-    section: {
-        marginBottom: 24,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        marginBottom: 16,
-    },
-    infoText: {
-        fontSize: 14,
-        textAlign: 'center',
-        marginTop: 8,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 60,
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 60,
-        paddingHorizontal: 40,
-    },
-    emptyText: {
-        fontSize: 18,
-        fontWeight: '600',
-        textAlign: 'center',
-        marginTop: 16,
-        marginBottom: 8,
     },
     emptySubtext: {
         fontSize: 14,
@@ -778,21 +735,25 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     householdActions: {
-        flexDirection: 'row',
+        flexDirection: 'column',
+        paddingVertical: 8,
         paddingHorizontal: 16,
-        paddingBottom: 16,
-        gap: 8,
+    },
+    actionRow: {
+        flexDirection: 'row',
+        gap: 0,
+        width: '100%',
     },
     actionButton: {
-        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 8,
+        paddingVertical: 14,
         paddingHorizontal: 12,
         borderWidth: 1,
         borderRadius: 8,
-        gap: 4,
+        gap: 8,
+        marginBottom: 6,
     },
     leaveButton: {
         borderColor: '#ef4444',
