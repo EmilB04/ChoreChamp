@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { UserProvider } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +16,62 @@ SplashScreen.preventAutoHideAsync();
 export const unstable_settings = {
   anchor: '(tabs)',
 };
+
+function RootLayoutInner() {
+  const { user, loading } = useAuth();
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await Promise.all([
+          initI18n(),
+          Font.loadAsync({ ...Ionicons.font }),
+        ]);
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+    prepare();
+  }, []);
+
+  useEffect(() => {
+    if (appIsReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady || loading) {
+    return null;
+  }
+
+  // If not logged in, show onboarding
+  if (!user) {
+    return (
+      <ThemeProvider>
+        <Stack>
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    );
+  }
+
+  // If logged in, show main app
+  return (
+    <UserProvider>
+      <ThemeProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </UserProvider>
+  );
+}
 
 export default function RootLayout() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -51,15 +107,7 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <UserProvider>
-        <ThemeProvider>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </UserProvider>
+      <RootLayoutInner />
     </AuthProvider>
   );
 }
