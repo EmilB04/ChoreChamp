@@ -132,18 +132,49 @@ export async function getAggregatedLeaderboard(
     householdId: string,
     weeks: WeekInfo[]
 ): Promise<LeaderboardEntry[]> {
+    if (weeks.length === 0) {
+        const householdMembers = await getHouseholdMembers(householdId);
+        return householdMembers.map(member => ({
+            userId: member.id,
+            firstName: member.firstName,
+            lastName: member.lastName,
+            username: member.username,
+            imageUri: member.imageUri,
+            points: 0
+        }));
+    }
+
     const aggregatedPoints: Record<string, number> = {};
+    const weekSet = new Set(weeks.map(w => w.weekKey));
     
-    for (const week of weeks) {
-        const weeklyPoints = await calculateWeeklyPoints(householdId, week.weekKey);
+    const years = [...new Set(weeks.map(w => w.year))];
+    
+    for (const year of years) {
+        const tasksRef = collection(db, 'tasks');
+        const q = query(
+            tasksRef,
+            where('householdId', '==', householdId),
+            where('done', '==', true),
+            where('year', '==', year)
+        );
         
-        for (const [userId, points] of Object.entries(weeklyPoints)) {
-            if (aggregatedPoints[userId]) {
-                aggregatedPoints[userId] += points;
-            } else {
-                aggregatedPoints[userId] = points;
+        const querySnapshot = await getDocs(q);
+        
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const taskWeekKey = `${data.year}-W${data.weekNumber.toString().padStart(2, '0')}`;
+            
+            if (weekSet.has(taskWeekKey)) {
+                const userId = data.completedBy;
+                const points = data.points || 0;
+                
+                if (aggregatedPoints[userId]) {
+                    aggregatedPoints[userId] += points;
+                } else {
+                    aggregatedPoints[userId] = points;
+                }
             }
-        }
+        });
     }
     
     const householdMembers = await getHouseholdMembers(householdId);
