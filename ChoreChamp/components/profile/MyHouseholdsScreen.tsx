@@ -63,13 +63,8 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
     const [isJoining, setIsJoining] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
 
-    // Fetch user's households on mount
-    useEffect(() => {
-        fetchHouseholds();
-    }, [userData?.id, userData?.household]);
-
     // Fetch household data
-    async function fetchHouseholds() {
+    const fetchHouseholds = React.useCallback(async () => {
         if (!userData?.id) {
             setLoading(false);
             return;
@@ -94,7 +89,12 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
         } finally {
             setLoading(false);
         }
-    };
+    }, [userData?.id, userData?.household]);
+
+    // Fetch user's households on mount
+    useEffect(() => {
+        fetchHouseholds();
+    }, [fetchHouseholds]);
 
     const handleCreateHousehold = async () => {
         if (newHouseholdName.trim() === '') {
