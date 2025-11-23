@@ -2,7 +2,9 @@ import Notification from "@/components/notifications/notification";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import { db } from "@/lib/firebase";
+import { getUserData } from "@/services/userService";
 import { useFocusEffect } from "@react-navigation/native";
+import { Image } from "expo-image";
 import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
@@ -17,6 +19,7 @@ export default function Notifications() {
     const [selectedTab, setSelectedTab] = useState<'unread' | 'previous'>('unread');
     const [selectedNotification, setSelectedNotification] = useState<any>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [profilePictures, setProfilePictures] = useState<Record<string, string>>({});
 
     // Reset to main view when tab is focused
     useFocusEffect(
@@ -35,18 +38,42 @@ export default function Notifications() {
             where("userId", "==", userData.id),
             orderBy("timestamp", "desc")
         );
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            console.log('Fetched notifications:', notifs);
-            if (notifs.length > 0) {
-                const readNotifs = notifs.filter(n => (n as any).read === true);
-                const unreadNotifs = notifs.filter(n => (n as any).read !== true);
-                console.log('Read notifications:', readNotifs);
-                console.log('Unread notifications:', unreadNotifs);
-            }
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+            const notifs = snapshot.docs.map(doc => {
+                const data = doc.data();
+                // Robustly coerce 'read' to boolean
+                let readValue = false;
+                if (typeof data.read === 'boolean') readValue = data.read;
+                else if (typeof data.read === 'string') readValue = data.read === 'true' || data.read === '1';
+                else if (typeof data.read === 'number') readValue = data.read === 1;
+                else readValue = false;
+                return {
+                    id: doc.id,
+                    userId: data.userId || '',
+                    ...data,
+                    timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : (typeof data.timestamp === 'string' ? new Date(data.timestamp) : new Date()),
+                    read: readValue,
+                };
+            });
+
+            console.log('[NotificationTab] Notifications fetched from Firestore:', notifs);
+
+            // Fetch profile pictures for all unique userIds in notifications
+            const userIds = Array.from(new Set(notifs.map(n => n.userId).filter(Boolean)));
+            const newProfilePictures: Record<string, string> = { ...profilePictures };
+            await Promise.all(userIds.map(async (uid) => {
+                if (!newProfilePictures[uid]) {
+                    try {
+                        const user = await getUserData(uid);
+                        if (user?.imageUri) newProfilePictures[uid] = user.imageUri;
+                    } catch {}
+                }
+            }));
+            setProfilePictures(newProfilePictures);
             setNotifications(notifs);
         });
         return () => unsubscribe();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userData?.id]);
 
     // Group notifications by time periods
@@ -173,10 +200,17 @@ export default function Notifications() {
                                             onPress={() => setSelectedNotification(notification)}
                                         >
                                             <View style={styles.notificationContent}>
-                                                <View style={[styles.avatar, { backgroundColor: colors.tint }]}>
-                                                    <Text style={styles.avatarText}>
-                                                        {notification.avatar}
-                                                    </Text>
+                                                <View style={[styles.avatar, { backgroundColor: colors.tint, overflow: 'hidden' }]}> 
+                                                    {profilePictures[notification.userId] ? (
+                                                        <Image
+                                                            source={{ uri: profilePictures[notification.userId] }}
+                                                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                                                        />
+                                                    ) : (
+                                                        <Text style={styles.avatarText}>
+                                                            {notification.avatar}
+                                                        </Text>
+                                                    )}
                                                 </View>
                                                 <View style={styles.notificationText}>
                                                     <Text style={[styles.notificationTitle, { color: colors.text }]}>
@@ -186,7 +220,7 @@ export default function Notifications() {
                                                         {notification.subtitle}
                                                     </Text>
                                                     <Text style={[styles.notificationPoints, { color: colors.tint }]}>
-                                                        {notification.points}
+                                                        {notification.points} poeng
                                                     </Text>
                                                     <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
@@ -302,12 +336,12 @@ export default function Notifications() {
                             }
                         >
                             {/* This week's read notifications */}
-                            {groupedNotifications.thisWeek.filter(n => n.read === true).length > 0 && (
+                            {groupedNotifications.thisWeek.filter(n => !!n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}> 
                                         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('notifications.thisWeek')}</Text>
                                     </View>
-                                    {groupedNotifications.thisWeek.filter(n => n.read === true).map((notification) => (
+                                    {groupedNotifications.thisWeek.filter(n => !!n.read).map((notification) => (
                                         <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground, opacity: 0.7 }]}
@@ -344,12 +378,12 @@ export default function Notifications() {
                             )}
 
                             {/* Earlier read notifications */}
-                            {groupedNotifications.earlier.filter(n => n.read === true).length > 0 && (
+                            {groupedNotifications.earlier.filter(n => !!n.read).length > 0 && (
                                 <>
                                     <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}> 
                                         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('notifications.earlier')}</Text>
                                     </View>
-                                    {groupedNotifications.earlier.filter(n => n.read === true).map((notification) => (
+                                    {groupedNotifications.earlier.filter(n => !!n.read).map((notification) => (
                                         <TouchableOpacity
                                             key={notification.id}
                                             style={[styles.notificationCard, { backgroundColor: colors.contextBackground, opacity: 0.7 }]}
@@ -386,7 +420,7 @@ export default function Notifications() {
                             )}
 
                             {/* Show message if no read notifications */}
-                            {notifications.filter(n => n.read === true).length === 0 && (
+                            {notifications.filter(n => !!n.read).length === 0 && (
                                 <View style={styles.emptyState}>
                                     <Text style={{ fontSize: 48, textAlign: 'center', marginBottom: 16 }}>💬</Text>
                                     <Text style={[styles.emptyStateText, { color: colors.lightDarkText }]}>{t('notifications.youAreUpToDate')}</Text>
