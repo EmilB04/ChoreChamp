@@ -5,7 +5,7 @@ import { db } from "@/lib/firebase";
 import { getUserData } from "@/services/userService";
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getDocs, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -31,46 +31,54 @@ export default function Notifications() {
     // Fetch notifications from Firestore for the current user
     const [notifications, setNotifications] = useState<any[]>([]);
 
+    // Helper to map and set notifications
+    const mapAndSetNotifications = async (docs: { id: string; data: () => any }[]) => {
+        const notifs = docs.map((doc: { id: string; data: () => any }) => {
+            const data = doc.data();
+            // Robustly coerce 'read' to boolean
+            let readValue = false;
+            if (typeof data.read === 'boolean') readValue = data.read;
+            else if (typeof data.read === 'string') readValue = data.read === 'true' || data.read === '1';
+            else if (typeof data.read === 'number') readValue = data.read === 1;
+            else readValue = false;
+            const mapped = {
+                id: doc.id,
+                userId: data.userId || '',
+                ...data,
+                timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : (typeof data.timestamp === 'string' ? new Date(data.timestamp) : new Date()),
+                read: readValue,
+            };
+            console.log('[NotificationTab] Notification mapped:', mapped);
+            return mapped;
+        });
+
+        console.log('[NotificationTab] Notifications fetched from Firestore:', notifs);
+
+        // Fetch profile pictures for all unique userIds in notifications
+        const userIds = Array.from(new Set(notifs.map((n: any) => n.userId).filter((uid: any) => typeof uid === 'string' && !!uid)));
+        const newProfilePictures: Record<string, string> = { ...profilePictures };
+        await Promise.all(userIds.map(async (uid: string) => {
+            if (!newProfilePictures[uid]) {
+                try {
+                    const user = await getUserData(uid);
+                    if (user?.imageUri) newProfilePictures[uid] = user.imageUri;
+                } catch {}
+            }
+        }));
+        setProfilePictures(newProfilePictures);
+        setNotifications(notifs);
+    };
+
     useEffect(() => {
         if (!userData?.id) return;
+        console.log('[NotificationTab] Querying notifications for userId:', userData.id);
         const q = query(
             collection(db, "notifications"),
             where("userId", "==", userData.id),
             orderBy("timestamp", "desc")
         );
         const unsubscribe = onSnapshot(q, async (snapshot) => {
-            const notifs = snapshot.docs.map(doc => {
-                const data = doc.data();
-                // Robustly coerce 'read' to boolean
-                let readValue = false;
-                if (typeof data.read === 'boolean') readValue = data.read;
-                else if (typeof data.read === 'string') readValue = data.read === 'true' || data.read === '1';
-                else if (typeof data.read === 'number') readValue = data.read === 1;
-                else readValue = false;
-                return {
-                    id: doc.id,
-                    userId: data.userId || '',
-                    ...data,
-                    timestamp: data.timestamp?.toDate ? data.timestamp.toDate() : (typeof data.timestamp === 'string' ? new Date(data.timestamp) : new Date()),
-                    read: readValue,
-                };
-            });
-
-            console.log('[NotificationTab] Notifications fetched from Firestore:', notifs);
-
-            // Fetch profile pictures for all unique userIds in notifications
-            const userIds = Array.from(new Set(notifs.map(n => n.userId).filter(Boolean)));
-            const newProfilePictures: Record<string, string> = { ...profilePictures };
-            await Promise.all(userIds.map(async (uid) => {
-                if (!newProfilePictures[uid]) {
-                    try {
-                        const user = await getUserData(uid);
-                        if (user?.imageUri) newProfilePictures[uid] = user.imageUri;
-                    } catch {}
-                }
-            }));
-            setProfilePictures(newProfilePictures);
-            setNotifications(notifs);
+            await mapAndSetNotifications(snapshot.docs);
         });
         return () => unsubscribe();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,11 +129,20 @@ export default function Notifications() {
     // Handle pull-to-refresh
     const onRefresh = async () => {
         setRefreshing(true);
-        // In a real app, you would fetch notifications from Firebase here
-        // For now, just simulate a refresh
-        setTimeout(() => {
-            setRefreshing(false);
-        }, 500);
+        if (userData?.id) {
+            try {
+                const q = query(
+                    collection(db, "notifications"),
+                    where("userId", "==", userData.id),
+                    orderBy("timestamp", "desc")
+                );
+                const snapshot = await getDocs(q);
+                await mapAndSetNotifications(snapshot.docs);
+            } catch (e) {
+                console.error('[NotificationTab] Error refreshing notifications:', e);
+            }
+        }
+        setRefreshing(false);
     };
 
     // Function to get relative time
@@ -335,6 +352,48 @@ export default function Notifications() {
                                 />
                             }
                         >
+                            {/* Today's read notifications */}
+                            {groupedNotifications.today.filter(n => !!n.read).length > 0 && (
+                                <>
+                                    <View style={[styles.sectionHeader, { borderBottomColor: colors.lightNonInteractiveText }]}> 
+                                        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('notifications.today')}</Text>
+                                    </View>
+                                    {groupedNotifications.today.filter(n => !!n.read).map((notification) => (
+                                        <TouchableOpacity
+                                            key={notification.id}
+                                            style={[styles.notificationCard, { backgroundColor: colors.contextBackground, opacity: 0.7 }]}
+                                            onPress={() => setSelectedNotification(notification)}
+                                        >
+                                            <View style={styles.notificationContent}>
+                                                <View style={[styles.avatar, { backgroundColor: colors.lightNonInteractiveText }]}> 
+                                                    <Text style={styles.avatarText}>
+                                                        {notification.avatar}
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.notificationText}>
+                                                    <Text style={[styles.notificationTitle, { color: colors.lightDarkText }]}> 
+                                                        {notification.title}
+                                                    </Text>
+                                                    {notification.subtitle && (
+                                                        <Text style={[styles.notificationSubtitle, { color: colors.lightNonInteractiveText }]}> 
+                                                            {notification.subtitle}
+                                                        </Text>
+                                                    )}
+                                                    {notification.points && (
+                                                        <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}> 
+                                                            Mottok {notification.points} poeng
+                                                        </Text>
+                                                    )}
+                                                    <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}> 
+                                                        {getRelativeTime(notification.timestamp)}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+                                </>
+                            )}
+
                             {/* This week's read notifications */}
                             {groupedNotifications.thisWeek.filter(n => !!n.read).length > 0 && (
                                 <>
