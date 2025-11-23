@@ -17,11 +17,10 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useSegments } from 'expo-router';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 const styles = StyleSheet.create({
@@ -41,13 +40,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: '600',
-    },
-    input: {
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        fontSize: 14,
-        marginBottom: 12,
     },
     button: {
         borderRadius: 8,
@@ -69,32 +61,34 @@ const styles = StyleSheet.create({
 });
 
 export default function TestUserLoader() {
-    const { loadSpecificUser, userData, resetToAuthUser } = useUser();
+    const { loadSpecificUser, resetToAuthUser } = useUser();
     const { colors } = useTheme();
     const { t } = useTranslation('app');
-    const [userId, setUserId] = useState('');
     const [loading, setLoading] = useState(false);
-    const segments = useSegments();
 
-    // Clear input if logged out or on onboarding
-    useEffect(() => {
-        // If user logs out or route is onboarding, clear
-        const isOnboarding = segments.some(seg => typeof seg === 'string' && seg.includes('onboarding'));
-        if (!userData || isOnboarding) {
-            setUserId('');
-        }
-    }, [userData, segments]);
-
-    const handleLoadUser = async () => {
-        if (!userId.trim()) {
-            Alert.alert(t('alerts.errorTitle'), t('profile.testUserLoader.enterId'));
-            return;
-        }
-
+    // Remove userId state and input, always load Emil's user
+    const handleLoadAdminUser = async () => {
+        const adminUserId = 'mRExgH1pI1e6TpGkj76Cn7Me9od2';
+        
         setLoading(true);
         try {
-            await loadSpecificUser(userId.trim());
-            Alert.alert(t('alerts.successTitle'), t('profile.testUserLoader.loaded', { userId: userId.trim() }));
+            await loadSpecificUser(adminUserId);
+            Alert.alert(t('alerts.successTitle'), 'Loaded admin user: ' + adminUserId);
+        } catch (error) {
+            const errMsg = error && typeof error === 'object' && 'message' in error ? (error as any).message : String(error);
+            Alert.alert(t('alerts.errorTitle'), t('profile.testUserLoader.failed', { error: errMsg }));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 🧪 TEST FUNCTION: Load regular test user
+    const handleLoadRegularUser = async () => {
+        const regularUserId = 'test_lars_1762445448147_hqxoc67vl';
+        setLoading(true);
+        try {
+            await loadSpecificUser(regularUserId);
+            Alert.alert(t('alerts.successTitle'), 'Loaded regular user: ' + regularUserId);
         } catch (error) {
             const errMsg = error && typeof error === 'object' && 'message' in error ? (error as any).message : String(error);
             Alert.alert(t('alerts.errorTitle'), t('profile.testUserLoader.failed', { error: errMsg }));
@@ -125,35 +119,34 @@ export default function TestUserLoader() {
                 >
                     <Text style={[styles.buttonText, { color: colors.tint }]}>{t('profile.testUserLoader.reset')}</Text>
                 </TouchableOpacity>
-                <TextInput
-                    style={[styles.input, { 
-                        backgroundColor: colors.background,
-                        borderColor: colors.tint,
-                        color: colors.text,
-                    }]}
-                    placeholder={t('profile.testUserLoader.placeholder')}
-                    placeholderTextColor={colors.lightDarkText}
-                    value={userId}
-                    onChangeText={setUserId}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    keyboardType="default"
-                />
                 <TouchableOpacity 
                     style={[
                         styles.button,
                         { backgroundColor: colors.tint },
                         loading && styles.buttonDisabled
                     ]}
-                    onPress={handleLoadUser}
+                    onPress={handleLoadAdminUser}
                     disabled={loading}
                 >
                     <Text style={[styles.buttonText, { color: colors.darkText }]}> 
-                        {loading ? t('profile.testUserLoader.loading') : t('profile.testUserLoader.load')}
+                        {loading ? t('profile.testUserLoader.loading') : 'Load Admin User'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[
+                        styles.button,
+                        { backgroundColor: colors.tint, marginTop: 12 },
+                        loading && styles.buttonDisabled
+                    ]}
+                    onPress={handleLoadRegularUser}
+                    disabled={loading}
+                >
+                    <Text style={[styles.buttonText, { color: colors.darkText }]}> 
+                        {loading ? t('profile.testUserLoader.loading') : 'Load Regular User'}
                     </Text>
                 </TouchableOpacity>
                 <Text style={[styles.hint, { color: colors.lightDarkText }]}> 
-                    {t('profile.testUserLoader.hint')}
+                    Loads admin (mRExgH1pI1e6TpGkj76Cn7Me9od2) or regular (test_lars_1762445448147_hqxoc67vl) user for testing
                 </Text>
             </View>
         </KeyboardAvoidingView>

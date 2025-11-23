@@ -1,7 +1,9 @@
+import FullScreenLoader from "@/components/FullScreenLoader";
 import Calendar from "@/components/ui/Calendar";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import { getHouseholdMembers } from "@/services/householdService";
+import { createNotification } from "@/services/notificationService";
 import { createTask } from "@/services/taskService";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from "expo-image";
@@ -424,11 +426,7 @@ export default function AddTask() {
                         {t('addTask.assignTitle')}
                     </Text>
                     {loadingMembers ? (
-                        <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
-                            <Text style={[styles.loadingText, { color: colors.text }]}>
-                                {t('addTask.loadingMembers')}
-                            </Text>
-                        </View>
+                        <FullScreenLoader text={t('addTask.loadingMembers')} />
                     ) : householdMembers.length === 0 ? (
                         <View style={[styles.personScrollView, { backgroundColor: colors.contextBackground }]}>
                             <Text style={[styles.loadingText, { color: colors.text }]}>
@@ -576,6 +574,22 @@ export default function AddTask() {
                                 });
 
                                 if (taskId) {
+                                    // Create notification for assigned user
+                                    if (selectedPerson && userData) {
+                                        await createNotification({
+                                            title: `${userData.username} tildelte deg en oppgave:`,
+                                            subtitle: title.trim(),
+                                            message: description.trim() || '',
+                                            timestamp: new Date(),
+                                            read: false,
+                                            type: 'task_assigned',
+                                            avatar: userData.username?.[0]?.toUpperCase() || '',
+                                            points: parseInt(points) || 10,
+                                            householdId: householdId,
+                                            userId: selectedPerson,
+                                            taskId: taskId,
+                                        });
+                                    }
                                     Alert.alert(
                                         t('addTask.successTitle'),
                                         t('addTask.successMessage'),

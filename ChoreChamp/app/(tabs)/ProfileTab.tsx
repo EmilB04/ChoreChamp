@@ -3,6 +3,7 @@ import EditProfileModal from '@/components/profile/EditProfileModal';
 import MyHouseholdsScreen from '@/components/profile/MyHouseholdsScreen';
 import TestUserLoader from '@/components/TestUserLoader';
 import UserLoadingState from '@/components/UserLoadingState';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import {
@@ -30,9 +31,10 @@ import commonStyles from "../commonStyles";
 
 //TODO: Implement log out functionality
 
-export default function Profile() {
+export default function ProfileTab() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();
+    const { logOut } = useAuth();
     const { t } = useTranslation('app');
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [showMyAccount, setShowMyAccount] = useState(false);
@@ -178,9 +180,14 @@ export default function Profile() {
                     icon="log-out"
                     title={t('profile.logout.title')}
                     description={t('profile.logout.description')}
-                    onPress={() => {
-                        // Navigate to WelcomeScreen
-                        router.push('/WelcomeScreen');
+                    onPress={async () => {
+                        try {
+                            await logOut();
+                            router.replace('/(onboarding)/LanguageSelection');
+                        } catch (e) {
+                            alert('Failed to log out.');
+                            console.error('Logout error:', e);
+                        }
                     }}
                 />
 

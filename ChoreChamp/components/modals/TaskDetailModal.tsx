@@ -1,4 +1,6 @@
 import { useTheme } from "@/contexts/ThemeContext";
+import { useUser } from "@/contexts/UserContext";
+import { deleteTask } from "@/services/taskService";
 import type { Task } from "@/types/task";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -28,13 +30,17 @@ interface TaskDetailModalProps {
   actionButtons?: ActionButton[];
 }
 
-export default function TaskDetailModal({
-  visible,
-  task,
-  onClose,
-  actionButtons,
-}: TaskDetailModalProps) {
+function TaskDetailModal(props: TaskDetailModalProps) {
+  const { visible, task, onClose, actionButtons } = props;
   const { colors } = useTheme();
+  const { userData } = useUser();
+  const isAdmin = userData?.role?.admin;
+
+  const handleDelete = async () => {
+    if (!task?.firebaseId) return;
+    const ok = await deleteTask(task.firebaseId.toString());
+    if (ok) onClose();
+  };
 
   if (!task) return null;
 
@@ -197,7 +203,17 @@ export default function TaskDetailModal({
                   </>
                 )}
               </View>
-            </View>
+            {/* Admin Delete Button */}
+            {isAdmin && (
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: colors.statusFailedBackground, marginTop: 16 }]}
+                onPress={handleDelete}
+              >
+                <Ionicons name="trash" size={20} color={colors.statusFailedText} />
+                <Text style={[styles.semiboldText, styles.actionButtonText, { color: colors.statusFailedText }]}>Slett oppgave</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
             {/* Task Details */}
             <View
@@ -583,3 +599,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export default TaskDetailModal;

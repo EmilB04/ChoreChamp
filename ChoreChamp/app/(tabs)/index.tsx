@@ -1,3 +1,4 @@
+import FullScreenLoader from "@/components/FullScreenLoader";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import {
@@ -5,8 +6,10 @@ import {
   isDicebearAvatar,
   parseDicebearUri,
 } from "@/lib/avatarUtils";
+import { getWeeklyLeaderboard } from "@/services/leaderboardService";
 import { getTasksForUser, markTaskAsComplete, markTaskAsIncomplete, rejectTask, resetVerification, verifyTask } from "@/services/taskService";
 import type { Task } from "@/types/task";
+import { getCurrentWeek } from "@/utils/weekUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImagePicker from 'expo-image-picker';
@@ -27,8 +30,6 @@ import WelcomeGreeting from "../../components/index/WelcomeGreeting";
 import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import commonStyles from "../commonStyles";
-import { getWeeklyLeaderboard } from "@/services/leaderboardService";
-import { getCurrentWeek } from "@/utils/weekUtils";
 
 // TODO:
 // 1. Fetch user data dynamically
@@ -432,6 +433,11 @@ export default function Dashboard() {
   // Show loading state while user data is being fetched
   if (!userData) {
     return <UserLoadingState pageName="Dashboard" />;
+  }
+
+  // Full-screen loading overlay if tasks or leaderboard are loading
+  if (loadingTasks || loadingLeaderboard) {
+    return <FullScreenLoader text="Laster inn..." />;
   }
 
   // ------------------------------------------------------------------ //

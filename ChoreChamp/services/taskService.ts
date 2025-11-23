@@ -1,6 +1,21 @@
 import { db } from '@/lib/firebase';
-import { addDoc, collection, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from 'firebase/firestore';
 import { getWeekInfo } from '@/utils/weekUtils';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from 'firebase/firestore';
+/**
+ * Delete a task by its document ID
+ * @param taskId - The task's document ID
+ */
+export async function deleteTask(taskId: string): Promise<boolean> {
+    if (!taskId) return false;
+    try {
+        const taskRef = doc(db, 'tasks', taskId);
+        await deleteDoc(taskRef);
+        return true;
+    } catch (error) {
+        console.error('Error deleting task:', error);
+        return false;
+    }
+}
 
 export interface TaskData {
     id: string;

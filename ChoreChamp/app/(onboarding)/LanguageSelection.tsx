@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useEntranceAnimation, useScaleAnimation, useStaggeredAnimation } from '@/hooks/useEntranceAnimation';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,7 +28,15 @@ const CONTINUE_TEXTS: Record<string, string> = {
 export default function LanguageSelection() {
     const router = useRouter();
     const { colors } = useTheme();
+    const { user } = useAuth();
     const [selected, setSelected] = useState<string | null>(null);
+
+    // If already logged in, redirect to dashboard
+    React.useEffect(() => {
+        if (user) {
+            router.replace('/(tabs)');
+        }
+    }, [user, router]);
 
     const { fadeAnim } = useEntranceAnimation();
     const logoScaleAnim = useScaleAnimation(100);
