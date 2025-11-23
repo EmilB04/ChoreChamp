@@ -7,6 +7,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 import 'react-native-reanimated';
 import { initI18n } from './i18n/i18n';
 
@@ -43,19 +44,35 @@ function RootLayoutInner() {
     }
   }, [appIsReady]);
 
+  // Debug log for auth state
+  useEffect(() => {
+    console.log('[RootLayoutInner] appIsReady:', appIsReady, 'loading:', loading, 'user:', user);
+  }, [appIsReady, loading, user]);
+
   if (!appIsReady || loading) {
-    return null;
+    // Show a loading spinner while waiting for auth state
+    return (
+      <UserProvider>
+        <ThemeProvider>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+            <Text style={{ fontSize: 18, marginBottom: 12 }}>Loading...</Text>
+          </View>
+        </ThemeProvider>
+      </UserProvider>
+    );
   }
 
   // If not logged in, show onboarding
   if (!user) {
     return (
-      <ThemeProvider>
-        <Stack>
-          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <UserProvider>
+        <ThemeProvider>
+          <Stack>
+            <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </UserProvider>
     );
   }
 

@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
@@ -16,14 +17,19 @@ Onboarding Screen
 const OnboardingScreen = () => {
     const router = useRouter();
     const { colors } = useTheme();
+    const { user } = useAuth();
     const translateY = useRef(new Animated.Value(0)).current;
     const opacity = useRef(new Animated.Value(1)).current;
 
     useEffect(() => {
+        // If already logged in, redirect to dashboard immediately
+        if (user) {
+            router.replace('/(tabs)');
+            return;
+        }
+
         const INITIAL_DELAY = 1500; // Delay before starting the animation in MS
-
         const ANIM_DURATION = 3000; // Duration of the animation in MS
-
         let navTimer: ReturnType<typeof setTimeout> | undefined;
 
         // Start the animation after delay 
@@ -40,10 +46,10 @@ const OnboardingScreen = () => {
                 useNativeDriver: USE_NATIVE_DRIVER,
             }).start();
 
-                // Navigate to the first onboarding step (language selection) after animation
-                navTimer = setTimeout(() => {
-                    router.replace('/(onboarding)/LanguageSelection');
-                }, ANIM_DURATION + 300);
+            // Navigate to the first onboarding step (language selection) after animation
+            navTimer = setTimeout(() => {
+                router.replace('/(onboarding)/LanguageSelection');
+            }, ANIM_DURATION + 300);
         }, INITIAL_DELAY);
 
         return () => {
@@ -52,7 +58,7 @@ const OnboardingScreen = () => {
             translateY.stopAnimation();
             opacity.stopAnimation();
         };
-    }, [router, translateY, opacity]);
+    }, [router, translateY, opacity, user]);
 
     return (
         <View style={[styles.container, { backgroundColor: colors.tint }]}>
