@@ -17,9 +17,8 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useSegments } from 'expo-router';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -62,20 +61,10 @@ const styles = StyleSheet.create({
 });
 
 export default function TestUserLoader() {
-    const { loadSpecificUser, userData, resetToAuthUser } = useUser();
+    const { loadSpecificUser, resetToAuthUser } = useUser();
     const { colors } = useTheme();
     const { t } = useTranslation('app');
     const [loading, setLoading] = useState(false);
-    const segments = useSegments();
-
-    // Clear input if logged out or on onboarding
-    useEffect(() => {
-        // If user logs out or route is onboarding, clear
-        const isOnboarding = segments.some(seg => typeof seg === 'string' && seg.includes('onboarding'));
-        if (!userData || isOnboarding) {
-            setUserId('');
-        }
-    }, [userData, segments]);
 
     // Remove userId state and input, always load Emil's user
     const handleLoadAdminUser = async () => {
