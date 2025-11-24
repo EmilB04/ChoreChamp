@@ -5,6 +5,7 @@ import type { Task } from "@/types/task";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Modal,
   ScrollView,
@@ -35,6 +36,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
   const { colors } = useTheme();
   const { userData } = useUser();
   const isAdmin = userData?.role?.admin;
+  const { t } = useTranslation('app');
 
   const handleDelete = async () => {
     if (!task?.firebaseId) return;
@@ -63,7 +65,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
           {/* Header */}
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Oppgavedetaljer
+              {t('profile.taskDetails.title')}
             </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={28} color={colors.text} />
@@ -94,14 +96,14 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                       size={16}
                       color={colors.statusSuccessText}
                     />
-                    <Text
+                      <Text
                       style={[
                         styles.semiboldText,
                         styles.statusText,
                         { color: colors.statusSuccessText },
                       ]}
                     >
-                      Fullført
+                        {t('profile.taskDetails.status.completed')}
                     </Text>
                   </View>
                 ) : (
@@ -116,14 +118,14 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                       size={16}
                       color={colors.statusFailedText}
                     />
-                    <Text
+                      <Text
                       style={[
                         styles.semiboldText,
                         styles.statusText,
                         { color: colors.statusFailedText },
                       ]}
                     >
-                      Ikke fullført
+                      {t('profile.taskDetails.status.notCompleted')}
                     </Text>
                   </View>
                 )}
@@ -150,7 +152,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                             { color: '#fff' },
                           ]}
                         >
-                          Godkjent
+                          {t('profile.taskDetails.status.verified')}
                         </Text>
                       </View>
                     )}
@@ -173,7 +175,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                             { color: '#fff' },
                           ]}
                         >
-                          Venter på godkjenning
+                          {t('profile.taskDetails.status.pending')}
                         </Text>
                       </View>
                     )}
@@ -196,7 +198,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                             { color: '#fff' },
                           ]}
                         >
-                          Avvist
+                          {t('profile.taskDetails.status.rejected')}
                         </Text>
                       </View>
                     )}
@@ -210,7 +212,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                 onPress={handleDelete}
               >
                 <Ionicons name="trash" size={20} color={colors.statusFailedText} />
-                <Text style={[styles.semiboldText, styles.actionButtonText, { color: colors.statusFailedText }]}>Slett oppgave</Text>
+                <Text style={[styles.semiboldText, styles.actionButtonText, { color: colors.statusFailedText }]}>{t('profile.taskDetails.delete')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -228,14 +230,14 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                   <Ionicons name="play-outline" size={24} color={colors.tint} />
                 </View>
                 <View style={styles.detailContent}>
-                  <Text
+                    <Text
                     style={[
                       styles.labelBase,
                       styles.detailLabel,
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Starttid
+                    {t('profile.taskDetails.startTime')}
                   </Text>
                   <Text
                     style={[
@@ -257,14 +259,14 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                   <Ionicons name="stop-outline" size={24} color={colors.tint} />
                 </View>
                 <View style={styles.detailContent}>
-                  <Text
+                    <Text
                     style={[
                       styles.labelBase,
                       styles.detailLabel,
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Sluttid
+                    {t('profile.taskDetails.endTime')}
                   </Text>
                   <Text
                     style={[
@@ -290,14 +292,14 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                   />
                 </View>
                 <View style={styles.detailContent}>
-                  <Text
+                    <Text
                     style={[
                       styles.labelBase,
                       styles.detailLabel,
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Varighet
+                    {t('profile.taskDetails.duration')}
                   </Text>
                   <Text
                     style={[
@@ -319,14 +321,14 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                   <Image source={task.assignedFromAvatar} style={styles.avatar} />
                 </View>
                 <View style={styles.detailContent}>
-                  <Text
+                    <Text
                     style={[
                       styles.labelBase,
                       styles.detailLabel,
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Tildelt av
+                    {t('profile.taskDetails.assignedFrom')}
                   </Text>
                   <Text
                     style={[
@@ -346,14 +348,14 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                   <Image source={task.avatar} style={styles.avatar} />
                 </View>
                 <View style={styles.detailContent}>
-                  <Text
+                    <Text
                     style={[
                       styles.labelBase,
                       styles.detailLabel,
                       { color: colors.lightDarkText },
                     ]}
                   >
-                    Tildelt til
+                    {t('profile.taskDetails.assignedTo')}
                   </Text>
                   <Text
                     style={[
@@ -366,6 +368,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                   </Text>
                 </View>
               </View>
+
             </View>
 
             {/* Description */}
@@ -377,10 +380,10 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                   { color: colors.lightDarkText },
                 ]}
               >
-                Beskrivelse
+                {t('profile.taskDetails.description')}
               </Text>
               <Text style={[styles.description, { color: colors.text }]}>
-                {task.description || "Ingen beskrivelse."}
+                {task.description || t('profile.taskDetails.descriptionNone')}
               </Text>
             </View>
 
@@ -394,7 +397,7 @@ function TaskDetailModal(props: TaskDetailModalProps) {
                     { color: colors.lightDarkText },
                   ]}
                 >
-                  Bildebevis
+                  {t('profile.taskDetails.imageEvidence')}
                 </Text>
                 <Image
                   source={{ uri: task.imgEvidence }}

@@ -4,11 +4,23 @@
     "loadingTasks": "Laster oppgaver...",
     "noTasks": "Ingen oppgaver for denne dagen 🎉"
   },
+  "tabs": {
+    "home": "Hjem",
+    "history": "Historikk",
+    "addTask": "Opprett oppgave",
+    "notifications": "Varsler",
+    "profile": "Profil"
+  },
   "leaderboard": {
     "title": "Ledertavle:",
     "loading": "Laster ledertavle...",
     "noMembers": "Ingen medlemmer i husstanden",
-    "needMore": "Trenger minst 3 medlemmer for ledertavle"
+    "needMore": "Trenger minst 3 medlemmer for ledertavle",
+    "filterTitle": "Velg tidsperiode",
+    "thisWeekLabel": "Denne uka",
+    "lastWeekLabel": "Forrige uke",
+    "thisMonthLabel": "Denne måneden",
+    "thisYearLabel": "Dette året"
   },
   "actions": {
     "undo": "Angre",
@@ -75,6 +87,18 @@
       "completed": "Fullført",
       "notCompleted": "Ikke fullført"
     }
+      ,
+      "loadingSummaries": "Laster historikk...",
+      "noHistoryFound": "Ingen historikk funnet.",
+      "weekShort": "Uke",
+      "summaryTitle": "Oppsummering - Uke {{week}}",
+      "summaryHeader": "Uke {{week}} - Oppsummering",
+      "completedCount": "Antall oppgaver fullført: {{completed}} / {{total}}",
+      "tasksCompletedLabel": "Oppgaver fullført",
+      "topContributorTitle": "Mest poeng",
+      "tasksThisWeek": "Alle oppgaver denne uken",
+      "assignedToLabel": "Tildelt til",
+      "createdByLabel": "Opprettet av"
   },
   "points": {
     "short": "poeng"
@@ -318,6 +342,26 @@
       "gallery": "Galleri",
       "camera": "Kamera",
       "avatar": "Avatar"
+    }
+    ,
+    "taskDetails": {
+      "title": "Oppgavedetaljer",
+      "status": {
+        "completed": "Fullført",
+        "notCompleted": "Ikke fullført",
+        "verified": "Godkjent",
+        "pending": "Venter på godkjenning",
+        "rejected": "Avvist"
+      },
+      "delete": "Slett oppgave",
+      "startTime": "Starttid",
+      "endTime": "Sluttid",
+      "duration": "Varighet",
+      "assignedFrom": "Tildelt av",
+      "assignedTo": "Tildelt til",
+      "description": "Beskrivelse",
+      "descriptionNone": "Ingen beskrivelse.",
+      "imageEvidence": "Bildebevis"
     }
   }
 }

@@ -236,8 +236,8 @@ export default function Notifications() {
                                                     <Text style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
                                                         {notification.subtitle}
                                                     </Text>
-                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}>
-                                                        {notification.points} poeng
+                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}> 
+                                                        {notification.points} {t('points.short')}
                                                     </Text>
                                                     <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
@@ -276,8 +276,8 @@ export default function Notifications() {
                                                     <Text style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
                                                         {notification.subtitle}
                                                     </Text>
-                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}>
-                                                        {notification.points}
+                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}> 
+                                                        {notification.points} {t('points.short')}
                                                     </Text>
                                                     <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
@@ -316,8 +316,8 @@ export default function Notifications() {
                                                     <Text style={[styles.notificationSubtitle, { color: colors.lightDarkText }]}>
                                                         {notification.subtitle}
                                                     </Text>
-                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}>
-                                                        {notification.points}
+                                                    <Text style={[styles.notificationPoints, { color: colors.tint }]}> 
+                                                        {notification.points} {t('points.short')}
                                                     </Text>
                                                     <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}>
                                                         {getRelativeTime(notification.timestamp)}
@@ -381,7 +381,7 @@ export default function Notifications() {
                                                     )}
                                                     {notification.points && (
                                                         <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}> 
-                                                            Mottok {notification.points} poeng
+                                                            {t('notifications.receivedPoints', { count: notification.points })}
                                                         </Text>
                                                     )}
                                                     <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}> 
@@ -423,7 +423,7 @@ export default function Notifications() {
                                                     )}
                                                     {notification.points && (
                                                         <Text style={[styles.notificationPoints, { color: colors.lightNonInteractiveText }]}> 
-                                                            Mottok {notification.points} poeng
+                                                            {t('notifications.receivedPoints', { count: notification.points })}
                                                         </Text>
                                                     )}
                                                     <Text style={[styles.notificationTime, { color: colors.lightNonInteractiveText }]}> 

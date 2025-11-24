@@ -171,7 +171,7 @@ export default function Dashboard() {
             time: `${hours}:${minutes}`,
             assignedTo: userData.username, // Using current user's name
             avatar: userData.imageUri ? { uri: userData.imageUri } : require("@/assets/images/icon.png"),
-            assignedFrom: task.createdByName || 'Unknown',
+            assignedFrom: task.createdByName || t('profile.notSpecified'),
             assignedFromAvatar: task.createdByAvatar ? { uri: task.createdByAvatar } : require("@/assets/images/icon.png"),
             duration: Math.round((timeEnd.getTime() - timeStart.getTime()) / 60000), // Duration in minutes
             finished: task.done,
@@ -420,7 +420,7 @@ export default function Dashboard() {
               time: `${hours}:${minutes}`,
               assignedTo: userData.username,
               avatar: userData.imageUri ? { uri: userData.imageUri } : require("@/assets/images/icon.png"),
-              assignedFrom: task.createdByName || 'Unknown',
+              assignedFrom: task.createdByName || t('profile.notSpecified'),
               assignedFromAvatar: task.createdByAvatar ? { uri: task.createdByAvatar } : require("@/assets/images/icon.png"),
               duration: Math.round((timeEnd.getTime() - timeStart.getTime()) / 60000),
               finished: task.done,
@@ -458,7 +458,7 @@ export default function Dashboard() {
 
   // Full-screen loading overlay if tasks or leaderboard are loading
   if (loadingTasks || loadingLeaderboard) {
-    return <FullScreenLoader text="Laster inn..." />;
+    return <FullScreenLoader text={t('dashboard.loadingTasks')} />;
   }
 
   // ------------------------------------------------------------------ //
@@ -841,10 +841,10 @@ export default function Dashboard() {
               {t('leaderboard.title')}
             </Text>
               <Text style={[styles.weekIndicator, { color: colors.lightText }]}>
-                {leaderboardFilter === 'thisWeek' && `Uke ${weekNumber}, ${year}`}
-                {leaderboardFilter === 'lastWeek' && 'Forrige uke'}
-                {leaderboardFilter === 'thisMonth' && 'Denne måneden'}
-                {leaderboardFilter === 'thisYear' && `${year}`}
+                {leaderboardFilter === 'thisWeek' && `${t('leaderboard.thisWeekLabel')} ${weekNumber}, ${year}`}
+                {leaderboardFilter === 'lastWeek' && t('leaderboard.lastWeekLabel')}
+                {leaderboardFilter === 'thisMonth' && t('leaderboard.thisMonthLabel')}
+                {leaderboardFilter === 'thisYear' && `${t('leaderboard.thisYearLabel', { year })}`}
               </Text>
             </View>
             <TouchableOpacity 
@@ -1163,7 +1163,7 @@ export default function Dashboard() {
         >
           <View style={[styles.filterModalContent, { backgroundColor: colors.background }]}>
             <Text style={[styles.filterModalTitle, { color: colors.text }]}>
-              Velg tidsperiode
+              {t('leaderboard.filterTitle')}
             </Text>
             
             <TouchableOpacity
@@ -1182,7 +1182,7 @@ export default function Dashboard() {
                 color={leaderboardFilter === 'thisWeek' ? colors.tint : colors.lightText} 
               />
               <Text style={[styles.filterOptionText, { color: colors.text }]}>
-                Denne uka
+                {t('leaderboard.thisWeekLabel')}
               </Text>
             </TouchableOpacity>
 
@@ -1202,7 +1202,7 @@ export default function Dashboard() {
                 color={leaderboardFilter === 'lastWeek' ? colors.tint : colors.lightText} 
               />
               <Text style={[styles.filterOptionText, { color: colors.text }]}>
-                Forrige uke
+                {t('leaderboard.lastWeekLabel')}
               </Text>
             </TouchableOpacity>
 
@@ -1222,7 +1222,7 @@ export default function Dashboard() {
                 color={leaderboardFilter === 'thisMonth' ? colors.tint : colors.lightText} 
               />
               <Text style={[styles.filterOptionText, { color: colors.text }]}>
-                Denne måneden
+                {t('leaderboard.thisMonthLabel')}
               </Text>
             </TouchableOpacity>
 
@@ -1242,7 +1242,7 @@ export default function Dashboard() {
                 color={leaderboardFilter === 'thisYear' ? colors.tint : colors.lightText} 
               />
               <Text style={[styles.filterOptionText, { color: colors.text }]}>
-                Dette året
+                {t('leaderboard.thisYearLabel')}
               </Text>
             </TouchableOpacity>
           </View>

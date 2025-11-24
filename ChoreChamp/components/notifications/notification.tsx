@@ -118,10 +118,9 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                                 {notification.subtitle ? `${notification.subtitle}, ` : ''}{notification.message ? notification.message.toLowerCase() : ''}
                             </Text>
                         </View>
-                        {/* Frist (Deadline) row, show task endTime if available, else fallback to notification endTime/timestamp */}
-                        {/* Frist (Deadline) row, always use task endTime if available, else fallback to notification timestamp */}
+                        {/* Deadline row - use i18n for the label */}
                         <View style={styles.infoRow}> 
-                            <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>Frist</Text>
+                            <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>{t('notifications.timeLabel')}</Text>
                             <Text style={[styles.infoValue, { color: colors.text }]}> 
                                 {task?.timeEnd
                                     ? formatTimestamp(task.timeEnd?.toDate ? task.timeEnd.toDate() : task.timeEnd)
@@ -131,7 +130,7 @@ export default function Notification({ notification, onBack, onToggleReadStatus,
                         {typeof notification.points === 'number' && !isNaN(notification.points) && (
                             <View style={styles.infoRow}> 
                                 <Text style={[styles.infoLabel, { color: colors.lightDarkText }]}>{t('notifications.pointsLabel')}</Text>
-                                <Text style={[styles.infoValue, { color: colors.text }]}>{notification.points}</Text>
+                                <Text style={[styles.infoValue, { color: colors.text }]}>{notification.points} {t('points.short')}</Text>
                             </View>
                         )}
                         <View style={styles.infoRow}> 

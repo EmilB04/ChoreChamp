@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from "react-native";
 
 import { HapticTab } from "@/components/haptic-tab";
@@ -33,6 +34,7 @@ function FloatingTabButton(props: any) {
 
 export default function TabLayout() {
   const { colors } = useTheme();
+  const { t } = useTranslation('app');
 
   return (
     <Tabs
@@ -53,7 +55,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Hjem",
+          title: t('tabs.home'),
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={28}
@@ -66,7 +68,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="HistoryTab"
         options={{
-          title: "Historikk",
+          title: t('tabs.history'),
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={28}
@@ -79,7 +81,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="AddTaskTab"
         options={{
-          title: "Add Task",
+          title: t('tabs.addTask'),
           tabBarButton: FloatingTabButton,
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
@@ -94,7 +96,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="NotificationTab"
         options={{
-          title: "Varsel",
+          title: t('tabs.notifications'),
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={28}
@@ -107,7 +109,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ProfileTab"
         options={{
-          title: "Profil",
+          title: t('tabs.profile'),
           tabBarIcon: ({ color, focused }) => (
             <IconSymbol
               size={28}

@@ -4,11 +4,23 @@
     "loadingTasks": "Lade Aufgaben...",
     "noTasks": "Keine Aufgaben für diesen Tag 🎉"
   },
+  "tabs": {
+    "home": "Start",
+    "history": "Verlauf",
+    "addTask": "Aufgabe hinzufügen",
+    "notifications": "Benachrichtigungen",
+    "profile": "Profil"
+  },
   "leaderboard": {
     "title": "Bestenliste:",
     "loading": "Bestenliste wird geladen...",
     "noMembers": "Keine Haushaltsmitglieder",
-    "needMore": "Mindestens 3 Mitglieder für Bestenliste erforderlich"
+    "needMore": "Mindestens 3 Mitglieder für Bestenliste erforderlich",
+    "filterTitle": "Zeitraum wählen",
+    "thisWeekLabel": "Diese Woche",
+    "lastWeekLabel": "Letzte Woche",
+    "thisMonthLabel": "Diesen Monat",
+    "thisYearLabel": "Dieses Jahr"
   },
   "actions": {
     "undo": "Rückgängig",
@@ -75,6 +87,18 @@
         "completed": "Erledigt",
         "notCompleted": "Nicht erledigt"
       }
+      ,
+      "loadingSummaries": "Verlauf wird geladen...",
+      "noHistoryFound": "Kein Verlauf gefunden.",
+      "weekShort": "Woche",
+      "summaryTitle": "Zusammenfassung - Woche {{week}}",
+      "summaryHeader": "Woche {{week}} - Zusammenfassung",
+      "completedCount": "Erledigte Aufgaben: {{completed}} / {{total}}",
+      "tasksCompletedLabel": "Erledigte Aufgaben",
+      "topContributorTitle": "Top-Beitragender",
+      "tasksThisWeek": "Alle Aufgaben dieser Woche",
+      "assignedToLabel": "Zugewiesen an",
+      "createdByLabel": "Erstellt von"
     },
     "addTask": {
       "title": "Neues\nAufgabe erstellen",
@@ -319,6 +343,26 @@
       "gallery": "Galerie",
       "camera": "Kamera",
       "avatar": "Avatar"
+    }
+    ,
+    "taskDetails": {
+      "title": "Aufgabendetails",
+      "status": {
+        "completed": "Erledigt",
+        "notCompleted": "Nicht erledigt",
+        "verified": "Bestätigt",
+        "pending": "Wartet auf Genehmigung",
+        "rejected": "Abgelehnt"
+      },
+      "delete": "Aufgabe löschen",
+      "startTime": "Startzeit",
+      "endTime": "Endzeit",
+      "duration": "Dauer",
+      "assignedFrom": "Zugewiesen von",
+      "assignedTo": "Zugewiesen an",
+      "description": "Beschreibung",
+      "descriptionNone": "Keine Beschreibung.",
+      "imageEvidence": "Bildnachweis"
     }
   }
 }

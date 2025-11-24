@@ -2,6 +2,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { WeeklySummary } from "@/services/taskService";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Modal,
   ScrollView,
@@ -23,6 +24,7 @@ export default function WeeklySummaryModal({
   summary,
 }: WeeklySummaryModalProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation('app');
 
   if (!summary) return null;
 
@@ -64,7 +66,7 @@ export default function WeeklySummaryModal({
           {/* Header */}
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
-              Uke {summary.weekNumber} - Oppsummering
+              {t('history.summaryHeader', { week: summary.weekNumber })}
             </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={28} color={colors.text} />
@@ -89,7 +91,7 @@ export default function WeeklySummaryModal({
                 ]}
               >
                 <Text style={[styles.statLabel, { color: colors.lightNonInteractiveText }]}>
-                  Oppgaver fullført
+                  {t('history.tasksCompletedLabel')}
                 </Text>
                 <Text style={[styles.statValue, { color: colors.text }]}>
                   {summary.completedTasks} / {summary.totalTasks}
@@ -114,7 +116,7 @@ export default function WeeklySummaryModal({
                       },
                     ]}
                   >
-                    {summary.allCompleted ? "Alle fullført" : "Ikke fullført"}
+                    {summary.allCompleted ? t('history.status.completed') : t('history.status.notCompleted')}
                   </Text>
                 </View>
               </View>
@@ -128,13 +130,13 @@ export default function WeeklySummaryModal({
                   ]}
                 >
                   <Text style={[styles.statLabel, { color: colors.lightNonInteractiveText }]}>
-                    Mest poeng
+                    {t('history.topContributorTitle')}
                   </Text>
                   <Text style={[styles.contributorName, { color: colors.text }]}>
                     {summary.topContributor.name}
                   </Text>
                   <Text style={[styles.contributorPoints, { color: colors.tint }]}>
-                    {summary.topContributor.points} poeng
+                    {summary.topContributor.points} {t('points.short')}
                   </Text>
                 </View>
               )}
@@ -143,8 +145,8 @@ export default function WeeklySummaryModal({
             {/* Task List */}
             <View style={styles.taskListContainer}>
               <Text style={[styles.taskListTitle, { color: colors.text }]}>
-                Alle oppgaver denne uken
-              </Text>
+                  {t('history.tasksThisWeek')}
+                </Text>
 
               {summary.tasks.map((task) => (
                 <View
@@ -201,13 +203,13 @@ export default function WeeklySummaryModal({
                     <View style={styles.infoRow}>
                       <Ionicons name="person-outline" size={14} color={colors.lightNonInteractiveText} />
                       <Text style={[styles.infoText, { color: colors.lightNonInteractiveText }]}>
-                        Tildelt til: {task.assignedToName || 'Ukjent'}
+                        {t('history.assignedToLabel')}: {task.assignedToName || t('profile.notSpecified')}
                       </Text>
                     </View>
                     <View style={styles.infoRow}>
                       <Ionicons name="create-outline" size={14} color={colors.lightNonInteractiveText} />
                       <Text style={[styles.infoText, { color: colors.lightNonInteractiveText }]}>
-                        Opprettet av: {task.createdByName || 'Ukjent'}
+                        {t('history.createdByLabel')}: {task.createdByName || t('profile.notSpecified')}
                       </Text>
                     </View>
                   </View>
@@ -219,7 +221,7 @@ export default function WeeklySummaryModal({
                         { color: colors.tint },
                       ]}
                     >
-                      {task.points} poeng
+                      {task.points} {t('points.short')}
                     </Text>
                   </View>
                 </View>

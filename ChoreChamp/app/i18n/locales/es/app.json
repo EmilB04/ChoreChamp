@@ -4,11 +4,23 @@
     "loadingTasks": "Cargando tareas...",
     "noTasks": "No hay tareas para este día 🎉"
   },
+  "tabs": {
+    "home": "Inicio",
+    "history": "Historial",
+    "addTask": "Crear tarea",
+    "notifications": "Notificaciones",
+    "profile": "Perfil"
+  },
   "leaderboard": {
     "title": "Tabla de clasificación:",
     "loading": "Cargando tabla...",
     "noMembers": "No hay miembros en el hogar",
-    "needMore": "Se necesitan al menos 3 miembros para la tabla"
+    "needMore": "Se necesitan al menos 3 miembros para la tabla",
+    "filterTitle": "Selecciona período",
+    "thisWeekLabel": "Esta semana",
+    "lastWeekLabel": "Semana anterior",
+    "thisMonthLabel": "Este mes",
+    "thisYearLabel": "Este año"
   },
   "actions": {
     "undo": "Deshacer",
@@ -75,6 +87,18 @@
       "completed": "Completada",
       "notCompleted": "No completada"
     }
+        ,
+        "loadingSummaries": "Cargando historial...",
+        "noHistoryFound": "No se encontró historial.",
+        "weekShort": "Semana",
+        "summaryTitle": "Resumen - Semana {{week}}",
+        "summaryHeader": "Semana {{week}} - Resumen",
+        "completedCount": "Tareas completadas: {{completed}} / {{total}}",
+        "tasksCompletedLabel": "Tareas completadas",
+        "topContributorTitle": "Más puntos",
+        "tasksThisWeek": "Todas las tareas de esta semana",
+        "assignedToLabel": "Asignado a",
+        "createdByLabel": "Creado por"
   },
   "addTask": {
     "title": "Crear nueva\ntarea",
@@ -320,5 +344,25 @@
         "camera": "Cámara",
         "avatar": "Avatar"
       }
+        ,
+        "taskDetails": {
+          "title": "Detalles de la tarea",
+          "status": {
+            "completed": "Completada",
+            "notCompleted": "No completada",
+            "verified": "Aprobada",
+            "pending": "En espera de aprobación",
+            "rejected": "Rechazada"
+          },
+          "delete": "Eliminar tarea",
+          "startTime": "Hora de inicio",
+          "endTime": "Hora de fin",
+          "duration": "Duración",
+          "assignedFrom": "Asignado por",
+          "assignedTo": "Asignado a",
+          "description": "Descripción",
+          "descriptionNone": "Sin descripción.",
+          "imageEvidence": "Evidencia de imagen"
+        }
     }
 }

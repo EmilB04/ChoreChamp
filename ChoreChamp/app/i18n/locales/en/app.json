@@ -4,6 +4,13 @@
     "loadingTasks": "Loading tasks...",
     "noTasks": "No tasks for this day 🎉"
   },
+  "tabs": {
+    "home": "Home",
+    "history": "History",
+    "addTask": "Add task",
+    "notifications": "Notifications",
+    "profile": "Profile"
+  },
   "greeting": {
     "morning": "Good morning",
     "forenoon": "Good morning",
@@ -52,6 +59,18 @@
       "completed": "Completed",
       "notCompleted": "Not completed"
     }
+    ,
+    "loadingSummaries": "Loading history...",
+    "noHistoryFound": "No history found.",
+    "weekShort": "Week",
+    "summaryTitle": "Summary - Week {{week}}",
+    "summaryHeader": "Week {{week}} - Summary",
+    "completedCount": "Completed tasks: {{completed}} / {{total}}",
+    "tasksCompletedLabel": "Tasks completed",
+    "topContributorTitle": "Top contributor",
+    "tasksThisWeek": "All tasks this week",
+    "assignedToLabel": "Assigned to",
+    "createdByLabel": "Created by"
   },
   "addTask": {
     "title": "Create new\ntask",
@@ -92,7 +111,12 @@
     "title": "Leaderboard:",
     "loading": "Loading leaderboard...",
     "noMembers": "No household members",
-    "needMore": "Need at least 3 members for leaderboard"
+    "needMore": "Need at least 3 members for leaderboard",
+    "filterTitle": "Select time period",
+    "thisWeekLabel": "This week",
+    "lastWeekLabel": "Last week",
+    "thisMonthLabel": "This month",
+    "thisYearLabel": "This year"
   },
   "actions": {
     "undo": "Undo",
@@ -187,6 +211,26 @@
       "gallery": "Gallery",
       "camera": "Camera",
       "avatar": "Avatar"
+    },
+
+    "taskDetails": {
+      "title": "Task details",
+      "status": {
+        "completed": "Completed",
+        "notCompleted": "Not completed",
+        "verified": "Verified",
+        "pending": "Pending approval",
+        "rejected": "Rejected"
+      },
+      "delete": "Delete task",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "duration": "Duration",
+      "assignedFrom": "Assigned by",
+      "assignedTo": "Assigned to",
+      "description": "Description",
+      "descriptionNone": "No description.",
+      "imageEvidence": "Image evidence"
     },
 
     "notSpecified": "Not specified",

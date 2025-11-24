@@ -200,7 +200,7 @@ export default function History() {
     // Apply search text filter if search is active
     if (searchText.trim() !== "") {
       const searchLower = searchText.toLowerCase().trim();
-      const status = summary.allCompleted ? "fullført" : "ikke fullført";
+      const status = (summary.allCompleted ? t('history.status.completed') : t('history.status.notCompleted')).toLowerCase();
       const matchesSearch = 
         summary.weekNumber.toString().includes(searchLower) ||
         status.includes(searchLower) ||
@@ -214,20 +214,20 @@ export default function History() {
     // If no filters selected, show all
     if (selectedFilters.length === 0) return true;
 
-    // Apply selected filters
+    // Apply selected filters (filter ids are used)
     return selectedFilters.every(filter => {
       switch (filter) {
-        case "Fullført":
+        case "completed":
           return summary.allCompleted;
-        case "Ikke fullført":
+        case "not_completed":
           return !summary.allCompleted;
-        case "Denne måneden":
+        case "this_month":
           return summary.startDate.getMonth() === getCurrentMonth();
-        case "Forrige måned":
+        case "prev_month":
           return summary.startDate.getMonth() === getPreviousMonth();
-        case "Høy aktivitet":
+        case "high_activity":
           return summary.totalTasks >= 8;
-        case "Lav aktivitet":
+        case "low_activity":
           return summary.totalTasks < 8;
         default:
           return true;
@@ -392,11 +392,11 @@ export default function History() {
 
       {/* History list */}
       {loadingSummaries ? (
-        <FullScreenLoader text="Laster historikk..." />
+        <FullScreenLoader text={t('history.loadingSummaries')} />
       ) : filteredHistoryData.length === 0 ? (
         <View style={styles.centerMessage}>
           <Text style={[styles.messageText, { color: colors.text }]}>
-            Ingen historikk funnet.
+            {t('history.noHistoryFound')}
           </Text>
         </View>
       ) : (
@@ -421,27 +421,27 @@ export default function History() {
               }}
             >
               <View style={[styles.weekBadge, { backgroundColor: colors.tint }]}>
-                <Text style={[styles.weekText, { color: colors.darkText }]}>
-                  Uke{"\n"}
+                <Text style={[styles.weekText, { color: colors.darkText }]}> 
+                  {t('history.weekShort')}{"\n"}
                   {summary.weekNumber}
                 </Text>
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={[styles.cardTitle, { color: colors.text }]}>
-                  Oppsummering - Uke {summary.weekNumber}
+                  {t('history.summaryTitle', { week: summary.weekNumber })}
                 </Text>
                 <View style={styles.statusContainer}>
-                  <Text style={[styles.cardSubtitle, { color: colors.text }]}>
-                    Alle oppgaver ble:{" "}
+                  <Text style={[styles.cardSubtitle, { color: colors.text }]}> 
+                    {t('history.allTasksWere')} {" "}
                   </Text>
                   <View style={[styles.statusText, { backgroundColor: summary.allCompleted ? colors.statusSuccessBackground : colors.statusFailedBackground }]}>
                     <Text style={[styles.statusTextInner, { color: summary.allCompleted ? colors.statusSuccessText : colors.statusFailedText }]}>
-                      {summary.allCompleted ? "Fullført" : "Ikke fullført"}
+                      {summary.allCompleted ? t('history.status.completed') : t('history.status.notCompleted')}
                     </Text>
                   </View>
                 </View>
-                <Text style={[styles.cardSubtitle, { color: colors.text }]}>
-                  Antall oppgaver fullført: {summary.completedTasks} / {summary.totalTasks}
+                <Text style={[styles.cardSubtitle, { color: colors.text }]}> 
+                  {t('history.completedCount', { completed: summary.completedTasks, total: summary.totalTasks })}
                 </Text>
                 <Text style={[styles.dates, { color: colors.lightNonInteractiveText }]}>
                   {formatDate(summary.startDate)} - {formatDate(summary.endDate)}
