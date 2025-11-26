@@ -1,3 +1,15 @@
+/**
+ * Add a user as admin to a household
+ * @param householdId - The household ID
+ * @param userId - The user ID to add as admin
+ */
+export async function addAdminToHousehold(householdId: string, userId: string): Promise<void> {
+    const householdRef = doc(db, 'households', householdId);
+    const userPath = `/users/${userId}`;
+    await updateDoc(householdRef, {
+        adminUsers: arrayUnion(userPath)
+    });
+}
 import { db } from '@/lib/firebase';
 import { addDoc, arrayUnion, collection, doc, DocumentReference, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 

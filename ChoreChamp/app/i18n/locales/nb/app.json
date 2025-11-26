@@ -279,7 +279,8 @@
       "copiedMessage": "Koden \"{{code}}\" er kopiert!",
       "closeLabel": "Lukk",
       "createHint": "Du blir automatisk administrator for den nye husstanden",
-      "membersTotal": "{{count}} medlemmer totalt"
+      "membersTotal": "{{count}} medlemmer totalt",
+      "makeAdmin": "Gjør til admin"
     },
     "appSettings": {
       "title": "App innstillinger",

@@ -281,6 +281,8 @@
       "closeLabel": "Schließen",
       "createHint": "Du wirst automatisch Administrator des neuen Haushalts",
       "membersTotal": "{{count}} Mitglieder insgesamt"
+      ,
+      "makeAdmin": "Zum Admin machen"
     },
     "appSettings": {
       "title": "App-Einstellungen",

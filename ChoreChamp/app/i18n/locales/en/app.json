@@ -329,6 +329,8 @@
       "closeLabel": "Close",
       "createHint": "You will automatically be administrator for the new household",
       "membersTotal": "{{count}} members total"
+      ,
+      "makeAdmin": "Make admin"
     },
 
     "appSettings": {

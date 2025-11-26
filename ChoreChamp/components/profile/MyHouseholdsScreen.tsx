@@ -1,6 +1,6 @@
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
-import { createHousehold, getHouseholdMembers, getHouseholdsForUser, getUserHouseholds, joinHousehold, leaveHousehold } from '@/services/householdService';
+import { createHousehold, getHouseholdMembers, getHouseholdsForUser, getUserHouseholds, joinHousehold, leaveHousehold, addAdminToHousehold } from '@/services/householdService';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +39,20 @@ interface Household {
 }
 
 export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) {
+        // Add admin to household (must be inside component to access selectedHousehold and handleShowMembers)
+        const handleMakeAdmin = async (householdId: string, memberId: string) => {
+            try {
+                await addAdminToHousehold(householdId, memberId);
+                // Refresh members and households
+                await fetchHouseholds();
+                // Refresh members modal if open
+                if (selectedHousehold) {
+                    await handleShowMembers(selectedHousehold);
+                }
+            } catch {
+                Alert.alert('Error', 'Could not make user admin.');
+            }
+        };
     const { colors } = useTheme();
     const { userData, refreshUserData } = useUser();
     const { t } = useTranslation('app');
@@ -518,51 +532,60 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
                                     {t('profile.households.membersTotal', { count: householdMembers.length })}
                                 </Text>
                                 
-                                {householdMembers.map((member) => (
-                                    <View key={member.id} style={[styles.memberCard, { backgroundColor: colors.contextBackground }]}>
-                                <View style={styles.memberInfo}>
-                                    <View style={styles.memberAvatar}>
-                                        {member.avatar ? (
-                                            <Image 
-                                                source={{ uri: member.avatar }} 
-                                                style={styles.avatarImage}
-                                            />
-                                        ) : (
-                                            <View style={[styles.avatarPlaceholder, { backgroundColor: colors.tint }]}> 
-                                                <Text style={[styles.avatarText, { color: colors.darkText }]}> 
-                                                    {(() => {
-                                                        const names = member.name.split(' ');
-                                                        const first = names[0]?.charAt(0) || '';
-                                                        const last = names[1]?.charAt(0) || '';
-                                                        return `${first}${last}`;
-                                                    })()}
-                                                </Text>
-                                            </View>
-                                        )}
-                                    </View>
-                                    <View style={styles.memberDetails}>
-                                        <Text style={[styles.memberName, { color: colors.text }]}> 
-                                            {member.name}
-                                        </Text>
-                                        <View style={styles.memberMeta}>
-                                            <View style={[
-                                                styles.memberRoleBadge,
-                                                { backgroundColor: selectedHousehold?.adminUsers.includes(`/users/${member.id}`) ? colors.tint : 'rgba(108, 117, 125, 0.2)' }
-                                            ]}>
-                                                <Text style={[
-                                                    styles.memberRoleText,
-                                                    { color: selectedHousehold?.adminUsers.includes(`/users/${member.id}`) ? colors.darkText : colors.lightDarkText }
-                                                ]}>
-                                                    {selectedHousehold?.adminUsers.includes(`/users/${member.id}`)
-                                                        ? t('profile.households.memberRoleAdmin')
-                                                        : t('profile.households.memberRoleMember')}
-                                                </Text>
+                                {householdMembers.map((member) => {
+                                    const isAdmin = selectedHousehold?.adminUsers.includes(`/users/${member.id}`);
+                                    const currentUserIsAdmin = userData?.id && selectedHousehold?.adminUsers.includes(`/users/${userData.id}`);
+                                    return (
+                                        <View key={member.id} style={[styles.memberCard, { backgroundColor: colors.contextBackground }]}> 
+                                            <View style={styles.memberInfo}>
+                                                <View style={styles.memberAvatar}>
+                                                    {member.avatar ? (
+                                                        <Image 
+                                                            source={{ uri: member.avatar }} 
+                                                            style={styles.avatarImage}
+                                                        />
+                                                    ) : (
+                                                        <View style={[styles.avatarPlaceholder, { backgroundColor: colors.tint }]}> 
+                                                            <Text style={[styles.avatarText, { color: colors.darkText }]}> 
+                                                                {(() => {
+                                                                    const names = member.name.split(' ');
+                                                                    const first = names[0]?.charAt(0) || '';
+                                                                    const last = names[1]?.charAt(0) || '';
+                                                                    return `${first}${last}`;
+                                                                })()}
+                                                            </Text>
+                                                        </View>
+                                                    )}
+                                                </View>
+                                                <View style={styles.memberDetails}>
+                                                    <Text style={[styles.memberName, { color: colors.text }]}> 
+                                                        {member.name}
+                                                    </Text>
+                                                    <View style={styles.memberMeta}>
+                                                        <View style={[styles.memberMetaRow]}>
+                                                            <View style={[styles.memberRoleBadge, isAdmin ? styles.memberRoleBadgeAdmin : styles.memberRoleBadgeMember, { backgroundColor: isAdmin ? colors.tint : 'rgba(108, 117, 125, 0.2)' }]}> 
+                                                                <Text style={[styles.memberRoleText, isAdmin ? styles.memberRoleTextAdmin : styles.memberRoleTextMember, { color: isAdmin ? colors.darkText : colors.lightDarkText }]}> 
+                                                                    {isAdmin
+                                                                        ? t('profile.households.memberRoleAdmin')
+                                                                        : t('profile.households.memberRoleMember')}
+                                                                </Text>
+                                                            </View>
+                                                            <View style={styles.memberMetaSpacer} />
+                                                            {!isAdmin && currentUserIsAdmin && selectedHousehold?.id && (
+                                                                <TouchableOpacity
+                                                                    style={[styles.makeAdminButton, { backgroundColor: colors.tint }]}
+                                                                    onPress={() => handleMakeAdmin(selectedHousehold.id, member.id)}
+                                                                >
+                                                                    <Text style={[styles.makeAdminButtonText, { color: colors.darkText }]}>{t('profile.households.makeAdmin')}</Text>
+                                                                </TouchableOpacity>
+                                                            )}
+                                                        </View>
+                                                    </View>
+                                                </View>
                                             </View>
                                         </View>
-                                    </View>
-                                </View>
-                                    </View>
-                                ))}
+                                    );
+                                })}
                             </>
                         )}
                     </ScrollView>
@@ -618,6 +641,29 @@ export default function MyHouseholdsScreen({ onBack }: MyHouseholdsScreenProps) 
 }
 
 const styles = StyleSheet.create({
+            memberMetaRow: {
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+            },
+            memberMetaSpacer: {
+                flex: 1,
+            },
+            makeAdminButton: {
+                marginLeft: 12,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 8,
+                alignSelf: 'flex-end',
+            },
+            makeAdminButtonText: {
+                fontWeight: '600',
+                fontSize: 12,
+            },
+            memberRoleBadgeAdmin: {},
+            memberRoleBadgeMember: {},
+            memberRoleTextAdmin: {},
+            memberRoleTextMember: {},
         section: {
             marginBottom: 24,
         },
