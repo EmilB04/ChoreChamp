@@ -1,8 +1,15 @@
 // Fallback for using MaterialIcons on Android and web.
 
+/*
+    Icon Symbol Component for ChoreChamp Application
+    This component renders Material Icons on Android and web as a fallback
+    for SF Symbols used on iOS. It maps SF Symbol names to Material Icon names
+    to ensure consistent iconography across platforms.
+*/
+
+import React, { ComponentProps } from 'react';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
-import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
 type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];

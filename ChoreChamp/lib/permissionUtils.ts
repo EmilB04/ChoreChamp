@@ -1,3 +1,9 @@
+/*
+    Permission Utilities for ChoreChamp Application
+    Handles requesting and checking camera and media library permissions
+    Provides user-friendly alerts and navigation to app settings if permissions are denied
+*/
+
 import i18n from '@/app/i18n/i18n';
 import { Camera } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';

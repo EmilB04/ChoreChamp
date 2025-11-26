@@ -1,8 +1,8 @@
 /*
-This context provides theming capabilities (light/dark mode) to the app.
-It uses React's Context API to share the current color scheme and colors
-throughout the component tree. The `useTheme` hook allows easy access to
-the theme data in any functional component.
+    This context provides theming capabilities (light/dark mode) to the app.
+    It uses React's Context API to share the current color scheme and colors
+    throughout the component tree. The `useTheme` hook allows easy access to
+    the theme data in any functional component.
 */
 
 import { Colors } from '@/constants/theme';

@@ -1,3 +1,10 @@
+/*
+    Notification Detail Component for ChoreChamp Application
+    This component displays detailed information about a specific notification,
+    including its title, message, timestamp, and related task details if available.
+    Users can mark notifications as read or unread, and navigate back to the previous screen.
+*/
+
 import { useTheme } from '@/contexts/ThemeContext';
 import { db } from '@/lib/firebase';
 import Ionicons from "@expo/vector-icons/build/Ionicons";

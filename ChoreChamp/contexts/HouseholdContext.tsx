@@ -1,3 +1,7 @@
+/*
+    Household Data Interface for ChoreChamp Application
+    Defines the structure of household data used in HouseholdContext
+*/
 
 
 interface HouseholdData {

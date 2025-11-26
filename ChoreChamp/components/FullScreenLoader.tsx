@@ -1,3 +1,9 @@
+/*
+    Full Screen Loader Component for ChoreChamp Application
+    This component displays a full-screen loading indicator with optional text.
+    It is used to indicate that a process is ongoing and the user should wait.
+*/
+
 import { useTheme } from '@/contexts/ThemeContext';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';

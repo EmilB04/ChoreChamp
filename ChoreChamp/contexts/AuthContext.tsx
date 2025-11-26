@@ -1,4 +1,10 @@
-
+/*
+    AuthContext to manage user authentication state and methods.
+    Provides sign-in, sign-up, sign-out functionalities using Firebase Auth.
+    Supports email/password, phone/password, and Google sign-in methods.
+    Utilizes Expo AuthSession for Google authentication flow.
+    Exposes user state and loading status to consuming components.
+*/
 
 // https://firebase.google.com/docs/auth/web/start/
 // https://react.dev/reference/react/createContext/
@@ -13,12 +19,12 @@
 
 // React imports
 import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+    type ReactNode,
 } from "react";
 
 
@@ -58,7 +64,7 @@ type Extra = {
 }
 
 type AuthProviderProps = {
-  children: ReactNode;
+    children: ReactNode;
 };
 
 const EXTRA = (Constants.expoConfig?.extra ?? {}) as Extra;
@@ -70,19 +76,19 @@ const slug = Constants.expoConfig?.slug;
 // When using Expo Go redirectUri is https://auth.expo.io...Else app scheme.
 const redirectUri = isExpoGo && owner && slug
     ? `https://auth.expo.io/@${owner}/${slug}`
-    : AuthSession.makeRedirectUri({ scheme: "chorechamp"});
+    : AuthSession.makeRedirectUri({ scheme: "chorechamp" });
 
 const authRequestConfig = isExpoGo
     ? {
         webClientId: EXTRA.WEB_CLIENT_ID,
         androidClientId: EXTRA.WEB_CLIENT_ID,
         iosClientId: EXTRA.WEB_CLIENT_ID,
-      }
+    }
     : {
         webClientId: EXTRA.WEB_CLIENT_ID,
-         androidClientId: EXTRA.WEB_CLIENT_ID,
-          iosClientId: EXTRA.WEB_CLIENT_ID,
-      };
+        androidClientId: EXTRA.WEB_CLIENT_ID,
+        iosClientId: EXTRA.WEB_CLIENT_ID,
+    };
 
 export type AuthContextType = {
     user: FirebaseUser | null;
@@ -99,7 +105,7 @@ export type AuthContextType = {
         lastName: string;
         phone: string;
         countryCode: string;
-        birthDate: string; 
+        birthDate: string;
         password: string;
     }) => Promise<void>;
 
@@ -110,7 +116,7 @@ export type AuthContextType = {
     signInWithGoogle: () => Promise<void>;
 }
 
-function buildEmailFromPhone (phone: string, countryCode: string) {
+function buildEmailFromPhone(phone: string, countryCode: string) {
     const digits = phone.replace(/\D/g, "");
     const countryDigits = countryCode.replace("+", "");
     return `${countryDigits}${digits}@chorechamp.app`;
@@ -143,8 +149,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             } catch (error) {
                 console.log("signInWithCredentials failed", error);
             }
-            })();
-        }, [googleResponse]);
+        })();
+    }, [googleResponse]);
 
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -218,15 +224,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 lastName,
                 username: fullName,
                 imageUri: "",
-                email, 
+                email,
                 phone: `${countryCode} ${phone}`,
-                birthDate, 
+                birthDate,
                 household: [],
                 points: 0,
                 language: "nb",
-                notificationsEnabled: true, 
-                locationEnabled: false, 
-                darkModeEnabled: true, 
+                notificationsEnabled: true,
+                locationEnabled: false,
+                darkModeEnabled: true,
                 role: { admin: true },
             };
 
@@ -236,16 +242,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         async logOut() {
             await signOut(auth);
         },
-        
+
         async signInWithGoogle() {
             if (!googleRequest) return;
             try {
                 await googlePromptAsync({ showInRecents: true });
-              } catch (error) {
+            } catch (error) {
                 console.log("googlePromptAsync error", error)
-              }
-            },
-        }),
+            }
+        },
+    }),
         [user, loading, googleRequest, googlePromptAsync]
     );
 

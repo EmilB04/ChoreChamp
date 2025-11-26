@@ -1,3 +1,10 @@
+/*
+    SVG Header Shapes for ChoreChamp Application
+    This file contains React components that render SVG shapes used in the header section of the app.
+    Shapes are responsive and adapt to different screen sizes.
+    The figures SVG paths are sourced from Figma designs.
+*/
+
 import React from "react";
 import Svg, { Path } from "react-native-svg";
 import { useWindowDimensions } from "react-native";

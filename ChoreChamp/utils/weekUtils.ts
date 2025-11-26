@@ -1,6 +1,9 @@
 /**
  * Utility functions for handling ISO 8601 week calculations
  * ISO 8601: Week starts on Monday, Week 1 contains first Thursday of year
+ * Includes functions to get current week, week info for a date,
+ * week key formatting, and week start/end dates.
+ * Defines WeekInfo interface
  */
 export interface WeekInfo {
   weekNumber: number;

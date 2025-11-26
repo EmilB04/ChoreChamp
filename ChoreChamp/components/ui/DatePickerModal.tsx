@@ -1,3 +1,9 @@
+/*
+    Date Picker Modal Component for ChoreChamp Application
+    This component provides a modal interface for users to select a date from a calendar view.
+    It supports minimum and maximum date constraints and allows users to confirm or cancel their selection.
+*/
+
 import { useTheme } from '@/contexts/ThemeContext';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -13,6 +19,9 @@ type Props = {
   title?: string;
 };
 
+// Note: This helper function was created by Claude 4.5
+// Prompt: "Create a helper function that converts a Date object to an ISO date string (YYYY-MM-DD)."
+// Response: See function below.
 function toISODate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');

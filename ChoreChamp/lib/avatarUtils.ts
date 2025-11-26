@@ -1,3 +1,8 @@
+/*
+    Avatar Utilities for ChoreChamp Application
+    Functions to create, parse, and generate avatars using Dicebear
+*/
+
 import { createAvatar } from "@dicebear/core";
 import { avataaars } from "@dicebear/collection";
 

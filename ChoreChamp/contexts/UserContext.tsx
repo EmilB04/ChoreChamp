@@ -1,8 +1,8 @@
 /*
-This context manages user data such as name, image, email, phone, notification preferences, and dark mode settings.
-It uses React's Context API to share user information throughout the component tree. 
-The `useUser` hook allows easy access to the user data and update functions in any functional component.
-Data is fetched from Firebase Firestore and synced in real-time.
+    This context manages user data such as name, image, email, phone, notification preferences, and dark mode settings.
+    It uses React's Context API to share user information throughout the component tree. 
+    The `useUser` hook allows easy access to the user data and update functions in any functional component.
+    Data is fetched from Firebase Firestore and synced in real-time.
 */
 
 import { auth } from '@/lib/firebase';

@@ -17,7 +17,9 @@
  * 2. Click on the 'users' collection
  * 3. Copy any document ID
  * 
- * ⚠️ IMPORTANT: Remove this file before production deployment!
+ * Note: This file was create by Claude 4.5 to help with testing user loading.
+ * Prompt: "Create a test utility to load any user from Firestore by ID for testing purposes."
+ * Result: See functions below.
  */
 
 import { getUserData } from '@/services/userService';

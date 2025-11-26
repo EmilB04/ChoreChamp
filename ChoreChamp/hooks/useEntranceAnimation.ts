@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Animated, Platform } from "react-native";
 
-// Created with the assistance of AI Claude Sonnet 4.5
 /*
+    Note: This custom hook for entrance animations was created with the assistance of Claude 4.5.
     Prompt: Help me create a custom hook for entrance animations in React Native, with fade-in and slide-up effects.
     Response: See below.
 */

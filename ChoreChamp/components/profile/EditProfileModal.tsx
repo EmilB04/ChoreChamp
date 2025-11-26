@@ -1,3 +1,10 @@
+/*
+    Edit Profile Modal Component for ChoreChamp Application
+    This component provides a modal interface for users to edit their profile information,
+    including username and profile image. Users can pick an image from the gallery,
+    take a new photo, or create a custom avatar using the Avatar Creator Modal.
+*/
+
 import AvatarCreatorModal from "@/components/modals/AvatarCreatorModal";
 import { useTheme } from "@/contexts/ThemeContext";
 import {

@@ -1,3 +1,9 @@
+/*
+    Back Button Component for ChoreChamp Application
+    This component renders a back button that allows users to navigate to the previous screen.
+    It uses Expo Router for navigation and adapts its color based on the current theme.
+*/
+
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';

@@ -1,3 +1,9 @@
+/*
+    Profile Header Component for ChoreChamp Application
+    This component renders a customizable header for profile-related screens.
+    It includes a back button, title, and an optional right-side element.
+*/
+
 import React from 'react';
 import {
     View,

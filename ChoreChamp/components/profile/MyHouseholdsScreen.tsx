@@ -1,3 +1,10 @@
+/*
+    My Households Screen Component for ChoreChamp Application
+    This component allows users to view, create, join, and manage their households.
+    Users can see the list of households they belong to, view members, share join codes,
+    set a standard household, and leave households.
+*/
+
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { createHousehold, getHouseholdMembers, getHouseholdsForUser, getUserHouseholds, joinHousehold, leaveHousehold, addAdminToHousehold } from '@/services/householdService';

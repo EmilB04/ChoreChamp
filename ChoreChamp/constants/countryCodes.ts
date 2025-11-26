@@ -1,3 +1,7 @@
+/*
+  List of country codes with country names and flags.
+*/
+
 export type CountryCodeOption = {
   code: string;
   country: string;

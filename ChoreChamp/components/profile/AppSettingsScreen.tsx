@@ -1,3 +1,9 @@
+/*
+    App Settings Screen Component for ChoreChamp Application
+    This component allows users to view and modify various application settings
+    such as notifications, dark mode, and location services.
+*/
+
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import React from 'react';

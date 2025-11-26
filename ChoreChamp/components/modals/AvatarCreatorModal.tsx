@@ -1,3 +1,10 @@
+/*
+    Avatar Creator Modal Component for ChoreChamp Application
+    This component provides a modal interface for users to create and customize their avatars.
+    Users can select various features such as hair, beard, skin color, eyes, mouth, clothes, and accessories.
+    The avatar is rendered as an SVG based on the selected options.
+*/
+
 import React, { useState, useMemo, useEffect } from "react";
 import {
   Modal,

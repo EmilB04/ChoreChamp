@@ -1,3 +1,8 @@
+/*
+  Avatar configuration options for customizing user avatars.
+  These options define the various styles and colors available for different avatar features.
+*/
+
 export const HAIR_OPTIONS = [
   "none",
   "bigHair",

@@ -2,6 +2,9 @@
  * 🧪 Firebase Connection Debugger
  * 
  * This utility helps diagnose Firebase connection and query issues.
+ * Note: This debug was created by Claude 4.5 to assist us in troubleshooting Firebase problems.
+ * Prompt: "Create a Firebase debug utility that tests connection, lists users, and checks for common errors."
+ * Result: See functions below.
  */
 
 import { db } from '@/lib/firebase';

@@ -1,6 +1,9 @@
 /**
  * Form Validation Utilities
  * Centralized validation logic for form fields
+ * Includes functions for validating names, phone numbers, birth dates, and passwords
+ * Also includes form completeness check and phone number formatting utilities
+ * Uses i18n for localized error messages
  */
 
 import i18n from '../app/i18n/i18n';

@@ -1,3 +1,7 @@
+/*
+  Context to manage the standard household across the app.
+  Stores the default household ID in AsyncStorage for persistence.
+*/
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

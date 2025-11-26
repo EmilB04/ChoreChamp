@@ -1,3 +1,8 @@
+/*
+    Firebase initialization and configuration for ChoreChamp application.
+    Sets up Firebase app, authentication with React Native persistence, and Firestore database.
+*/
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import type { Auth } from "firebase/auth";

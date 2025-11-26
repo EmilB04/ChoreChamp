@@ -1,3 +1,10 @@
+/*
+    My Account Screen Component for ChoreChamp Application
+    This component allows users to view and edit their account information,
+    including name, email, and phone number. It also provides options to
+    view privacy information and delete the account.
+*/
+
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUser } from '@/contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';

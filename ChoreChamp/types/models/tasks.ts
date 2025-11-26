@@ -1,3 +1,8 @@
+/*
+    Task model definitions for the ChoreChamp application.
+    These types define the structure of task-related data used throughout the app.
+*/
+
 export type Task = {
     assignedTo: string; // Reference to /collection/users
     createdBy: string;

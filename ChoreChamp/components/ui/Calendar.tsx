@@ -1,3 +1,10 @@
+/*
+    Calendar Component for ChoreChamp Application
+    This component renders a customizable calendar modal that allows users to select dates.
+    It supports navigation between months, highlights the selected date, and disables dates
+    outside of specified min and max bounds.
+*/
+
 import { useTheme } from '@/contexts/ThemeContext';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -284,7 +291,7 @@ const styles = StyleSheet.create({
         maxWidth: '95%',
         borderRadius: 20,
         padding: 20,
-        ...Platform.select({
+        ...Platform.select({ // Platform select was proposed by GPT 5
             ios: {
                 boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.3)',
             },

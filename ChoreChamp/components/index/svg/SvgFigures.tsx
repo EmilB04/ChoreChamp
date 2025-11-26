@@ -1,3 +1,10 @@
+/*
+    SVG Figures Components for ChoreChamp Application
+    This file contains React components that render SVG figures used in the app.
+    Figures are responsive and adapt to different screen sizes.
+    The figures SVG paths are sourced from Figma designs.
+*/
+
 import React from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

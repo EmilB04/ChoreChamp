@@ -1,3 +1,8 @@
+/*
+    User model definitions for the ChoreChamp application.
+    These types define the structure of user-related data used throughout the app.
+*/
+
 import { Timestamp } from "firebase/firestore";
 
 export type languageOptions = 'nb' | 'en' | 'es' | 'de';

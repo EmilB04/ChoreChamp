@@ -1,4 +1,7 @@
-// Type definitions for tasks
+/*
+    Task model definition for ChoreChamp application.
+    This interface defines the structure of task-related data used throughout the app.
+*/
 
 export interface Task {
   id: number;

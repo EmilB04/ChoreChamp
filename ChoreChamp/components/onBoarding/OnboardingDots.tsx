@@ -1,11 +1,10 @@
+/*
+    Displays 4 dots to represent onboarding progress.
+    Highlights the active dot based on the activeIndex prop.
+*/
 import React from "react";
 import { StyleSheet, View} from "react-native";
 
-/*
-OnboardingDots Component
-    - Displays 4 dots to represent onboarding progress.
-    - Highlights the active dot based on the activeIndex prop.
-*/
 
 type props = {
     activeIndex: number;

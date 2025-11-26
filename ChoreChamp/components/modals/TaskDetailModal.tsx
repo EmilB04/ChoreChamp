@@ -1,3 +1,11 @@
+/*
+    Task Detail Modal Component for ChoreChamp Application
+    This component displays detailed information about a specific task in a modal view.
+    It shows task title, status, timings, assigned users, description, and image evidence if available.
+    Admin users have the ability to delete the task directly from this modal.
+    Action buttons can be customized and passed as props for additional functionalities.
+*/
+
 import { useTheme } from "@/contexts/ThemeContext";
 import { useUser } from "@/contexts/UserContext";
 import { deleteTask } from "@/services/taskService";

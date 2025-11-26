@@ -1,3 +1,5 @@
+import { db } from '@/lib/firebase';
+import { addDoc, arrayUnion, collection, doc, DocumentReference, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 /**
  * Add a user as admin to a household
  * @param householdId - The household ID
@@ -10,13 +12,12 @@ export async function addAdminToHousehold(householdId: string, userId: string): 
         adminUsers: arrayUnion(userPath)
     });
 }
-import { db } from '@/lib/firebase';
-import { addDoc, arrayUnion, collection, doc, DocumentReference, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 
 export interface Household {
     id: string;
     familyName: string;
     familyMembers: string[];
+    adminUsers: string[];
     points: Record<string, number>;
 }
 

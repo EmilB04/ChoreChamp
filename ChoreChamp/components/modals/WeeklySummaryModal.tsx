@@ -1,3 +1,9 @@
+/*
+  Weekly Summary Modal Component for ChoreChamp Application
+  This component displays a modal with a summary of weekly tasks, including
+  completed tasks, top contributor, and detailed task list for the week.
+*/
+
 import { useTheme } from "@/contexts/ThemeContext";
 import { WeeklySummary } from "@/services/taskService";
 import { Ionicons } from "@expo/vector-icons";
