@@ -23,9 +23,6 @@ import {
 } from "react-native";
 import commonStyles from "../commonStyles";
 
-
-// TODO: Make own function of time related things eg. currentHour and currentMinute
-
 export default function AddTask() {
     const { colors } = useTheme();
     const { userData } = useUser();
