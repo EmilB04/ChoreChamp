@@ -533,7 +533,8 @@ const styles = StyleSheet.create({
     },
     mainContent: {
         flex: 1,
-        paddingBottom: 80, // Space for bottom switcher
+        paddingBottom: 0,
+        marginBottom: 0,
     },
     bottomSwitcherContainer: {
         flexDirection: 'row',
@@ -584,6 +585,7 @@ const styles = StyleSheet.create({
     },
     notificationsList: {
         flex: 1,
+        marginBottom: 32, // Add space above nav bar
     },
     notificationCard: {
         padding: 4,

@@ -237,7 +237,14 @@ export default function History() {
 
   return (
     <View
-      style={[commonStyles.container, { backgroundColor: colors.background }]}
+      style={[
+        commonStyles.container,
+        {
+          flex: 1,
+          backgroundColor: colors.background,
+          paddingBottom: 0, // account for nav bar
+        },
+      ]}
     >
       {/* Header */}
       <Text style={[commonStyles.headerTitle, { color: colors.text }]}>
