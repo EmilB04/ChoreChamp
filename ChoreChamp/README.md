@@ -1,50 +1,127 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# ChoreChamp 🏆
 
-## Get started
+A modern household task management app built with React Native and Expo, designed to gamify chores and foster collaboration among household members.
 
-1. Install dependencies
+## 📱 About the Project
+
+ChoreChamp is a mobile application that transforms mundane household tasks into an engaging, gamified experience. Track tasks, compete with housemates, and maintain a clean, organized home through friendly competition and clear task management.
+
+## 👥 Contributors
+
+- **[EmilB04](https://github.com/EmilB04)** - Fullstack Developer & Project Owner
+  - Frontend setup
+  - UI/UX design and implementation
+  - Architecture and tab navigation
+  - Theme management and responsiveness
+  - Responsible for Tasks (Create, Assign, Verify, Reject, Evidence)
+- **[Khosman23](https://github.com/Khosman23)** - Frontend Developer
+  - UI/UX design and implementation
+  - Onboarding and user experience
+  - Language responsible (i18n)
+- **[idatol](https://github.com/idatol)** - Fullstack Developer
+  - UI/UX design and implementation
+  - Profile and settings management
+  - Responsible for Leaderboard
+- **[Andolaus](https://github.com/Andolaus)** - Fullstack Developer
+  - Backend setup
+  - Authentication and database management
+  - API development and integration
+- **[Thomsen97](https://github.com/Thomsen97)** - Fullstack Developer
+  - Component for task overview
+  - Responsible for HistoryTab
+
+### ✨ Key Features
+
+- **Dynamic Task Scheduling**: Smart time-slot generation that adapts to tasks outside normal hours
+- **Multi-Household Support**: Switch between different households with ease
+- **Advanced Search & Filtering**: Find specific tasks and history entries quickly
+- **Interactive Dashboard**: Real-time task overview with live "now line" indicator
+- **Adaptive UI**: Responsive SVG graphics that scale across all device sizes
+- **Theme Support**: Centralized theme management with dark/light mode compatibility
+- **Progress Tracking**: Visual task completion status and leaderboards
+- **Smart Notifications**: Stay updated on upcoming and overdue tasks
+
+### 🛠️ Tech Stack
+
+- **Framework**: React Native with Expo
+- **Language**: TypeScript
+- **Navigation**: Expo Router with tab-based navigation  
+- **Graphics**: react-native-svg for scalable vector graphics
+- **Styling**: StyleSheet with responsive design patterns
+- **State Management**: React Context API for theme management
+- **Time Management**: Dynamic time calculations with live updates
+
+### 📱 Supported Platforms
+
+- iOS
+- Android  
+- Web (Progressive Web App)
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- pnpm (recommended)
+- Expo CLI
+- iOS Simulator (for iOS development)
+- Android Studio (for Android development)
+
+### Installation
+
+1. **Clone the repository**
 
    ```bash
-   npm install
+   git clone https://github.com/EmilB04/ChoreChamp.git
+   cd ChoreChamp
    ```
 
-2. Start the app
+2. **Navigate to the project directory**
 
    ```bash
-   npx expo start
+   cd ChoreChamp
    ```
 
-In the output, you'll find options to open the app in a
+3. **Install dependencies**
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   ```bash
+   pnpm install
+   ```
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+4. **Start the development server**
 
-## Get a fresh project
+   ```bash
+   pnpm expo start
+   ```
 
-When you're ready, run:
+5. **Run on your preferred platform**
+   - Press `i` for iOS Simulator
+   - Press `a` for Android Emulator  
+   - Press `w` for Web browser
+   - Scan QR code with Expo Go app for physical device
 
-```bash
-npm run reset-project
-```
+## 🏫 Academic Context
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This project is developed as part of the **Mobilprogrammering** (Mobile Programming) course, demonstrating:
 
-## Learn more
+- Modern React Native development practices
+- TypeScript integration for type safety
+- Responsive design principles
+- State management patterns
+- Cross-platform mobile development
+- User experience design for mobile interfaces
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📄 License
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+This project is developed for educational purposes as part of a mobile programming course.
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+*Built with ❤️ for the Mobilprogrammering course - Making household chores fun, one task at a time!* 🏠✨
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+<!--
+This README was generated with Claude Sonnet 4 with the following prompt:
+
+Update #file:README.md with relevant info about the project along side the contributors
+-->

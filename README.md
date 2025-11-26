@@ -1,3 +1,4 @@
+
 # ChoreChamp 🏆
 
 A modern household task management app built with React Native and Expo, designed to gamify chores and foster collaboration among household members.
@@ -8,7 +9,7 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 
 ## 👥 Contributors
 
-- **[EmilB04](https://github.com/EmilB04)** - Fullstack Developer& Project Owner
+- **[EmilB04](https://github.com/EmilB04)** - Fullstack Developer & Project Owner
   - Frontend setup
   - UI/UX design and implementation
   - Architecture and tab navigation
@@ -21,7 +22,7 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 - **[idatol](https://github.com/idatol)** - Fullstack Developer
   - UI/UX design and implementation
   - Profile and settings management
-  - Responsible for Leaderboard 
+  - Responsible for Leaderboard
 - **[Andolaus](https://github.com/Andolaus)** - Fullstack Developer
   - Backend setup
   - Authentication and database management
@@ -62,7 +63,7 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 ### Prerequisites
 
 - Node.js (v18 or later)
-- npm or yarn
+- pnpm (recommended)
 - Expo CLI
 - iOS Simulator (for iOS development)
 - Android Studio (for Android development)
@@ -85,13 +86,13 @@ ChoreChamp is a mobile application that transforms mundane household tasks into 
 3. **Install dependencies**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 4. **Start the development server**
 
    ```bash
-   npx expo start
+   pnpm expo start
    ```
 
 5. **Run on your preferred platform**
@@ -123,4 +124,4 @@ This project is developed for educational purposes as part of a mobile programmi
 This README was generated with Claude Sonnet 4 with the following prompt:
 
 Update #file:README.md with relevant info about the project along side the contributors
--->*
+-->
