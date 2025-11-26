@@ -90,7 +90,6 @@ export default function WelcomeScreen() {
               transform: [{ scale: imageScaleAnim }],
             }]}>
               <View style={[styles.iconInner, { backgroundColor: colors.tint }]}>
-                {/* TODO: Replace with logo */}
                 <Ionicons name="sparkles" size={48} color={colors.darkText} />
               </View>
             </Animated.View>

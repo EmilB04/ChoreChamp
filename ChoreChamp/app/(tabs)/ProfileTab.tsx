@@ -29,8 +29,6 @@ import { SvgXml } from "react-native-svg";
 import MyAccountScreen from '../../components/profile/MyAccountScreen';
 import commonStyles from "../commonStyles";
 
-//TODO: Implement log out functionality
-
 export default function ProfileTab() {
     const { colors } = useTheme();
     const { userData, updateUserData } = useUser();

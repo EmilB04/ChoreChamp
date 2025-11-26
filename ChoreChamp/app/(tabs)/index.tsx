@@ -32,11 +32,6 @@ import SvgFigures from "../../components/index/svg/SvgFigures";
 import TaskDetailModal from "../../components/modals/TaskDetailModal";
 import commonStyles from "../commonStyles";
 
-// TODO:
-// 1. Fetch user data dynamically
-// 2. Integrate main content and leaderboard sections
-// 3. Add interactivity to calendar (e.g., navigate to daily view on tap)
-
 export default function Dashboard() {
   const { colors } = useTheme();
   const { userData } = useUser();

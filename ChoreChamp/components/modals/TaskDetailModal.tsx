@@ -15,8 +15,6 @@ import {
   View,
 } from "react-native";
 
-// TODO: Implement validation for action buttons based on user ID and task assignedToId
-
 interface ActionButton {
   label: string;
   onPress: () => void;
