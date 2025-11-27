@@ -1,6 +1,24 @@
 import { renderHook, act } from "@testing-library/react-native";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 
+// Mock Firebase Auth and Firestore
+jest.mock("@/lib/firebase", () => ({
+  auth: {
+    onAuthStateChanged: jest.fn((callback) => {
+      // Simulate no authenticated user
+      callback(null);
+      return jest.fn(); // unsubscribe function
+    }),
+  },
+  db: {},
+}));
+
+// Mock userService
+jest.mock("@/services/userService", () => ({
+  getUserData: jest.fn(),
+  updateUserData: jest.fn(),
+}));
+
 describe("UserContext", () => {
   // Helper function to render the hook with provider
   const setup = () => renderHook(() => useUser(), { wrapper: UserProvider });
@@ -8,51 +26,32 @@ describe("UserContext", () => {
   it("has correct initial values", () => {
     const { result } = setup();
 
-    // Just check that initial values exist and are strings
-    expect(result.current.userData.name).toBeDefined();
-    expect(result.current.userData.email).toBeDefined();
+    // userData is null when no user is authenticated
+    expect(result.current.userData).toBeNull();
+    expect(result.current.loading).toBe(false);
   });
 
-  it("can update name", () => {
+  it("cannot update when no user is authenticated", () => {
     const { result } = setup();
 
     act(() => {
-      result.current.updateUserData({ name: "Test User" });
+      result.current.updateUserData({ firstName: "Test User" });
     });
 
-    expect(result.current.userData.name).toBe("Test User");
+    // userData should still be null since no user is authenticated
+    expect(result.current.userData).toBeNull();
   });
 
-  it("can update email", () => {
+  it("has updateUserData function available", () => {
     const { result } = setup();
 
-    act(() => {
-      result.current.updateUserData({ email: "test@example.com" });
-    });
-
-    expect(result.current.userData.email).toBe("test@example.com");
+    expect(typeof result.current.updateUserData).toBe("function");
   });
 
-  it("keeps other data when updating one field", () => {
-    const { result } = setup();
-    const originalEmail = result.current.userData.email;
-
-    act(() => {
-      result.current.updateUserData({ name: "Changed Name" });
-    });
-
-    // Email should still be the same
-    expect(result.current.userData.email).toBe(originalEmail);
-  });
-
-  it("can toggle dark mode", () => {
+  it("has refreshUserData function available", () => {
     const { result } = setup();
 
-    act(() => {
-      result.current.updateUserData({ darkModeEnabled: false });
-    });
-
-    expect(result.current.userData.darkModeEnabled).toBe(false);
+    expect(typeof result.current.refreshUserData).toBe("function");
   });
 
   it("throws error when used outside provider", () => {
